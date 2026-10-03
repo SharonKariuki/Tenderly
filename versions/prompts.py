@@ -3,12 +3,16 @@
 Bump COMPARE_PROMPT_VERSION whenever COMPARE_PROMPT changes: it is part of the cache key (R11).
 """
 
-COMPARE_PROMPT_VERSION = "v1"
+COMPARE_PROMPT_VERSION = "v2"
 
 COMPARE_PROMPT = """\
 You compare a public tender document with a later addendum to it.
 
-List every change the addendum makes to the tender. For each change give:
+List every change the addendum makes to the tender. Go through the addendum item by item:
+every numbered item or paragraph that changes, adds to, removes from or clarifies a term of
+the tender is at least one change. That includes a clarification that makes something
+mandatory, a new form to attach, a changed unit of issue, and a price schedule or table that
+is replaced. For each change give:
 - category: exactly one of
   deadline (the closing or submission date or time),
   eligibility (who may tender),
