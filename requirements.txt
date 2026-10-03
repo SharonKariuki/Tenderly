@@ -1,0 +1,21 @@
+# All free / open source. Exact pins (sprint plan section 2); bump deliberately.
+Django==5.2.17
+djangorestframework==3.18.1
+drf-spectacular==0.30.0
+django-cors-headers==4.9.0
+whitenoise==6.12.0
+gunicorn==26.2.0
+psycopg[binary]==3.3.6
+dj-database-url==3.1.2
+python-dotenv==1.2.4
+
+# AI and documents
+google-genai==2.28.0
+pydantic==2.13.5
+pdfplumber==0.11.10
+python-dateutil==2.9.0.post0
+
+# Tests and lint
+pytest==9.1.1
+pytest-django==4.14.0
+ruff==0.16.10
