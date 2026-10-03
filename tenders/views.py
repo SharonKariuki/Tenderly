@@ -1,72 +1,75 @@
 """tenders views. Owner: B.
 
-M0 stubs returning canned JSON so the frontend contract exists from day one. Keep the class
-names (tenderready/urls.py points at them) and replace the bodies in M2 and M3.
+Thin (C8): validate, call the service, respond. OwnedViewMixin scopes every query to the
+signed-in user (R19), so another user's tender is a 404.
 """
 
-from drf_spectacular.types import OpenApiTypes
-from drf_spectacular.utils import OpenApiParameter, extend_schema
+from drf_spectacular.utils import extend_schema
 from rest_framework import status
+from rest_framework.generics import GenericAPIView, ListAPIView, RetrieveAPIView
+from rest_framework.parsers import MultiPartParser
 from rest_framework.request import Request
 from rest_framework.response import Response
-from rest_framework.views import APIView
 
-STUB_REQUIREMENT = {
-    "id": "r3",
-    "label": "Valid Tax Compliance Certificate",
-    "requirement_type": "mandatory_document",
-    "required_doc_type": "kra_tax_compliance",
-    "mandatory": True,
-    "source_quote": "Bidders shall submit a valid Tax Compliance Certificate.",
-    "page": 4,
-}
-
-STUB_TENDER = {
-    "id": 12,
-    "title": "Supply of office stationery (SAMPLE)",
-    "current_version": 1,
-    "created_at": "2026-10-03T10:05:00+03:00",
-    "latest_version": {
-        "version_no": 1,
-        "source": "upload",
-        "published_on": "2026-09-20",
-        "deadline": "2026-10-20T10:00:00+03:00",
-        "requirements": [STUB_REQUIREMENT],
-        "summary_en": "The county is buying office stationery. Bids close on 20 October.",
-        "created_at": "2026-10-03T10:05:00+03:00",
-    },
-}
+from core.exceptions import Unprocessable
+from core.mixins import OwnedViewMixin
+from documents.serializers import FileUploadSerializer
+from tenders.models import Tender
+from tenders.serializers import (
+    SummaryQuerySerializer,
+    SummarySerializer,
+    TenderListSerializer,
+    TenderSerializer,
+)
+from tenders.services import create_tender, latest_version
 
 
-class TenderListCreateView(APIView):
-    @extend_schema(operation_id="tenders_list", responses=OpenApiTypes.OBJECT)
-    def get(self, request: Request) -> Response:
-        return Response([{key: STUB_TENDER[key] for key in ("id", "title", "current_version")}])
+class TenderListCreateView(OwnedViewMixin, ListAPIView):
+    queryset = Tender.objects.all()
+    serializer_class = TenderListSerializer
+    parser_classes = [MultiPartParser]
 
-    @extend_schema(request=OpenApiTypes.OBJECT, responses=OpenApiTypes.OBJECT)
-    def post(self, request: Request) -> Response:
-        return Response(STUB_TENDER, status=status.HTTP_201_CREATED)
+    @extend_schema(operation_id="tenders_list")
+    def get(self, request: Request, *args, **kwargs) -> Response:
+        return super().get(request, *args, **kwargs)
 
-
-class TenderDetailView(APIView):
-    @extend_schema(responses=OpenApiTypes.OBJECT)
-    def get(self, request: Request, pk: int) -> Response:
-        return Response({**STUB_TENDER, "id": pk})
-
-
-class TenderSummaryView(APIView):
     @extend_schema(
-        parameters=[OpenApiParameter("lang", str, enum=["en", "sw"], default="en")],
-        responses=OpenApiTypes.OBJECT,
+        request={"multipart/form-data": FileUploadSerializer},
+        responses={201: TenderSerializer},
     )
+    def post(self, request: Request) -> Response:
+        upload = FileUploadSerializer(data=request.data)
+        upload.is_valid(raise_exception=True)
+        file = upload.validated_data["file"]
+        tender = create_tender(request.user, file.read(), file.content_type, file.name)
+        return Response(TenderSerializer(tender).data, status=status.HTTP_201_CREATED)
+
+
+class TenderDetailView(OwnedViewMixin, RetrieveAPIView):
+    queryset = Tender.objects.all()
+    serializer_class = TenderSerializer
+
+
+class TenderSummaryView(OwnedViewMixin, GenericAPIView):
+    queryset = Tender.objects.all()
+    serializer_class = SummarySerializer
+
+    @extend_schema(parameters=[SummaryQuerySerializer], responses=SummarySerializer)
     def get(self, request: Request, pk: int) -> Response:
-        lang = request.query_params.get("lang", "en")
+        query = SummaryQuerySerializer(data=request.query_params)
+        query.is_valid(raise_exception=True)
+        tender = self.get_object()
+        version = latest_version(tender)
+        if version is None:
+            raise Unprocessable("This tender has no version yet.", code="no_version")
+        # Only the English summary exists. A request for Kiswahili gets the English one,
+        # labelled as English, so nothing unverified is shown as Kiswahili (R14).
         return Response(
             {
-                "tender_id": pk,
-                "version_no": 1,
-                "lang": lang,
-                "summary": STUB_TENDER["latest_version"]["summary_en"],
-                "needs_human_review": lang == "sw",  # R14
+                "tender_id": tender.pk,
+                "version_no": version.version_no,
+                "lang": "en",
+                "summary": version.summary_en,
+                "needs_human_review": False,
             }
         )

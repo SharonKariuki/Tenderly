@@ -46,3 +46,24 @@ def parse_date(value: object) -> date | None:
 def days_before(day: date, reference: date) -> int:
     """How many days `day` falls before `reference`. Negative when it falls after."""
     return (reference - day).days
+
+
+def parse_deadline(value: object) -> datetime | None:
+    """A closing date and time from text such as "2026-10-20T10:00" or "20 October 2026
+    10:00". Text without an offset is Nairobi time. Unreadable input is None (R4)."""
+    if value is None:
+        return None
+    if isinstance(value, datetime):
+        moment = value
+    else:
+        text = str(value).strip()
+        if not text:
+            return None
+        try:
+            moment = datetime.fromisoformat(text)
+        except ValueError:
+            try:
+                moment = parser.parse(text, dayfirst=True)
+            except (ValueError, OverflowError):
+                return None
+    return moment if moment.tzinfo else moment.replace(tzinfo=NAIROBI)

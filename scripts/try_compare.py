@@ -1,8 +1,8 @@
 """Run compare_versions on the sample pairs and report hits and misses. Owner: C.
 
-Needs B's LLM client (llm/client.py) and GEMINI_API_KEY and LLM_MODEL in .env. The text
-layer and hash come from pdfplumber and the deadlines from expected.json, so this script
-does not depend on tender extraction.
+Needs GEMINI_API_KEY and LLM_MODEL in .env and a migrated database (answers are cached).
+The text layer and hash come from pdfplumber and the deadlines from expected.json, so this
+script does not depend on tender extraction.
 
 Usage: python scripts/try_compare.py
 Exit code 0 when at least 2 of the 3 pairs are fully correct (the M1 gate).
@@ -24,6 +24,7 @@ import django  # noqa: E402
 django.setup()
 
 import pdfplumber  # noqa: E402
+from django.conf import settings  # noqa: E402
 
 from core.contracts import TenderExtraction  # noqa: E402
 from versions.compare import compare_versions, normalise  # noqa: E402
@@ -68,10 +69,8 @@ def run_pair(folder: Path) -> bool:
 
 
 def main() -> int:
-    try:
-        import llm.client  # noqa: F401
-    except ImportError:
-        print("llm/client.py is not on this branch yet (B's feat/b-llm-client). Nothing was run.")
+    if not settings.GEMINI_API_KEY or not settings.LLM_MODEL:
+        print("GEMINI_API_KEY and LLM_MODEL are not set, so nothing was run.")
         return 2
     folders = sorted(path.parent for path in PAIRS_DIR.glob("*/expected.json"))
     correct = sum(run_pair(folder) for folder in folders)
