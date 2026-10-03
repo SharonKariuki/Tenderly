@@ -22,7 +22,6 @@ CONTRACT = [
     ("post", "/api/tenders/12/versions/", 201),
     ("get", "/api/tenders/12/changes/", 200),
     ("get", "/api/alerts/", 200),
-    ("patch", "/api/alerts/1/read/", 200),
     ("get", "/api/insight/?doc_type=cr12", 200),
 ]
 

@@ -43,5 +43,95 @@
     "year": null,
     "tags": ["missing", "addendum"],
     "illustrative": true
+  },
+  {
+    "doc_type": "kra_tax_compliance",
+    "reason": "The tax compliance certificate submitted belonged to a director personally and not to the bidding company, so it was not accepted.",
+    "source_title": "Illustrative case, not a cited decision",
+    "source_url": "",
+    "year": null,
+    "tags": ["wrong_holder", "preliminary_evaluation"],
+    "illustrative": true
+  },
+  {
+    "doc_type": "kra_tax_compliance",
+    "reason": "The tender deadline was extended by an addendum and the tax compliance certificate expired before the new closing date, so the bid was declared non-responsive.",
+    "source_title": "Illustrative case, not a cited decision",
+    "source_url": "",
+    "year": null,
+    "tags": ["expired", "addendum"],
+    "illustrative": true
+  },
+  {
+    "doc_type": "cr12",
+    "reason": "The directors listed on the CR12 did not match the directors whose identity cards were submitted, and the bid was rejected for inconsistent documents.",
+    "source_title": "Illustrative case, not a cited decision",
+    "source_url": "",
+    "year": null,
+    "tags": ["director_mismatch", "preliminary_evaluation"],
+    "illustrative": true
+  },
+  {
+    "doc_type": "agpo_certificate",
+    "reason": "The AGPO certificate had expired before the tender closing date, so the bidder could not benefit from the reserved tender.",
+    "source_title": "Illustrative case, not a cited decision",
+    "source_url": "",
+    "year": null,
+    "tags": ["expired", "eligibility"],
+    "illustrative": true
+  },
+  {
+    "doc_type": "business_registration",
+    "reason": "The bidder submitted a business name registration where the tender required a certificate of incorporation, and the bid failed preliminary evaluation.",
+    "source_title": "Illustrative case, not a cited decision",
+    "source_url": "",
+    "year": null,
+    "tags": ["wrong_document", "preliminary_evaluation"],
+    "illustrative": true
+  },
+  {
+    "doc_type": "national_id",
+    "reason": "Identity card copies were provided for only one of two directors although the tender asked for every director, so the bid was declared non-responsive.",
+    "source_title": "Illustrative case, not a cited decision",
+    "source_url": "",
+    "year": null,
+    "tags": ["incomplete", "preliminary_evaluation"],
+    "illustrative": true
+  },
+  {
+    "doc_type": "audited_accounts",
+    "reason": "The audited accounts covered one financial year where the tender asked for two, so the bid did not pass the mandatory requirements.",
+    "source_title": "Illustrative case, not a cited decision",
+    "source_url": "",
+    "year": null,
+    "tags": ["incomplete", "financial"],
+    "illustrative": true
+  },
+  {
+    "doc_type": "audited_accounts",
+    "reason": "The audited accounts were not signed by the auditor, and the evaluation committee treated them as not submitted.",
+    "source_title": "Illustrative case, not a cited decision",
+    "source_url": "",
+    "year": null,
+    "tags": ["unsigned", "financial"],
+    "illustrative": true
+  },
+  {
+    "doc_type": "bank_statement",
+    "reason": "The bank statements covered three months where the tender asked for six, so the bid failed the mandatory requirements.",
+    "source_title": "Illustrative case, not a cited decision",
+    "source_url": "",
+    "year": null,
+    "tags": ["incomplete", "financial"],
+    "illustrative": true
+  },
+  {
+    "doc_type": "business_permit",
+    "reason": "The single business permit was for the previous year and had expired by the tender closing date, so the bid was rejected.",
+    "source_title": "Illustrative case, not a cited decision",
+    "source_url": "",
+    "year": null,
+    "tags": ["expired", "preliminary_evaluation"],
+    "illustrative": true
   }
 ]
