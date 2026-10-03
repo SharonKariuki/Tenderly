@@ -8,7 +8,7 @@ A business owner uploads her compliance documents and a tender. TenderReady extr
 
 The full sprint plan is in [tenerlymd.md](tenerlymd.md). It is the source of truth; this README is the short version.
 
-> **Backend v0.1.** Real today: accounts (register, login, profile, delete-my-data), the rules engine and the readiness check endpoints. Documents, tenders, versions, alerts and insight are registered and return sample JSON until their owners' PRs land. The [Frontend Handoff Sheet](docs/handoff.md) lists the state of every endpoint.
+> **Every endpoint is real.** Accounts, documents, tenders, the readiness check, addenda, alerts and Rejection Insight all read and write the database. Uploads are read by Gemini, so `GEMINI_API_KEY` and `LLM_MODEL` must be set; without them an upload returns `502 ai_not_configured`. Not built, by decision: the Kiswahili summary and insight attached to check items. The [Frontend Handoff Sheet](docs/handoff.md) describes every endpoint; [docs/validation.md](docs/validation.md) has the accuracy numbers.
 
 ## Setup
 
@@ -72,9 +72,21 @@ curl -X PUT http://127.0.0.1:8000/api/profile/ \
   -H "Authorization: Token <token>" -H "Content-Type: application/json" \
   -d '{"business_name": "Demo Business Ltd", "kra_pin": "P000000000X", "consent": true}'
 
-# 4. Run the readiness check on a tender
-curl -X POST http://127.0.0.1:8000/api/tenders/12/check/ -H "Authorization: Token <token>"
+# 4. Upload and confirm a document, then upload a tender (needs GEMINI_API_KEY and LLM_MODEL)
+curl -X POST http://127.0.0.1:8000/api/documents/ -H "Authorization: Token <token>" \
+  -F "file=@sample_data/documents/tax_compliance_DUMMY.pdf"
+curl -X PATCH http://127.0.0.1:8000/api/documents/1/ -H "Authorization: Token <token>" \
+  -H "Content-Type: application/json" -d '{"confirmed": true}'
+curl -X POST http://127.0.0.1:8000/api/tenders/ -H "Authorization: Token <token>" \
+  -F "file=@sample_data/tenders/mashariki-cleaning/tender_SIMULATED.pdf"
+
+# 5. Run the readiness check, then upload the addendum
+curl -X POST http://127.0.0.1:8000/api/tenders/1/check/ -H "Authorization: Token <token>"
+curl -X POST http://127.0.0.1:8000/api/tenders/1/versions/ -H "Authorization: Token <token>" \
+  -F "file=@sample_data/tenders/mashariki-cleaning/addendum_1_SIMULATED.pdf"
 ```
+
+The whole demo story is scripted: start the server, then run `python scripts/e2e_demo.py --runs 3`.
 
 In Swagger (`/api/docs/`), click **Authorize** and enter `Token <token>`.
 
@@ -85,7 +97,7 @@ Every error is `{"error": {"code": "...", "message": "..."}}`.
 The API runs on a free Render web service, with the database on Neon. [render.yaml](render.yaml) describes the service and [build.sh](build.sh) installs, collects static files and applies migrations.
 
 1. On render.com: **New > Blueprint**, pick this repository.
-2. Fill in `DATABASE_URL` (Neon pooled string) and `FRONTEND_ORIGIN` (the frontend URL). `SECRET_KEY` is generated.
+2. Fill in `DATABASE_URL` (Neon pooled string), `FRONTEND_ORIGIN` (the frontend URL), `GEMINI_API_KEY` and `LLM_MODEL`. For real email also set `EMAIL_BACKEND` to `django.core.mail.backends.smtp.EmailBackend`, `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD` (a Gmail app password) and `DEFAULT_FROM_EMAIL`. `SECRET_KEY` is generated. The build applies migrations and loads the insight cases.
 3. Open `https://<service>.onrender.com/api/health/`, then `/api/docs/`.
 
 The service deploys the `main` branch. It sleeps when idle: call `/api/health/` five minutes before a demo.
@@ -109,8 +121,8 @@ Touch only the apps you own (G8).
 | `insight/` | `RejectionCase`, seed command, views | C |
 | `sample_data/documents/` | dummy documents | B |
 | `sample_data/tenders/` | sample tenders and simulated addenda | C |
-| `scripts/` | `e2e_demo.py`, `try_compare.py`, `send_test_email.py` | C |
-| `tests/` | `test_rules*` (A), `test_extract*` (B), `test_compare*` (C) | shared |
+| `scripts/` | `e2e_demo.py`, `try_compare.py`, `try_extract.py`, `send_test_email.py`, sample generators | C |
+| `tests/` | one file per app or flow; `test_full_flow.py` walks the demo story | shared |
 | `docs/` | validation notes, handoff sheet | shared |
 | `.github/pull_request_template.md` | PR template | A |
 
