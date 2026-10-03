@@ -1,0 +1,23 @@
+{
+  "tender": "tender_SIMULATED.pdf",
+  "addendum": "addendum_1_SIMULATED.pdf",
+  "old_deadline": "2026-10-20T10:00:00+03:00",
+  "new_deadline": "2026-11-03T10:00:00+03:00",
+  "changes": [
+    {
+      "category": "deadline",
+      "old_quote": "Completed tenders must be submitted on or before Tuesday, 20th October 2026 at 10.00 a.m. East African Time.",
+      "new_quote": "Completed tenders must be submitted on or before Tuesday, 3rd November 2026 at 10.00 a.m. East African Time."
+    },
+    {
+      "category": "required_documents",
+      "old_quote": null,
+      "new_quote": "MR6. Valid Single Business Permit issued by a County Government."
+    },
+    {
+      "category": "specifications_quantities",
+      "old_quote": "Item 1: Trained cleaners deployed daily to county offices. Quantity: 12 cleaners.",
+      "new_quote": "Item 1: Trained cleaners deployed daily to county offices. Quantity: 18 cleaners."
+    }
+  ]
+}

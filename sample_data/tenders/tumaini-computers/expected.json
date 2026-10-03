@@ -1,0 +1,23 @@
+{
+  "tender": "tender_SIMULATED.pdf",
+  "addendum": "addendum_1_SIMULATED.pdf",
+  "old_deadline": "2026-11-06T12:00:00+03:00",
+  "new_deadline": "2026-11-20T12:00:00+03:00",
+  "changes": [
+    {
+      "category": "deadline",
+      "old_quote": "Completed tenders must be submitted on or before Friday, 6th November 2026 at 12.00 noon East African Time.",
+      "new_quote": "Completed tenders must be submitted on or before Friday, 20th November 2026 at 12.00 noon East African Time."
+    },
+    {
+      "category": "required_documents",
+      "old_quote": null,
+      "new_quote": "MR6. Current CR12 form issued within the last twelve (12) months."
+    },
+    {
+      "category": "specifications_quantities",
+      "old_quote": "Item 1: Desktop computers with monitor, keyboard and mouse. Quantity: 40 units.",
+      "new_quote": "Item 1: Desktop computers with monitor, keyboard and mouse. Quantity: 55 units."
+    }
+  ]
+}
