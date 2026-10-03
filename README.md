@@ -8,7 +8,7 @@ A business owner uploads her compliance documents and a tender. TenderReady extr
 
 The full sprint plan is in [tenerlymd.md](tenerlymd.md). It is the source of truth; this README is the short version.
 
-> The foundation is in place: every model with its first migration, `core/contracts.py`, real register and login, and every endpoint registered with a stub view returning canned JSON. The logic behind the stubs arrives through the task issues.
+> **Backend v0.1.** Real today: accounts (register, login, profile, delete-my-data), the rules engine and the readiness check endpoints. Documents, tenders, versions, alerts and insight are registered and return sample JSON until their owners' PRs land. The [Frontend Handoff Sheet](docs/handoff.md) lists the state of every endpoint.
 
 ## Setup
 
@@ -48,9 +48,47 @@ Then open:
 
 Notes:
 
+- When you run `pytest` with a Neon `DATABASE_URL` in `.env`, the tests try to create their database on Neon. Run them on SQLite instead: `DATABASE_URL=sqlite:///db.sqlite3 pytest`.
 - `.env` is git-ignored. Never commit it, and never put real values in `.env.example`.
 - `DATABASE_URL` is the Neon **pooled** connection string with `sslmode=require`. If it is empty, Django falls back to a local `db.sqlite3` so the checks and tests still run.
 - Dummy or consented documents only (R21). Never upload real IDs or real certificates.
+
+## API quickstart
+
+The frontend contract is the [Frontend Handoff Sheet](docs/handoff.md): base URL, token header, every endpoint and a sample response for every screen.
+
+```bash
+# 1. Register (or POST /api/auth/login) and keep the token
+curl -X POST http://127.0.0.1:8000/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"email": "owner@example.com", "password": "a-long-dummy-passphrase-42"}'
+# {"token": "<token>", "user_id": 1, "email": "owner@example.com"}
+
+# 2. Send the token on every other request
+curl http://127.0.0.1:8000/api/profile/ -H "Authorization: Token <token>"
+
+# 3. Save the profile and give consent
+curl -X PUT http://127.0.0.1:8000/api/profile/ \
+  -H "Authorization: Token <token>" -H "Content-Type: application/json" \
+  -d '{"business_name": "Demo Business Ltd", "kra_pin": "P000000000X", "consent": true}'
+
+# 4. Run the readiness check on a tender
+curl -X POST http://127.0.0.1:8000/api/tenders/12/check/ -H "Authorization: Token <token>"
+```
+
+In Swagger (`/api/docs/`), click **Authorize** and enter `Token <token>`.
+
+Every error is `{"error": {"code": "...", "message": "..."}}`.
+
+## Deploy
+
+The API runs on a free Render web service, with the database on Neon. [render.yaml](render.yaml) describes the service and [build.sh](build.sh) installs, collects static files and applies migrations.
+
+1. On render.com: **New > Blueprint**, pick this repository.
+2. Fill in `DATABASE_URL` (Neon pooled string) and `FRONTEND_ORIGIN` (the frontend URL). `SECRET_KEY` is generated.
+3. Open `https://<service>.onrender.com/api/health/`, then `/api/docs/`.
+
+The service deploys the `main` branch. It sleeps when idle: call `/api/health/` five minutes before a demo.
 
 ## Apps and ownership
 
