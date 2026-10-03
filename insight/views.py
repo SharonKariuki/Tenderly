@@ -1,30 +1,21 @@
-"""insight views. Owner: C.
+"""insight views. Owner: C."""
 
-M0 stub returning canned JSON so the frontend contract exists from day one. Keep the class
-name (tenderready/urls.py points at it) and replace the body in M2.
-"""
-
-from drf_spectacular.types import OpenApiTypes
-from drf_spectacular.utils import OpenApiParameter, extend_schema
+from drf_spectacular.utils import extend_schema
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from insight.serializers import InsightCaseSerializer, InsightQuerySerializer
+from insight.services import get_insights
+
 
 class InsightListView(APIView):
-    @extend_schema(parameters=[OpenApiParameter("doc_type", str)], responses=OpenApiTypes.OBJECT)
+    """Rejection cases are public reference data, not user data, so there is no owner
+    filter here (R19 covers user rows). Signing in is still required."""
+
+    @extend_schema(parameters=[InsightQuerySerializer], responses=InsightCaseSerializer(many=True))
     def get(self, request: Request) -> Response:
-        doc_type = request.query_params.get("doc_type", "kra_tax_compliance")
-        return Response(
-            [
-                {
-                    "doc_type": doc_type,
-                    "reason": "Tax compliance certificate expired before the tender closing date.",
-                    "source_title": "Illustrative case (stub)",
-                    "source_url": "",
-                    "year": 2025,
-                    "tags": ["expiry"],
-                    "illustrative": True,
-                }
-            ]
-        )
+        query = InsightQuerySerializer(data=request.query_params)
+        query.is_valid(raise_exception=True)
+        cases = get_insights(query.validated_data.get("doc_type"))
+        return Response(InsightCaseSerializer(cases, many=True).data)

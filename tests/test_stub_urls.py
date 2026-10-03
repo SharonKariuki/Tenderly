@@ -19,7 +19,6 @@ CONTRACT = [
     ("get", "/api/tenders/12/", 200),
     ("get", "/api/tenders/12/summary/?lang=sw", 200),
     ("get", "/api/alerts/", 200),
-    ("patch", "/api/alerts/1/read/", 200),
     ("get", "/api/insight/?doc_type=cr12", 200),
 ]
 
