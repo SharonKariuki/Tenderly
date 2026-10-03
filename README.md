@@ -97,7 +97,7 @@ Every error is `{"error": {"code": "...", "message": "..."}}`.
 The API runs on a free Render web service, with the database on Neon. [render.yaml](render.yaml) describes the service and [build.sh](build.sh) installs, collects static files and applies migrations.
 
 1. On render.com: **New > Blueprint**, pick this repository.
-2. Fill in `DATABASE_URL` (Neon pooled string), `FRONTEND_ORIGIN` (the frontend URL), `GEMINI_API_KEY` and `LLM_MODEL`. For real email also set `EMAIL_BACKEND` to `django.core.mail.backends.smtp.EmailBackend`, `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD` (a Gmail app password) and `DEFAULT_FROM_EMAIL`. `SECRET_KEY` is generated. The build applies migrations and loads the insight cases.
+2. Fill in `DATABASE_URL` (Neon pooled string), `FRONTEND_ORIGIN` (the frontend URL), `GEMINI_API_KEY` and `LLM_MODEL` (a model name such as `gemini-3.5-flash-lite`, the one measured in [docs/validation.md](docs/validation.md)). For real email also set `EMAIL_BACKEND` to `django.core.mail.backends.smtp.EmailBackend`, `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD` (a Gmail app password) and `DEFAULT_FROM_EMAIL`. `SECRET_KEY` is generated. The build applies migrations and loads the insight cases.
 3. Open `https://<service>.onrender.com/api/health/`, then `/api/docs/`.
 
 The service deploys the `main` branch. It sleeps when idle: call `/api/health/` five minutes before a demo.

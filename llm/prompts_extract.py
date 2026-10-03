@@ -1,7 +1,7 @@
 """Extraction prompts. Owner: B. Named constants only (C2); bump the version when a prompt
 changes, so cached answers of the old prompt are not reused (R11)."""
 
-DOCUMENT_PROMPT_VERSION = "v1"
+DOCUMENT_PROMPT_VERSION = "v2"
 DOCUMENT_PROMPT = """You read one business document from a Kenyan supplier, such as a tax \
 compliance certificate, a certificate of incorporation or business registration, an AGPO \
 certificate, a CR12, a national identity card, audited accounts, a bank statement or a \
@@ -12,6 +12,7 @@ Report only what is printed in the document.
 - holder_name: the business or person the document was issued to, exactly as printed.
 - kra_pin: the KRA PIN, if one is printed.
 - registration_number: the company or business registration number, if one is printed.
+  Never an identity card number, a certificate number or a KRA PIN.
 - issued_on and expires_on: dates as YYYY-MM-DD. A document with no expiry date has
   expires_on null. Never work out an expiry date that is not printed.
 - directors: the full names of the directors, only if the document lists them.

@@ -7,6 +7,7 @@ for JSON, validates it against a Pydantic schema (C1) and caches the result (R11
 import json
 import logging
 import time
+from typing import get_origin
 
 from django.conf import settings
 from pydantic import BaseModel, ValidationError
@@ -44,6 +45,37 @@ def with_schema(prompt: str, schema: type[BaseModel]) -> str:
         "Use null for anything that is not visible; never guess.\n"
         f"{json.dumps(schema.model_json_schema())}"
     )
+
+
+def load_json(raw: str) -> object:
+    """The JSON in an answer. Models sometimes wrap it in a code fence or add a sentence
+    around it; the outermost object or list is taken. Raises ValueError when there is none."""
+    text = raw.strip()
+    try:
+        return json.loads(text)
+    except ValueError:
+        pass
+    starts = [i for i in (text.find("{"), text.find("[")) if i != -1]
+    if not starts:
+        raise ValueError("no JSON in the answer")
+    start = min(starts)
+    end = text.rfind("}" if text[start] == "{" else "]")
+    return json.loads(text[start : end + 1])
+
+
+def parse_answer(raw: str, schema: type[BaseModel]) -> BaseModel:
+    """Validate an answer against the schema (C1). A bare list is accepted for a schema with
+    exactly one list field, which some models return instead of the wrapping object."""
+    data = load_json(raw)
+    if isinstance(data, list):
+        list_fields = [
+            name
+            for name, field in schema.model_fields.items()
+            if get_origin(field.annotation) is list
+        ]
+        if len(list_fields) == 1:
+            data = {list_fields[0]: data}
+    return schema.model_validate(data)
 
 
 def call_model(prompt: str, file_bytes: bytes | None, mime: str | None) -> str:
@@ -91,7 +123,7 @@ def generate_json(
         started = time.monotonic()
         try:
             raw = call_model(full_prompt, file_bytes, mime)
-            result = schema.model_validate(json.loads(raw)).model_dump(mode="json")
+            result = parse_answer(raw, schema).model_dump(mode="json")
         except (ValidationError, ValueError) as error:
             failure = type(error).__name__  # the answer was not valid JSON for the schema
         except Exception as error:
