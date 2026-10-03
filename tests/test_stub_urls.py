@@ -1,10 +1,10 @@
-"""Every endpoint of the API contract (sprint plan section 4) is registered and answers."""
+"""Every endpoint of the API contract (sprint plan section 4) that is still a stub is
+registered and answers. Real endpoints have their own test files."""
 
 import pytest
 from rest_framework.test import APIClient
 
 from accounts.models import User
-from core.contracts import DISCLAIMER, CheckResult
 
 CONTRACT = [
     ("get", "/api/profile/", 200),
@@ -18,8 +18,6 @@ CONTRACT = [
     ("post", "/api/tenders/", 201),
     ("get", "/api/tenders/12/", 200),
     ("get", "/api/tenders/12/summary/?lang=sw", 200),
-    ("post", "/api/tenders/12/check/", 201),
-    ("get", "/api/tenders/12/checks/latest/", 200),
     ("get", "/api/tenders/12/versions/", 200),
     ("post", "/api/tenders/12/versions/", 201),
     ("get", "/api/tenders/12/changes/", 200),
@@ -50,14 +48,6 @@ def test_endpoint_is_private(settings, method: str, url: str, expected: int) -> 
     settings.DEMO_MODE = False
 
     assert getattr(APIClient(), method)(url).status_code == 401
-
-
-def test_stub_check_matches_the_agreed_shape(client: APIClient) -> None:
-    result = CheckResult.model_validate(client.post("/api/tenders/12/check/").json())
-
-    assert result.tender_id == 12
-    assert result.disclaimer == DISCLAIMER  # R15
-    assert {item.status for item in result.items} == {"expiring", "missing"}
 
 
 def test_unknown_url_is_404(client: APIClient) -> None:
