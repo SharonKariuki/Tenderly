@@ -16,6 +16,7 @@ from core.contracts import (
     Requirement,
 )
 from rules.dates import days_before, deadline_date
+from rules.deadline_note import make_deadline_note  # noqa: F401  (contract import path)
 from rules.doc_types import EXPIRING_DOC_TYPES, label_for, required_doc_type
 from rules.mismatch import find_mismatches
 
@@ -130,12 +131,6 @@ def run_readiness_check(
     # R20: no score, only ready or attention_needed.
     overall = OverallStatus.READY if all_met and not mismatches else OverallStatus.ATTENTION_NEEDED
     return CheckResult(deadline=deadline, overall=overall, items=items, mismatches=mismatches)
-
-
-def make_deadline_note(
-    old_deadline: datetime | None, new_deadline: datetime | None, published_on: date | None
-) -> str | None:
-    raise NotImplementedError("M2: feat/a-deadline-note")
 
 
 def diff_checks(old: CheckResult, new: CheckResult) -> list[Flip]:
