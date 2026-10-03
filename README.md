@@ -102,6 +102,17 @@ Shared files (`core/contracts.py`, `tenderready/settings.py`, `tenderready/urls.
 | G12 | Bugs found on dev are fixed the same way: `fix/` branch, PR to dev, lead merges. |
 | G13 | **Migrations:** only the owner of an app runs `makemigrations` for it, and the migration file is committed in the same PR as the model change. Never edit or delete a migration that is already on dev. If two migrations collide, the lead runs `makemigrations --merge`. |
 
+### How the rules are enforced
+
+| What | How |
+|---|---|
+| G1, G2, G10 | `main` and `dev` are protected: changes arrive by pull request only, with no force-pushes and no branch deletion. On `main` this applies to the lead too. |
+| G4 | [CODEOWNERS](.github/CODEOWNERS) makes the lead the required reviewer of every PR to `dev`. A PR to `main` needs one approval from a teammate. |
+| G7, G13 | The **CI** check runs ruff, `manage.py check`, `makemigrations --check`, `migrate` (on a throwaway SQLite database) and pytest on every PR. |
+| G1, G2, G5 to G10, G13 | The **PR conventions** check ([check_pr.py](.github/scripts/check_pr.py)) fails a PR when the base is not `dev`, the branch name or a commit message is off-format, a template section is empty or a checklist box is unticked, a `.env` file is included, a file outside the author's apps is touched, an existing migration is edited, or the branch contains a merge commit. |
+
+Both checks must be green before a PR can be merged. If a check blocks something legitimate, say so in the chat; the lead decides.
+
 ### Daily commands
 
 ```bash
