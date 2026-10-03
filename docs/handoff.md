@@ -93,7 +93,7 @@ Every endpoint is **real**: it reads and writes the database. Uploads are read b
 | `POST /api/tenders/{id}/check/` | Run the readiness check | Real | 7.4 |
 | `GET /api/tenders/{id}/checks/latest/` | Latest stored check | Real | 7.4 |
 | `GET /api/tenders/{id}/versions/` | Version history | Real | 7.5 |
-| `POST /api/tenders/{id}/versions/` | Upload an addendum | Real, needs B's tender extraction | 7.5 |
+| `POST /api/tenders/{id}/versions/` | Upload an addendum | Real | 7.5 |
 | `GET /api/tenders/{id}/changes/` | Change log | Real | 7.5 |
 | `GET /api/alerts/` | In-app alerts | Real | 7.6 |
 | `PATCH /api/alerts/{id}/read/` | Mark an alert read | Real | 7.6 |
@@ -271,7 +271,7 @@ A tender upload is a PDF or a photo, capped at 10 MB. A requirement whose quote 
 - Show `reason` and `source_quote` (with `page`) under every line.
 - `mismatches`: `field` is `business_name`, `kra_pin` or `directors`; `values` are the values that disagree. `doc_ids` may hold one id when a document disagrees with the profile.
 - `deadline_note` is `null` on the first version.
-- `insight` is a list of the objects shown under 7.4b; it may be empty.
+- `insight` is always an empty list in this release. To show Rejection Insight next to a line that is not met, look up the requirement in the tender's `requirements` by `requirement_id` and call `GET /api/insight/?doc_type=` with its `required_doc_type`.
 - **Always show `disclaimer`** in the page footer.
 
 ### 7.4b Rejection Insight
@@ -282,17 +282,17 @@ A tender upload is a PDF or a photo, capped at 10 MB. A requirement whose quote 
 [
   {
     "doc_type": "kra_tax_compliance",
-    "reason": "Tax compliance certificate expired before the tender closing date.",
-    "source_title": "Illustrative case (stub)",
+    "reason": "The tax compliance certificate was valid when the bid was prepared but had expired by the tender closing date, so the bid failed preliminary evaluation.",
+    "source_title": "Illustrative case, not a cited decision",
     "source_url": "",
-    "year": 2025,
-    "tags": ["expiry"],
+    "year": null,
+    "tags": ["expired", "preliminary_evaluation"],
     "illustrative": true
   }
 ]
 ```
 
-Label cases where `illustrative` is `true` as illustrative.
+Label cases where `illustrative` is `true` as illustrative. All 20 cases in this release are illustrative: none is taken from a Review Board decision. Without `doc_type` the endpoint returns every case.
 
 ## 7.5 Tracked tenders and addenda
 
