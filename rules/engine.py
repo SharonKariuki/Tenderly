@@ -134,4 +134,45 @@ def run_readiness_check(
 
 
 def diff_checks(old: CheckResult, new: CheckResult) -> list[Flip]:
-    raise NotImplementedError("M3: feat/a-diff-and-deploy")
+    """What changed for the user between two checks of the same tender (R8).
+
+    Items are paired by label first, because requirement ids can be renumbered between
+    versions, and by requirement id otherwise. Unchanged items are left out; a requirement
+    that is new has old_status None, one that was dropped has new_status None.
+    """
+
+    def key(label: str) -> str:
+        return " ".join(label.lower().split())
+
+    by_label = {key(item.label): item for item in old.items}
+    by_id = {item.requirement_id: item for item in old.items}
+    paired: set[str] = set()
+
+    flips: list[Flip] = []
+    for item in new.items:
+        candidates = (by_label.get(key(item.label)), by_id.get(item.requirement_id))
+        before = next((c for c in candidates if c and c.requirement_id not in paired), None)
+        if before is not None:
+            paired.add(before.requirement_id)
+        if before is None or before.status != item.status:
+            flips.append(
+                Flip(
+                    requirement_id=item.requirement_id,
+                    label=item.label,
+                    old_status=before.status if before else None,
+                    new_status=item.status,
+                    reason=item.reason,
+                )
+            )
+    flips.extend(
+        Flip(
+            requirement_id=item.requirement_id,
+            label=item.label,
+            old_status=item.status,
+            new_status=None,
+            reason="No longer required in this version.",
+        )
+        for item in old.items
+        if item.requirement_id not in paired
+    )
+    return flips
