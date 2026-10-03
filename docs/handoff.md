@@ -9,7 +9,7 @@ Everything the frontend hour needs: where the API is, how to sign in, every endp
 | Where | URL |
 |---|---|
 | Local | `http://127.0.0.1:8000` |
-| Deployed (Render) | `https://<service>.onrender.com` (the lead posts the real URL in the team chat) |
+| Deployed (Render) | `https://tenderready-api.onrender.com` |
 
 The free Render instance sleeps when idle and Neon suspends too. Call `GET /api/health/` five minutes before the demo; the first call can take up to a minute.
 
