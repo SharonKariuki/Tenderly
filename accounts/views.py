@@ -1,6 +1,6 @@
 """accounts views. Owner: A (lead).
 
-Register, login and profile are real. me/data is a stub until M2.
+Thin: parse, call the serializer or service, respond (C8).
 """
 
 from drf_spectacular.types import OpenApiTypes
@@ -19,6 +19,7 @@ from accounts.serializers import (
     RegisterSerializer,
     TokenResponseSerializer,
 )
+from accounts.services import delete_user_data
 
 
 def token_payload(user: User) -> dict:
@@ -66,8 +67,8 @@ class ProfileView(APIView):
 
 
 class MeDataView(APIView):
-    """Stub (M0). Made real in M2; the stub deletes nothing."""
+    """Delete everything the signed-in user has stored. The login itself stays."""
 
     @extend_schema(responses=OpenApiTypes.OBJECT)
     def delete(self, request: Request) -> Response:
-        return Response({"deleted": {"documents": 0, "tenders": 0, "alerts": 0, "files": 0}})
+        return Response({"deleted": delete_user_data(request.user)})
