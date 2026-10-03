@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [dev, main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r requirements.txt
+      # G7: a PR must be runnable. No DATABASE_URL here, so Django uses local SQLite.
+      - name: Ruff
+        run: ruff check . && ruff format --check .
+      - name: Django system check
+        run: python manage.py check
+      - name: Model changes have their migration committed (G13)
+        run: python manage.py makemigrations --check --dry-run
+      - name: Migrations apply
+        run: python manage.py migrate --noinput
+      - name: Pytest
+        run: pytest

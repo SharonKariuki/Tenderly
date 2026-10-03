@@ -1,0 +1,38 @@
+# Render blueprint for the TenderReady API (free web service; the database stays on Neon).
+# Render: New > Blueprint > pick this repository. Then fill in the values marked sync: false.
+services:
+  - type: web
+    name: tenderready-api
+    runtime: python
+    plan: free
+    branch: main
+    buildCommand: ./build.sh
+    startCommand: gunicorn tenderready.wsgi:application
+    healthCheckPath: /api/health/
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "false"
+      - key: DEMO_MODE
+        value: "false"
+      - key: MAX_UPLOAD_MB
+        value: "10"
+      - key: DATABASE_URL # Neon pooled connection string, sslmode=require
+        sync: false
+      - key: FRONTEND_ORIGIN # the frontend URL, for CORS; several are comma separated
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: LLM_MODEL
+        sync: false
+      - key: EMAIL_BACKEND # django.core.mail.backends.smtp.EmailBackend to send real email
+        sync: false
+      - key: EMAIL_HOST_USER
+        sync: false
+      - key: EMAIL_HOST_PASSWORD
+        sync: false
+      - key: DEFAULT_FROM_EMAIL
+        sync: false
