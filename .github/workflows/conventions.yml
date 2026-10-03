@@ -1,0 +1,38 @@
+name: PR conventions
+
+on:
+  pull_request:
+    branches: [dev, main]
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  conventions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      # The checker comes from the base branch, so a PR cannot relax its own rules.
+      - name: Check the PR against the Git rules (G1-G13)
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          if git cat-file -e "$BASE_SHA:.github/scripts/check_pr.py" 2>/dev/null; then
+            git show "$BASE_SHA:.github/scripts/check_pr.py" > "$RUNNER_TEMP/check_pr.py"
+          else
+            cp .github/scripts/check_pr.py "$RUNNER_TEMP/check_pr.py"
+          fi
+          python "$RUNNER_TEMP/check_pr.py"
