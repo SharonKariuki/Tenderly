@@ -91,6 +91,27 @@ def test_missing_key_or_model_fails_at_once(monkeypatch, settings):
     assert raised.value.detail.code == "ai_not_configured"
 
 
+class Listing(BaseModel):
+    changes: list[Answer] = []
+
+
+def test_a_bare_list_is_wrapped_for_a_schema_with_one_list_field(monkeypatch):
+    answers(monkeypatch, json.dumps([{"name": "a"}]))
+
+    assert generate_json("Compare.", Listing) == {"changes": [{"name": "a", "count": 0}]}
+
+
+def test_json_inside_a_code_fence_or_a_sentence_is_read(monkeypatch):
+    answers(
+        monkeypatch,
+        '```json\n{"name": "a"}\n```',
+        'Here is the answer: {"name": "b", "count": 2}. Done.',
+    )
+
+    assert generate_json("Read this.", Answer) == {"name": "a", "count": 0}
+    assert generate_json("Read this.", Answer) == {"name": "b", "count": 2}
+
+
 def test_nothing_from_the_answer_is_logged(monkeypatch, caplog):
     answers(monkeypatch, json.dumps({"name": "SECRET-PIN"}))
 
