@@ -92,12 +92,12 @@ For a field error the message starts with the field name, for example `"email: A
 | `GET /api/tenders/{id}/summary/?lang=en\|sw` | Summary | Stub (B) | 7.3 |
 | `POST /api/tenders/{id}/check/` | Run the readiness check | Real | 7.4 |
 | `GET /api/tenders/{id}/checks/latest/` | Latest stored check | Real | 7.4 |
-| `GET /api/tenders/{id}/versions/` | Version history | Stub (C) | 7.5 |
-| `POST /api/tenders/{id}/versions/` | Upload an addendum | Stub (C) | 7.5 |
-| `GET /api/tenders/{id}/changes/` | Change log | Stub (C) | 7.5 |
-| `GET /api/alerts/` | In-app alerts | Stub (C) | 7.6 |
-| `PATCH /api/alerts/{id}/read/` | Mark an alert read | Stub (C) | 7.6 |
-| `GET /api/insight/?doc_type=` | Rejection Insight | Stub (C) | 7.4 |
+| `GET /api/tenders/{id}/versions/` | Version history | Real | 7.5 |
+| `POST /api/tenders/{id}/versions/` | Upload an addendum | Real, needs B's tender extraction | 7.5 |
+| `GET /api/tenders/{id}/changes/` | Change log | Real | 7.5 |
+| `GET /api/alerts/` | In-app alerts | Real | 7.6 |
+| `PATCH /api/alerts/{id}/read/` | Mark an alert read | Real | 7.6 |
+| `GET /api/insight/?doc_type=` | Rejection Insight | Real | 7.4 |
 
 The two check endpoints are real but need a real tender in the database. While `POST /api/tenders/` is a stub, they answer `404` for any id; build the result page against the sample in 7.4.
 
@@ -349,7 +349,8 @@ Label cases where `illustrative` is `true` as illustrative.
 }
 ```
 
-- `created` is `false` when the same addendum is uploaded twice; nothing new is stored.
+- The second upload of the same addendum returns `200` with `created` `false`: nothing new is stored, `flips` is empty, `alert_id` is `null` and `check` is the stored check of that version (or `null` if there is none).
+- In a change, `affects_user` is `true` when the change made a line of her checklist stop being met: a moved deadline that a certificate no longer reaches, or a new required document she does not have. Changes to quantities, pricing and submission method are always `false`, because the checklist does not cover them.
 - In a flip, `old_status` is `null` for a requirement the addendum added, and `new_status` is `null` for one it removed.
 - Say on the page that the app cannot guarantee it has seen every addendum; the procuring entity's official channel is the authority.
 
@@ -374,7 +375,9 @@ Label cases where `illustrative` is `true` as illustrative.
 
 - Unread means `read_at` is `null`; the bell count is the number of those.
 - `PATCH /api/alerts/{id}/read/` (no body) returns the alert with `read_at` set. Call it when she opens the alert, then go to the result page of `tender_id`.
-- The email is sent by the backend. If it fails, the alert is still in this list.
+- The email is sent by the backend after the response, so `sent_at` is `null` at first and is filled once the email has gone out. If it fails, `sent_at` stays `null` and the alert is still in this list.
+- `message` is the full plain-text alert (several lines, ending with the disclaimer). Show it with line breaks kept.
+- The email links to `{FRONTEND_ORIGIN}/tenders/{tender_id}`. Tell the lead if the result page lives at another path.
 
 ## Dates and times
 
