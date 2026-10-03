@@ -20,7 +20,7 @@ from versions.serializers import (
     TenderChangeSerializer,
     VersionSerializer,
 )
-from versions.services import store_addendum
+from versions.services import process_addendum
 
 
 class VersionListCreateView(APIView):
@@ -40,7 +40,7 @@ class VersionListCreateView(APIView):
         upload = AddendumUploadSerializer(data=request.data)
         upload.is_valid(raise_exception=True)
         file = upload.validated_data["file"]
-        result = store_addendum(tender, file.read(), file.content_type, file.name)
+        result = process_addendum(tender, file.read(), file.content_type, filename=file.name)
         # R9: a duplicate upload is a 200 with the version we already have.
         code = status.HTTP_201_CREATED if result.created else status.HTTP_200_OK
         return Response(result.model_dump(mode="json"), status=code)

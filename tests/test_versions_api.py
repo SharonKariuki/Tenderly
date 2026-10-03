@@ -116,7 +116,8 @@ def test_addendum_creates_version_two_with_its_changes(client, tender, extract_c
         "required_documents",
         "specifications_quantities",
     ]
-    assert body["check"] is None and body["flips"] == [] and body["alert_id"] is None
+    assert body["check"]["version_no"] == 2
+    assert body["alert_id"] is not None
 
     tender.refresh_from_db()
     assert tender.current_version == 2

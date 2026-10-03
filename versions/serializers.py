@@ -54,7 +54,7 @@ class ChangeSerializer(serializers.Serializer):
 
 
 class AddendumResultSerializer(serializers.Serializer):
-    """The AddendumResult contract. check, flips and alert_id are filled by the M3 flow."""
+    """The AddendumResult contract (core.contracts)."""
 
     created = serializers.BooleanField()
     version_no = serializers.IntegerField()
