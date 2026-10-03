@@ -1,0 +1,50 @@
+{
+  "business_registration_DUMMY.pdf": {
+    "document_type": "business_registration",
+    "holder_name": "Demo Business Ltd",
+    "kra_pin": null,
+    "registration_number": "PVT-DEMO0001",
+    "issued_on": "2022-03-14",
+    "expires_on": null,
+    "directors": []
+  },
+  "tax_compliance_DUMMY.pdf": {
+    "document_type": "kra_tax_compliance",
+    "holder_name": "Demo Business Ltd",
+    "kra_pin": "P000000000X",
+    "registration_number": null,
+    "issued_on": "2025-10-29",
+    "expires_on": "2026-10-28",
+    "directors": []
+  },
+  "agpo_certificate_DUMMY.pdf": {
+    "document_type": "agpo_certificate",
+    "holder_name": "Demo Business Ltd",
+    "kra_pin": null,
+    "registration_number": null,
+    "issued_on": "2024-10-13",
+    "expires_on": "2026-10-12",
+    "directors": []
+  },
+  "cr12_DUMMY.pdf": {
+    "document_type": "cr12",
+    "holder_name": "Demo Business Ltd",
+    "kra_pin": null,
+    "registration_number": "PVT-DEMO0001",
+    "issued_on": "2026-09-01",
+    "expires_on": null,
+    "directors": [
+      "Wanjiru Achieng Kamau",
+      "Otieno Baraka Mwangi"
+    ]
+  },
+  "national_id_DUMMY.pdf": {
+    "document_type": "national_id",
+    "holder_name": "Wanjiru Akinyi Kamau",
+    "kra_pin": null,
+    "registration_number": null,
+    "issued_on": "2019-06-05",
+    "expires_on": null,
+    "directors": []
+  }
+}
