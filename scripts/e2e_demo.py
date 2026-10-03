@@ -33,6 +33,7 @@ DOCUMENTS_DIR = ROOT / "sample_data" / "documents"
 PAIR_DIR = ROOT / "sample_data" / "tenders" / "mashariki-cleaning"
 PASSWORD = "Tender-demo-2026"
 DOCUMENTS_NEEDED = 5
+DOCUMENT_SUFFIXES = (".pdf", ".png", ".jpg", ".jpeg")
 EMAIL_WAIT_SECONDS = 20
 TIMEOUT_SECONDS = 120  # the first call can wake a sleeping server and database
 
@@ -140,7 +141,9 @@ def real_flips(flips: list[dict]) -> list[dict]:
 
 
 def step_1(api: Api, state: dict) -> str:
-    files = sorted(p for p in state["documents_dir"].iterdir() if p.name != ".gitkeep")
+    files = sorted(
+        p for p in state["documents_dir"].iterdir() if p.suffix.lower() in DOCUMENT_SUFFIXES
+    )
     require(
         len(files) >= DOCUMENTS_NEEDED,
         f"need {DOCUMENTS_NEEDED} dummy documents in {state['documents_dir']}, found {len(files)}",
