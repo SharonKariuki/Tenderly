@@ -1,0 +1,47 @@
+[
+  {
+    "doc_type": "kra_tax_compliance",
+    "reason": "The tax compliance certificate was valid when the bid was prepared but had expired by the tender closing date, so the bid failed preliminary evaluation.",
+    "source_title": "Illustrative case, not a cited decision",
+    "source_url": "",
+    "year": null,
+    "tags": ["expired", "preliminary_evaluation"],
+    "illustrative": true
+  },
+  {
+    "doc_type": "cr12",
+    "reason": "The CR12 submitted was older than the twelve months the tender allowed, so the bid was declared non-responsive.",
+    "source_title": "Illustrative case, not a cited decision",
+    "source_url": "",
+    "year": null,
+    "tags": ["out_of_date", "preliminary_evaluation"],
+    "illustrative": true
+  },
+  {
+    "doc_type": "agpo_certificate",
+    "reason": "The tender was reserved for one AGPO category and the bidder's certificate was for a different category, so the bidder was found ineligible.",
+    "source_title": "Illustrative case, not a cited decision",
+    "source_url": "",
+    "year": null,
+    "tags": ["wrong_category", "eligibility"],
+    "illustrative": true
+  },
+  {
+    "doc_type": "business_registration",
+    "reason": "The business name on the registration certificate did not match the name on the tax compliance certificate, and the bid was rejected for inconsistent documents.",
+    "source_title": "Illustrative case, not a cited decision",
+    "source_url": "",
+    "year": null,
+    "tags": ["name_mismatch", "preliminary_evaluation"],
+    "illustrative": true
+  },
+  {
+    "doc_type": "business_permit",
+    "reason": "A mandatory business permit added by an addendum was not included because the bidder had not seen the addendum, and the bid was declared non-responsive.",
+    "source_title": "Illustrative case, not a cited decision",
+    "source_url": "",
+    "year": null,
+    "tags": ["missing", "addendum"],
+    "illustrative": true
+  }
+]

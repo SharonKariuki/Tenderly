@@ -1,0 +1,23 @@
+{
+  "tender": "tender_SIMULATED.pdf",
+  "addendum": "addendum_1_SIMULATED.pdf",
+  "old_deadline": "2026-10-27T11:00:00+03:00",
+  "new_deadline": "2026-11-10T11:00:00+03:00",
+  "changes": [
+    {
+      "category": "deadline",
+      "old_quote": "Completed tenders must be submitted on or before Tuesday, 27th October 2026 at 11.00 a.m. East African Time.",
+      "new_quote": "Completed tenders must be submitted on or before Tuesday, 10th November 2026 at 11.00 a.m. East African Time."
+    },
+    {
+      "category": "required_documents",
+      "old_quote": null,
+      "new_quote": "MR6. Certified bank statements for the last six (6) months."
+    },
+    {
+      "category": "specifications_quantities",
+      "old_quote": "Item 1: Aluminium sulphate in 50 kg bags. Quantity: 500 bags.",
+      "new_quote": "Item 1: Aluminium sulphate in 50 kg bags. Quantity: 750 bags."
+    }
+  ]
+}
