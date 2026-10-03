@@ -110,14 +110,21 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+# R22: email is the login identity.
+AUTH_USER_MODEL = "accounts.User"
+
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework.authentication.TokenAuthentication",
+        # Only acts when DEMO_MODE is on and the request carries no token.
+        "accounts.authentication.DemoUserAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
     ],
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    # C5: {"error": {"code": "...", "message": "..."}} everywhere.
+    "EXCEPTION_HANDLER": "core.exceptions.api_exception_handler",
 }
 
 SPECTACULAR_SETTINGS = {
@@ -125,6 +132,8 @@ SPECTACULAR_SETTINGS = {
     "DESCRIPTION": "Deadline-aware tender readiness checks and the Addenda Watcher.",
     "VERSION": "0.1.0",
     "SERVE_INCLUDE_SCHEMA": False,
+    # The demo-user fallback is not a scheme a client can use, so keep it out of the docs.
+    "AUTHENTICATION_WHITELIST": ["rest_framework.authentication.TokenAuthentication"],
 }
 
 CORS_ALLOWED_ORIGINS = env_list("FRONTEND_ORIGIN", "http://localhost:5173")
