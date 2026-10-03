@@ -1,6 +1,6 @@
 """accounts views. Owner: A (lead).
 
-Register and login are real. Profile and me/data are stubs until M1 and M2.
+Register, login and profile are real. me/data is a stub until M2.
 """
 
 from drf_spectacular.types import OpenApiTypes
@@ -13,7 +13,12 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from accounts.models import User
-from accounts.serializers import LoginSerializer, RegisterSerializer, TokenResponseSerializer
+from accounts.serializers import (
+    LoginSerializer,
+    ProfileSerializer,
+    RegisterSerializer,
+    TokenResponseSerializer,
+)
 
 
 def token_payload(user: User) -> dict:
@@ -44,27 +49,20 @@ class LoginView(APIView):
         return Response(token_payload(serializer.validated_data["user"]))
 
 
-STUB_PROFILE = {
-    "email": "demo@tenderready.local",
-    "business_name": "Demo Business",
-    "kra_pin": "P000000000X",
-    "reg_number": "PVT-DEMO0001",
-    "agpo_category": "women",
-    "preferred_language": "en",
-    "consent_at": None,
-}
-
-
 class ProfileView(APIView):
-    """Stub (M0). Made real in M1."""
+    """The signed-in user's business profile and consent."""
 
-    @extend_schema(responses=OpenApiTypes.OBJECT)
+    @extend_schema(responses=ProfileSerializer)
     def get(self, request: Request) -> Response:
-        return Response(STUB_PROFILE)
+        return Response(ProfileSerializer(request.user).data)
 
-    @extend_schema(request=OpenApiTypes.OBJECT, responses=OpenApiTypes.OBJECT)
+    @extend_schema(request=ProfileSerializer, responses=ProfileSerializer)
     def put(self, request: Request) -> Response:
-        return Response(STUB_PROFILE)
+        # Partial on purpose: the frontend saves the profile form and the consent tick apart.
+        serializer = ProfileSerializer(request.user, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
 
 
 class MeDataView(APIView):
