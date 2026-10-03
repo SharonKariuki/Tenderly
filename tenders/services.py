@@ -12,7 +12,7 @@ from pathlib import PurePath
 
 import pdfplumber
 from django.db import transaction
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from accounts.models import User
 from core.contracts import DocType, Requirement, RequirementType, TenderExtraction
@@ -36,6 +36,31 @@ class RequirementOutput(BaseModel):
     source_quote: str | None = None
     page: int | None = None
 
+    @field_validator("requirement_type", mode="before")
+    @classmethod
+    def unknown_type_is_other(cls, value: object) -> object:
+        """R13: a value outside the enum is "other", not a failed answer."""
+        return value if value in RequirementType.values else RequirementType.OTHER
+
+    @field_validator("required_doc_type", mode="before")
+    @classmethod
+    def unknown_doc_type_is_none(cls, value: object) -> object:
+        """No mappable document means the check shows the line as unclear (R6)."""
+        return value if value in DocType.values else None
+
+    @field_validator("mandatory", mode="before")
+    @classmethod
+    def null_is_mandatory(cls, value: object) -> object:
+        return True if value is None else value
+
+    @field_validator("page", mode="before")
+    @classmethod
+    def unreadable_page_is_none(cls, value: object) -> object:
+        try:
+            return int(value) if value is not None else None
+        except (TypeError, ValueError):
+            return None
+
 
 class TenderOutput(BaseModel):
     """What the LLM must return. Dates arrive as text and are parsed in one place (R18)."""
@@ -45,6 +70,16 @@ class TenderOutput(BaseModel):
     deadline: str | None = None
     requirements: list[RequirementOutput] = Field(default_factory=list)
     summary_en: str = ""
+
+    @field_validator("requirements", mode="before")
+    @classmethod
+    def null_list_is_empty(cls, value: object) -> object:
+        return value or []
+
+    @field_validator("summary_en", mode="before")
+    @classmethod
+    def null_summary_is_empty(cls, value: object) -> object:
+        return value or ""
 
 
 @dataclass(frozen=True)

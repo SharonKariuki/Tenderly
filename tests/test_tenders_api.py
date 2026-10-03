@@ -17,7 +17,13 @@ from core.models import StoredFile
 from llm import client as llm_client
 from rules.dates import NAIROBI, parse_deadline
 from tenders.models import Tender, TenderVersion
-from tenders.services import RequirementOutput, extract_tender, kept_requirements, text_hash
+from tenders.services import (
+    RequirementOutput,
+    TenderOutput,
+    extract_tender,
+    kept_requirements,
+    text_hash,
+)
 
 pytestmark = pytest.mark.django_db
 
@@ -179,6 +185,29 @@ def test_a_scan_keeps_its_requirements_because_there_is_no_text_to_check():
 
     assert [item.id for item in kept_requirements(proposed, "")] == ["r1"]
     assert kept_requirements(proposed, "A tender about something else.") == []
+
+
+def test_an_untidy_requirement_is_read_without_guessing():
+    output = TenderOutput.model_validate(
+        {
+            "requirements": [
+                {
+                    "label": "Permit",
+                    "requirement_type": "licence",
+                    "required_doc_type": "permit",
+                    "mandatory": None,
+                    "page": "two",
+                }
+            ],
+            "summary_en": None,
+        }
+    )
+
+    requirement = output.requirements[0]
+    assert requirement.requirement_type == "other" and requirement.required_doc_type is None
+    assert requirement.mandatory is True and requirement.page is None
+    assert output.summary_en == ""
+    assert TenderOutput.model_validate({"requirements": None}).requirements == []
 
 
 def test_text_hash_ignores_spacing_and_falls_back_to_the_file():

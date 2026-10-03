@@ -201,6 +201,16 @@ def test_another_user_cannot_change_or_delete_her_document(client, model_calls):
     assert Document.objects.get().confirmed is False
 
 
+def test_an_untidy_answer_is_read_without_guessing():
+    output = DocumentOutput.model_validate(
+        {"document_type": "passport", "directors": None, "confidence": 92}
+    )
+
+    assert output.document_type == "other"  # R13: outside the enum
+    assert output.directors == [] and output.confidence == 0.92
+    assert DocumentOutput.model_validate({"confidence": "high"}).confidence == 0
+
+
 def test_to_extracted_never_guesses():
     extracted = to_extracted(
         DocumentOutput(

@@ -7,7 +7,7 @@ null, and a low confidence asks the user to review (R4).
 import hashlib
 
 from django.db import transaction
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from accounts.models import User
 from core.contracts import REVIEW_CONFIDENCE_THRESHOLD, DocType, ExtractedDocument
@@ -32,6 +32,27 @@ class DocumentOutput(BaseModel):
     expires_on: str | None = None
     directors: list[str] = Field(default_factory=list)
     confidence: float = Field(default=0, ge=0, le=1)
+
+    @field_validator("document_type", mode="before")
+    @classmethod
+    def unknown_type_is_other(cls, value: object) -> object:
+        """A type outside the enum is "other", not a failed answer (R13)."""
+        return value if value in DocType.values else DocType.OTHER
+
+    @field_validator("directors", mode="before")
+    @classmethod
+    def null_list_is_empty(cls, value: object) -> object:
+        return value or []
+
+    @field_validator("confidence", mode="before")
+    @classmethod
+    def percent_to_fraction(cls, value: object) -> object:
+        """Some answers give 92 for 0.92. Anything unreadable is 0, which asks for review."""
+        try:
+            number = float(value)
+        except (TypeError, ValueError):
+            return 0
+        return number / 100 if 1 < number <= 100 else number
 
 
 def clean(value: str | None) -> str | None:
