@@ -6,6 +6,7 @@ view bodies, never the names, so this file does not need to change again.
 
 from django.contrib import admin
 from django.urls import path
+from django.views.generic import RedirectView
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 from accounts.views import LoginView, MeDataView, ProfileView, RegisterView
@@ -18,6 +19,8 @@ from tenders.views import TenderDetailView, TenderListCreateView, TenderSummaryV
 from versions.views import ChangeListView, VersionListCreateView
 
 urlpatterns = [
+    # The bare address is what people type first; send them to the docs.
+    path("", RedirectView.as_view(pattern_name="docs"), name="root"),
     path("admin/", admin.site.urls),
     path("api/health/", health, name="health"),
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
