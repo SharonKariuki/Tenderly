@@ -80,11 +80,11 @@ def test_alert_endpoints_are_private(settings):
     assert APIClient().patch("/api/alerts/1/read/").status_code == 401
 
 
-def test_seed_command_loads_fifteen_cases_and_is_idempotent():
+def test_seed_command_loads_twenty_cases_and_is_idempotent():
     call_command("seed_insight")
     call_command("seed_insight")
 
-    assert RejectionCase.objects.count() == 15
+    assert RejectionCase.objects.count() == 20
 
 
 def test_get_insights_filters_by_document_type():
@@ -105,7 +105,7 @@ def test_insight_endpoint_filters_and_validates_doc_type(client: APIClient):
     invalid = client.get("/api/insight/?doc_type=passport")
 
     assert filtered.status_code == 200
-    assert len(filtered.json()) == 3
+    assert len(filtered.json()) == 4
     assert set(filtered.json()[0]) == {
         "doc_type",
         "reason",
@@ -115,6 +115,6 @@ def test_insight_endpoint_filters_and_validates_doc_type(client: APIClient):
         "tags",
         "illustrative",
     }
-    assert len(everything.json()) == 15
+    assert len(everything.json()) == 20
     assert invalid.status_code == 400
     assert "error" in invalid.json()

@@ -44,7 +44,7 @@ def test_expected_quotes_are_in_the_text_layers(expected_path: Path):
 def test_insight_seed_cases_have_every_field():
     cases = json.loads(SEED_FILE.read_text(encoding="utf-8"))
     fields = {"doc_type", "reason", "source_title", "source_url", "year", "tags", "illustrative"}
-    assert len(cases) >= 5
+    assert len(cases) >= 20  # sprint plan, M4: at least 20
     for case in cases:
         assert set(case) == fields
         assert case["reason"]

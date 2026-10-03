@@ -133,5 +133,50 @@
     "year": null,
     "tags": ["expired", "preliminary_evaluation"],
     "illustrative": true
+  },
+  {
+    "doc_type": "kra_tax_compliance",
+    "reason": "The KRA PIN on the tax compliance certificate differed from the PIN on the tender form, and the evaluation committee could not confirm that both belonged to the bidder.",
+    "source_title": "Illustrative case, not a cited decision",
+    "source_url": "",
+    "year": null,
+    "tags": ["pin_mismatch", "preliminary_evaluation"],
+    "illustrative": true
+  },
+  {
+    "doc_type": "agpo_certificate",
+    "reason": "The AGPO certificate was issued to a sister company, not to the bidder named on the tender form, so the bid was not eligible for the reserved tender.",
+    "source_title": "Illustrative case, not a cited decision",
+    "source_url": "",
+    "year": null,
+    "tags": ["wrong_holder", "eligibility"],
+    "illustrative": true
+  },
+  {
+    "doc_type": "national_id",
+    "reason": "The name on a director's identity card was spelled differently from the CR12, and the bidder gave no explanation, so the documents were treated as inconsistent.",
+    "source_title": "Illustrative case, not a cited decision",
+    "source_url": "",
+    "year": null,
+    "tags": ["name_mismatch", "preliminary_evaluation"],
+    "illustrative": true
+  },
+  {
+    "doc_type": "business_registration",
+    "reason": "The certificate of incorporation was submitted as an unreadable photocopy, so the evaluation committee could not verify the registration number.",
+    "source_title": "Illustrative case, not a cited decision",
+    "source_url": "",
+    "year": null,
+    "tags": ["illegible", "preliminary_evaluation"],
+    "illustrative": true
+  },
+  {
+    "doc_type": "bank_statement",
+    "reason": "The bank statements were not certified by the bank as the tender required, so they were not accepted as proof of financial capacity.",
+    "source_title": "Illustrative case, not a cited decision",
+    "source_url": "",
+    "year": null,
+    "tags": ["uncertified", "financial"],
+    "illustrative": true
   }
 ]
