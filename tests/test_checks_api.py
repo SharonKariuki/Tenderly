@@ -7,6 +7,7 @@ from rest_framework.test import APIClient
 
 from accounts.models import User
 from checks.models import Check
+from checks.services import recheck
 from core.contracts import DISCLAIMER, CheckResult
 from core.models import StoredFile
 from documents.models import Document
@@ -238,3 +239,71 @@ def test_both_endpoints_are_private(settings, user: User) -> None:
 
     assert APIClient().post(f"/api/tenders/{tender.pk}/check/").status_code == 401
     assert APIClient().get(f"/api/tenders/{tender.pk}/checks/latest/").status_code == 401
+
+
+def add_version(tender: Tender, deadline: datetime, requirements: list, published_on=None) -> None:
+    TenderVersion.objects.create(
+        tender=tender,
+        version_no=2,
+        file=stored_file(tender.owner),
+        text_hash="b" * 64,
+        deadline=deadline,
+        published_on=published_on,
+        requirements=requirements,
+    )
+
+
+def test_the_check_is_idempotent(client: APIClient, user: User) -> None:
+    tender = tender_for(user)
+
+    first = client.post(f"/api/tenders/{tender.pk}/check/")
+    second = client.post(f"/api/tenders/{tender.pk}/check/")
+
+    assert (first.status_code, second.status_code) == (201, 200)
+    assert second.json() == first.json()
+    assert Check.objects.count() == 1
+
+
+def test_a_changed_result_is_stored_as_a_new_row(client: APIClient, user: User) -> None:
+    tender = tender_for(user, requirements=REQUIREMENTS[:1])
+    client.post(f"/api/tenders/{tender.pk}/check/")
+    document_for(user, date(2031, 1, 1))
+
+    assert client.post(f"/api/tenders/{tender.pk}/check/").status_code == 201
+    assert Check.objects.count() == 2
+
+
+def test_the_first_version_has_no_deadline_note(client: APIClient, user: User) -> None:
+    tender = tender_for(user)
+
+    assert client.post(f"/api/tenders/{tender.pk}/check/").json()["deadline_note"] is None
+
+
+def test_a_moved_deadline_puts_the_note_in_the_payload(client: APIClient, user: User) -> None:
+    # R10.
+    tender = tender_for(user)
+    add_version(tender, datetime(2030, 10, 27, 10, 0, tzinfo=NAIROBI), REQUIREMENTS)
+
+    note = client.post(f"/api/tenders/{tender.pk}/check/").json()["deadline_note"]
+
+    assert note.startswith("The deadline moved from 20 October 2030 at 10:00 to 27 October 2030")
+    assert "7 days later" in note
+
+
+def test_recheck_reports_what_flipped_after_an_addendum(user: User) -> None:
+    # R8: the deadline moves past the certificate's expiry and a new document is required.
+    tender = tender_for(user, requirements=REQUIREMENTS[:1])
+    document_for(user, date(2030, 10, 25))
+    first, flips = recheck(user, tender)
+    assert first.overall == "ready"
+    assert flips == []
+
+    add_version(tender, datetime(2030, 11, 3, 10, 0, tzinfo=NAIROBI), REQUIREMENTS)
+    second, flips = recheck(user, tender)
+
+    assert second.version_no == 2
+    assert second.overall == "attention_needed"
+    assert [(flip.requirement_id, flip.old_status, flip.new_status) for flip in flips] == [
+        ("r1", "met", "expiring"),
+        ("r2", None, "missing"),
+    ]
