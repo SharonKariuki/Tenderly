@@ -62,17 +62,17 @@ Show `message` to the user. Branch on `code` only when you need to.
 
 | Status | Meaning | Codes you will meet |
 |---|---|---|
-| 400 | The request is wrong | `invalid`, `required`, `email_taken`, `invalid_kra_pin`, `password_too_short` |
+| 400 | The request is wrong | `invalid`, `required`, `email_taken`, `invalid_kra_pin`, `password_too_short`, `file_too_large`, `unsupported_file_type` |
 | 401 | Not signed in, or wrong password | `not_authenticated`, `invalid_credentials` |
 | 404 | Not found, or not yours | `not_found` |
-| 422 | Understood but cannot be processed | `no_version`, `invalid_requirements` |
-| 502 | The AI service failed after retries | `ai_failure` |
+| 422 | Understood but cannot be processed | `no_version`, `invalid_requirements`, `unreadable_tender` |
+| 502 | The AI service failed after retries, or is not set up | `ai_failure`, `ai_not_configured` |
 
 For a field error the message starts with the field name, for example `"email: An account with this email already exists."`.
 
 ## Endpoint list
 
-**Real** endpoints read and write the database. **Stub** endpoints return the fixed sample shown below, whatever you send; their owner replaces them without changing the path.
+Every endpoint is **real**: it reads and writes the database. Uploads are read by the AI service, so they take a few seconds and need `GEMINI_API_KEY` and `LLM_MODEL` set on the server.
 
 | Endpoint | Purpose | State at freeze | Screen |
 |---|---|---|---|
@@ -82,14 +82,14 @@ For a field error the message starts with the field name, for example `"email: A
 | `GET /api/profile/` | Business profile and consent | Real | 7.1 |
 | `PUT /api/profile/` | Save profile, give consent | Real | 7.1 |
 | `DELETE /api/me/data/` | Delete all my data | Real | 7.1 |
-| `GET /api/documents/` | List documents | Stub (B) | 7.2 |
-| `POST /api/documents/` | Upload and extract | Stub (B) | 7.2 |
-| `PATCH /api/documents/{id}/` | Correct fields, confirm | Stub (B) | 7.2 |
-| `DELETE /api/documents/{id}/` | Remove | Stub (B) | 7.2 |
-| `GET /api/tenders/` | List tenders | Stub (B) | 7.5 |
-| `POST /api/tenders/` | Upload a tender | Stub (B) | 7.3 |
-| `GET /api/tenders/{id}/` | Tender with latest version | Stub (B) | 7.3 |
-| `GET /api/tenders/{id}/summary/?lang=en\|sw` | Summary | Stub (B) | 7.3 |
+| `GET /api/documents/` | List documents | Real | 7.2 |
+| `POST /api/documents/` | Upload and extract | Real | 7.2 |
+| `PATCH /api/documents/{id}/` | Correct fields, confirm | Real | 7.2 |
+| `DELETE /api/documents/{id}/` | Remove | Real | 7.2 |
+| `GET /api/tenders/` | List tenders | Real | 7.5 |
+| `POST /api/tenders/` | Upload a tender | Real | 7.3 |
+| `GET /api/tenders/{id}/` | Tender with latest version | Real | 7.3 |
+| `GET /api/tenders/{id}/summary/?lang=en\|sw` | Summary | Real | 7.3 |
 | `POST /api/tenders/{id}/check/` | Run the readiness check | Real | 7.4 |
 | `GET /api/tenders/{id}/checks/latest/` | Latest stored check | Real | 7.4 |
 | `GET /api/tenders/{id}/versions/` | Version history | Real | 7.5 |
@@ -99,7 +99,7 @@ For a field error the message starts with the field name, for example `"email: A
 | `PATCH /api/alerts/{id}/read/` | Mark an alert read | Real | 7.6 |
 | `GET /api/insight/?doc_type=` | Rejection Insight | Real | 7.4 |
 
-The two check endpoints are real but need a real tender in the database. While `POST /api/tenders/` is a stub, they answer `404` for any id; build the result page against the sample in 7.4.
+The check endpoints answer `404` for a tender that does not exist or belongs to someone else.
 
 ## 7.1 Sign up, sign in and consent
 
@@ -163,12 +163,12 @@ It removes her documents, tenders, checks, alerts and files, and empties the pro
 }
 ```
 
-- `PATCH /api/documents/{id}/` with corrected fields and `{"confirmed": true}` returns the document.
+- `PATCH /api/documents/{id}/` (JSON) returns the document. Send only what changes: `doc_type`, `issued_on`, `expires_on`, `confirmed`, and `extracted` with any of `holder_name`, `kra_pin`, `registration_number`, `directors`. Confirming clears `needs_review`.
 - `DELETE /api/documents/{id}/` returns `204` with no body.
 - Highlight documents where `needs_review` is `true`. Show unconfirmed documents differently: **only confirmed documents count** in the check.
 - A field the AI could not read is `null`. Show it empty; never fill it in.
 - `doc_type` is one of `kra_tax_compliance`, `business_registration`, `agpo_certificate`, `cr12`, `national_id`, `audited_accounts`, `bank_statement`, `business_permit`, `other`.
-- Uploads are capped at 10 MB. Dummy documents only.
+- Uploads are a PDF or a photo (JPEG, PNG or WebP), capped at 10 MB. Dummy documents only.
 
 ## 7.3 New tender
 
@@ -202,19 +202,21 @@ It removes her documents, tenders, checks, alerts and files, and empties the pro
 }
 ```
 
-`GET /api/tenders/{id}/summary/?lang=sw`:
+`GET /api/tenders/{id}/summary/`:
 
 ```json
 {
   "tender_id": 12,
   "version_no": 1,
-  "lang": "sw",
+  "lang": "en",
   "summary": "...",
-  "needs_human_review": true
+  "needs_human_review": false
 }
 ```
 
-When `needs_human_review` is `true` (always for Kiswahili), show the "AI-generated, needs a human check" label.
+Only the English summary exists. `?lang=sw` is accepted and returns the same English summary with `lang` `en`; there is no Kiswahili summary in this release.
+
+A tender upload is a PDF or a photo, capped at 10 MB. A requirement whose quote cannot be found in the PDF text is left out. A file with no requirements and no closing date is a `422` `unreadable_tender`.
 
 ## 7.4 Result page: can I bid?
 

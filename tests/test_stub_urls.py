@@ -12,9 +12,6 @@ CONTRACT = [
     ("delete", "/api/me/data/", 200),
     ("get", "/api/documents/", 200),
     ("get", "/api/tenders/", 200),
-    ("post", "/api/tenders/", 201),
-    ("get", "/api/tenders/12/", 200),
-    ("get", "/api/tenders/12/summary/?lang=sw", 200),
     ("get", "/api/alerts/", 200),
     ("get", "/api/insight/?doc_type=cr12", 200),
 ]
