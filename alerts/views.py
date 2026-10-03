@@ -1,35 +1,31 @@
 """alerts views. Owner: C.
 
-M0 stubs returning canned JSON so the frontend contract exists from day one. Keep the class
-names (tenderready/urls.py points at them) and replace the bodies in M2.
+R19: every query here is filtered by request.user, so one user never sees another's alerts.
 """
 
-from drf_spectacular.types import OpenApiTypes
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from drf_spectacular.utils import extend_schema
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-STUB_ALERT = {
-    "id": 1,
-    "tender_id": 12,
-    "changes": [1],
-    "message": "One change affects you: the deadline moved and your tax certificate now "
-    "expires before it.",
-    "channel": "in_app",
-    "sent_at": "2026-10-03T11:00:00+03:00",
-    "read_at": None,
-    "created_at": "2026-10-03T11:00:00+03:00",
-}
+from alerts.models import Alert
+from alerts.serializers import AlertSerializer
 
 
 class AlertListView(APIView):
-    @extend_schema(responses=OpenApiTypes.OBJECT)
+    @extend_schema(responses=AlertSerializer(many=True))
     def get(self, request: Request) -> Response:
-        return Response([STUB_ALERT])
+        alerts = Alert.objects.filter(owner=request.user).prefetch_related("changes")
+        return Response(AlertSerializer(alerts, many=True).data)
 
 
 class AlertReadView(APIView):
-    @extend_schema(request=None, responses=OpenApiTypes.OBJECT)
+    @extend_schema(request=None, responses=AlertSerializer)
     def patch(self, request: Request, pk: int) -> Response:
-        return Response({**STUB_ALERT, "id": pk, "read_at": "2026-10-03T11:05:00+03:00"})
+        alert = get_object_or_404(Alert, pk=pk, owner=request.user)
+        if alert.read_at is None:
+            alert.read_at = timezone.now()
+            alert.save(update_fields=["read_at"])
+        return Response(AlertSerializer(alert).data)
