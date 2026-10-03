@@ -13,12 +13,16 @@ from tenders.models import Tender
 
 
 class CheckRunView(APIView):
-    """Run the readiness check on the latest version of the tender and store it."""
+    """Run the readiness check on the latest version of the tender. 201 when a new result is
+    stored, 200 when nothing changed since the stored one."""
 
-    @extend_schema(request=None, responses={201: OpenApiTypes.OBJECT})
+    @extend_schema(request=None, responses={201: OpenApiTypes.OBJECT, 200: OpenApiTypes.OBJECT})
     def post(self, request: Request, pk: int) -> Response:
         tender = get_object_or_404(Tender, pk=pk, owner=request.user)  # R19
-        return Response(run_check(request.user, tender).result, status=status.HTTP_201_CREATED)
+        check, created = run_check(request.user, tender)
+        return Response(
+            check.result, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK
+        )
 
 
 class LatestCheckView(APIView):

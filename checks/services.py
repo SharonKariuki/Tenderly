@@ -10,10 +10,10 @@ from rest_framework.exceptions import NotFound
 
 from accounts.models import User
 from checks.models import Check
-from core.contracts import CheckResult, DocumentFacts, ProfileFacts, Requirement
+from core.contracts import CheckResult, DocumentFacts, Flip, ProfileFacts, Requirement
 from core.exceptions import Unprocessable
 from documents.models import Document
-from rules.engine import run_readiness_check
+from rules.engine import diff_checks, make_deadline_note, run_readiness_check
 from tenders.models import Tender, TenderVersion
 
 
@@ -45,9 +45,7 @@ def latest_version(tender: Tender) -> TenderVersion:
     return version
 
 
-def run_check(user: User, tender: Tender) -> Check:
-    """Run the readiness check on the tender's latest version and store it."""
-    version = latest_version(tender)
+def build_result(user: User, tender: Tender, version: TenderVersion) -> CheckResult:
     try:
         requirements = [Requirement.model_validate(item) for item in version.requirements]
     except ValidationError as error:
@@ -57,27 +55,64 @@ def run_check(user: User, tender: Tender) -> Check:
         ) from error
 
     documents = [document_facts(doc) for doc in Document.objects.filter(owner=user)]
-    result: CheckResult = run_readiness_check(
+    result = run_readiness_check(
         requirements, documents, profile_facts(user), version.deadline, today=timezone.localdate()
     )
     result.tender_id = tender.pk
     result.version_no = version.version_no
-    return Check.objects.create(
-        tender=tender,
-        version_no=version.version_no,
-        owner=user,
-        result=result.model_dump(mode="json"),
+
+    previous = tender.versions.filter(version_no__lt=version.version_no).order_by("-version_no")
+    if previous := previous.first():
+        result.deadline_note = make_deadline_note(
+            previous.deadline, version.deadline, version.published_on
+        )
+    return result
+
+
+def stored_check(user: User, tender: Tender, version_no: int) -> Check | None:
+    """The newest stored check of one version (the latest row per version wins)."""
+    return (
+        Check.objects.filter(owner=user, tender=tender, version_no=version_no)
+        .order_by("-created_at", "-pk")
+        .first()
     )
+
+
+def run_check(user: User, tender: Tender) -> tuple[Check, bool]:
+    """Run the readiness check on the tender's latest version.
+
+    Idempotent: when the result equals the stored one, that row is returned and nothing is
+    written. Returns the check and whether a new row was created.
+    """
+    version = latest_version(tender)
+    result = build_result(user, tender, version).model_dump(mode="json")
+    existing = stored_check(user, tender, version.version_no)
+    if existing is not None and existing.result == result:
+        return existing, False
+    check = Check.objects.create(
+        tender=tender, version_no=version.version_no, owner=user, result=result
+    )
+    return check, True
 
 
 def latest_check(user: User, tender: Tender) -> Check:
     """The newest stored check of the tender's latest version."""
-    version = latest_version(tender)
-    check = (
-        Check.objects.filter(owner=user, tender=tender, version_no=version.version_no)
-        .order_by("-created_at", "-pk")
-        .first()
-    )
+    check = stored_check(user, tender, latest_version(tender).version_no)
     if check is None:
         raise NotFound("No check has been run on the latest version of this tender yet.")
     return check
+
+
+def recheck(user: User, tender: Tender) -> tuple[CheckResult, list[Flip]]:
+    """For the addenda flow (R8): check the latest version and report what flipped against
+    the stored check of the version before it. No earlier check means no flips."""
+    check, _ = run_check(user, tender)
+    new = CheckResult.model_validate(check.result)
+    before = (
+        Check.objects.filter(owner=user, tender=tender, version_no__lt=check.version_no)
+        .order_by("-version_no", "-created_at", "-pk")
+        .first()
+    )
+    if before is None:
+        return new, []
+    return new, diff_checks(CheckResult.model_validate(before.result), new)
