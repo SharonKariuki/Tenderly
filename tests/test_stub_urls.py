@@ -1,0 +1,69 @@
+"""Every endpoint of the API contract (sprint plan section 4) is registered and answers."""
+
+import pytest
+from rest_framework.test import APIClient
+
+from accounts.models import User
+from core.contracts import DISCLAIMER, CheckResult
+
+CONTRACT = [
+    ("get", "/api/profile/", 200),
+    ("put", "/api/profile/", 200),
+    ("delete", "/api/me/data/", 200),
+    ("get", "/api/documents/", 200),
+    ("post", "/api/documents/", 201),
+    ("patch", "/api/documents/7/", 200),
+    ("delete", "/api/documents/7/", 204),
+    ("get", "/api/tenders/", 200),
+    ("post", "/api/tenders/", 201),
+    ("get", "/api/tenders/12/", 200),
+    ("get", "/api/tenders/12/summary/?lang=sw", 200),
+    ("post", "/api/tenders/12/check/", 201),
+    ("get", "/api/tenders/12/checks/latest/", 200),
+    ("get", "/api/tenders/12/versions/", 200),
+    ("post", "/api/tenders/12/versions/", 201),
+    ("get", "/api/tenders/12/changes/", 200),
+    ("get", "/api/alerts/", 200),
+    ("patch", "/api/alerts/1/read/", 200),
+    ("get", "/api/insight/?doc_type=cr12", 200),
+]
+
+pytestmark = pytest.mark.django_db
+
+
+@pytest.fixture
+def client() -> APIClient:
+    api_client = APIClient()
+    api_client.force_authenticate(User.objects.create_user(email="owner@example.com"))
+    return api_client
+
+
+@pytest.mark.parametrize(("method", "url", "expected"), CONTRACT)
+def test_endpoint_answers_for_a_signed_in_user(
+    client: APIClient, method: str, url: str, expected: int
+) -> None:
+    assert getattr(client, method)(url).status_code == expected
+
+
+@pytest.mark.parametrize(("method", "url", "expected"), CONTRACT)
+def test_endpoint_is_private(settings, method: str, url: str, expected: int) -> None:
+    settings.DEMO_MODE = False
+
+    assert getattr(APIClient(), method)(url).status_code == 401
+
+
+def test_stub_check_matches_the_agreed_shape(client: APIClient) -> None:
+    result = CheckResult.model_validate(client.post("/api/tenders/12/check/").json())
+
+    assert result.tender_id == 12
+    assert result.disclaimer == DISCLAIMER  # R15
+    assert {item.status for item in result.items} == {"expiring", "missing"}
+
+
+def test_unknown_url_is_404(client: APIClient) -> None:
+    assert client.get("/api/nope/").status_code == 404
+
+
+def test_docs_and_schema_are_public() -> None:
+    assert APIClient().get("/api/docs/").status_code == 200
+    assert APIClient().get("/api/schema/").status_code == 200
