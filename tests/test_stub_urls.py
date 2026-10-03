@@ -11,18 +11,8 @@ CONTRACT = [
     ("put", "/api/profile/", 200),
     ("delete", "/api/me/data/", 200),
     ("get", "/api/documents/", 200),
-    ("post", "/api/documents/", 201),
-    ("patch", "/api/documents/7/", 200),
-    ("delete", "/api/documents/7/", 204),
     ("get", "/api/tenders/", 200),
-    ("post", "/api/tenders/", 201),
-    ("get", "/api/tenders/12/", 200),
-    ("get", "/api/tenders/12/summary/?lang=sw", 200),
-    ("get", "/api/tenders/12/versions/", 200),
-    ("post", "/api/tenders/12/versions/", 201),
-    ("get", "/api/tenders/12/changes/", 200),
     ("get", "/api/alerts/", 200),
-    ("patch", "/api/alerts/1/read/", 200),
     ("get", "/api/insight/?doc_type=cr12", 200),
 ]
 

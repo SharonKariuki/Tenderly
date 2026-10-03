@@ -1,62 +1,56 @@
 """versions views. Owner: C.
 
-M0 stubs returning canned JSON so the frontend contract exists from day one. Keep the class
-names (tenderready/urls.py points at them) and replace the bodies in M2 and M3.
+R19: the tender is always loaded through request.user, so a user only reaches her own
+versions and changes.
 """
 
-from drf_spectacular.types import OpenApiTypes
+from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
+from rest_framework.parsers import MultiPartParser
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-STUB_CHANGE = {
-    "id": 1,
-    "from_version": 1,
-    "to_version": 2,
-    "category": "deadline",
-    "old_quote": "The closing date is 20 October 2026 at 10:00.",
-    "new_quote": "The closing date is extended to 27 October 2026 at 10:00.",
-    "affects_user": True,
-    "explanation": "The deadline moved by one week.",
-}
-
-STUB_VERSIONS = [
-    {"version_no": 1, "source": "upload", "deadline": "2026-10-20T10:00:00+03:00"},
-    {"version_no": 2, "source": "upload", "deadline": "2026-10-27T10:00:00+03:00"},
-]
+from tenders.models import Tender
+from versions.models import TenderChange
+from versions.serializers import (
+    AddendumResultSerializer,
+    AddendumUploadSerializer,
+    TenderChangeSerializer,
+    VersionSerializer,
+)
+from versions.services import process_addendum
 
 
 class VersionListCreateView(APIView):
-    @extend_schema(responses=OpenApiTypes.OBJECT)
-    def get(self, request: Request, pk: int) -> Response:
-        return Response(STUB_VERSIONS)
+    parser_classes = [MultiPartParser]
 
-    @extend_schema(request=OpenApiTypes.OBJECT, responses=OpenApiTypes.OBJECT)
+    @extend_schema(responses=VersionSerializer(many=True))
+    def get(self, request: Request, pk: int) -> Response:
+        tender = get_object_or_404(Tender, pk=pk, owner=request.user)
+        return Response(VersionSerializer(tender.versions.order_by("version_no"), many=True).data)
+
+    @extend_schema(
+        request={"multipart/form-data": AddendumUploadSerializer},
+        responses={201: AddendumResultSerializer, 200: AddendumResultSerializer},
+    )
     def post(self, request: Request, pk: int) -> Response:
-        return Response(
-            {
-                "created": True,
-                "version_no": 2,
-                "changes": [STUB_CHANGE],
-                "check": None,
-                "flips": [
-                    {
-                        "requirement_id": "r3",
-                        "label": "Valid Tax Compliance Certificate",
-                        "old_status": "met",
-                        "new_status": "expiring",
-                        "reason": "The deadline moved past the certificate's expiry date",
-                    }
-                ],
-                "alert_id": 1,
-            },
-            status=status.HTTP_201_CREATED,
-        )
+        tender = get_object_or_404(Tender, pk=pk, owner=request.user)
+        upload = AddendumUploadSerializer(data=request.data)
+        upload.is_valid(raise_exception=True)
+        file = upload.validated_data["file"]
+        result = process_addendum(tender, file.read(), file.content_type, filename=file.name)
+        # R9: a duplicate upload is a 200 with the version we already have.
+        code = status.HTTP_201_CREATED if result.created else status.HTTP_200_OK
+        return Response(result.model_dump(mode="json"), status=code)
 
 
 class ChangeListView(APIView):
-    @extend_schema(responses=OpenApiTypes.OBJECT)
+    @extend_schema(responses=TenderChangeSerializer(many=True))
     def get(self, request: Request, pk: int) -> Response:
-        return Response([STUB_CHANGE])
+        tender = get_object_or_404(Tender, pk=pk, owner=request.user)
+        changes = TenderChange.objects.filter(tender=tender).select_related(
+            "from_version", "to_version"
+        )
+        return Response(TenderChangeSerializer(changes, many=True).data)

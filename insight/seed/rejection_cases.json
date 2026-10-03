@@ -1,0 +1,182 @@
+[
+  {
+    "doc_type": "kra_tax_compliance",
+    "reason": "The tax compliance certificate was valid when the bid was prepared but had expired by the tender closing date, so the bid failed preliminary evaluation.",
+    "source_title": "Illustrative case, not a cited decision",
+    "source_url": "",
+    "year": null,
+    "tags": ["expired", "preliminary_evaluation"],
+    "illustrative": true
+  },
+  {
+    "doc_type": "cr12",
+    "reason": "The CR12 submitted was older than the twelve months the tender allowed, so the bid was declared non-responsive.",
+    "source_title": "Illustrative case, not a cited decision",
+    "source_url": "",
+    "year": null,
+    "tags": ["out_of_date", "preliminary_evaluation"],
+    "illustrative": true
+  },
+  {
+    "doc_type": "agpo_certificate",
+    "reason": "The tender was reserved for one AGPO category and the bidder's certificate was for a different category, so the bidder was found ineligible.",
+    "source_title": "Illustrative case, not a cited decision",
+    "source_url": "",
+    "year": null,
+    "tags": ["wrong_category", "eligibility"],
+    "illustrative": true
+  },
+  {
+    "doc_type": "business_registration",
+    "reason": "The business name on the registration certificate did not match the name on the tax compliance certificate, and the bid was rejected for inconsistent documents.",
+    "source_title": "Illustrative case, not a cited decision",
+    "source_url": "",
+    "year": null,
+    "tags": ["name_mismatch", "preliminary_evaluation"],
+    "illustrative": true
+  },
+  {
+    "doc_type": "business_permit",
+    "reason": "A mandatory business permit added by an addendum was not included because the bidder had not seen the addendum, and the bid was declared non-responsive.",
+    "source_title": "Illustrative case, not a cited decision",
+    "source_url": "",
+    "year": null,
+    "tags": ["missing", "addendum"],
+    "illustrative": true
+  },
+  {
+    "doc_type": "kra_tax_compliance",
+    "reason": "The tax compliance certificate submitted belonged to a director personally and not to the bidding company, so it was not accepted.",
+    "source_title": "Illustrative case, not a cited decision",
+    "source_url": "",
+    "year": null,
+    "tags": ["wrong_holder", "preliminary_evaluation"],
+    "illustrative": true
+  },
+  {
+    "doc_type": "kra_tax_compliance",
+    "reason": "The tender deadline was extended by an addendum and the tax compliance certificate expired before the new closing date, so the bid was declared non-responsive.",
+    "source_title": "Illustrative case, not a cited decision",
+    "source_url": "",
+    "year": null,
+    "tags": ["expired", "addendum"],
+    "illustrative": true
+  },
+  {
+    "doc_type": "cr12",
+    "reason": "The directors listed on the CR12 did not match the directors whose identity cards were submitted, and the bid was rejected for inconsistent documents.",
+    "source_title": "Illustrative case, not a cited decision",
+    "source_url": "",
+    "year": null,
+    "tags": ["director_mismatch", "preliminary_evaluation"],
+    "illustrative": true
+  },
+  {
+    "doc_type": "agpo_certificate",
+    "reason": "The AGPO certificate had expired before the tender closing date, so the bidder could not benefit from the reserved tender.",
+    "source_title": "Illustrative case, not a cited decision",
+    "source_url": "",
+    "year": null,
+    "tags": ["expired", "eligibility"],
+    "illustrative": true
+  },
+  {
+    "doc_type": "business_registration",
+    "reason": "The bidder submitted a business name registration where the tender required a certificate of incorporation, and the bid failed preliminary evaluation.",
+    "source_title": "Illustrative case, not a cited decision",
+    "source_url": "",
+    "year": null,
+    "tags": ["wrong_document", "preliminary_evaluation"],
+    "illustrative": true
+  },
+  {
+    "doc_type": "national_id",
+    "reason": "Identity card copies were provided for only one of two directors although the tender asked for every director, so the bid was declared non-responsive.",
+    "source_title": "Illustrative case, not a cited decision",
+    "source_url": "",
+    "year": null,
+    "tags": ["incomplete", "preliminary_evaluation"],
+    "illustrative": true
+  },
+  {
+    "doc_type": "audited_accounts",
+    "reason": "The audited accounts covered one financial year where the tender asked for two, so the bid did not pass the mandatory requirements.",
+    "source_title": "Illustrative case, not a cited decision",
+    "source_url": "",
+    "year": null,
+    "tags": ["incomplete", "financial"],
+    "illustrative": true
+  },
+  {
+    "doc_type": "audited_accounts",
+    "reason": "The audited accounts were not signed by the auditor, and the evaluation committee treated them as not submitted.",
+    "source_title": "Illustrative case, not a cited decision",
+    "source_url": "",
+    "year": null,
+    "tags": ["unsigned", "financial"],
+    "illustrative": true
+  },
+  {
+    "doc_type": "bank_statement",
+    "reason": "The bank statements covered three months where the tender asked for six, so the bid failed the mandatory requirements.",
+    "source_title": "Illustrative case, not a cited decision",
+    "source_url": "",
+    "year": null,
+    "tags": ["incomplete", "financial"],
+    "illustrative": true
+  },
+  {
+    "doc_type": "business_permit",
+    "reason": "The single business permit was for the previous year and had expired by the tender closing date, so the bid was rejected.",
+    "source_title": "Illustrative case, not a cited decision",
+    "source_url": "",
+    "year": null,
+    "tags": ["expired", "preliminary_evaluation"],
+    "illustrative": true
+  },
+  {
+    "doc_type": "kra_tax_compliance",
+    "reason": "The KRA PIN on the tax compliance certificate differed from the PIN on the tender form, and the evaluation committee could not confirm that both belonged to the bidder.",
+    "source_title": "Illustrative case, not a cited decision",
+    "source_url": "",
+    "year": null,
+    "tags": ["pin_mismatch", "preliminary_evaluation"],
+    "illustrative": true
+  },
+  {
+    "doc_type": "agpo_certificate",
+    "reason": "The AGPO certificate was issued to a sister company, not to the bidder named on the tender form, so the bid was not eligible for the reserved tender.",
+    "source_title": "Illustrative case, not a cited decision",
+    "source_url": "",
+    "year": null,
+    "tags": ["wrong_holder", "eligibility"],
+    "illustrative": true
+  },
+  {
+    "doc_type": "national_id",
+    "reason": "The name on a director's identity card was spelled differently from the CR12, and the bidder gave no explanation, so the documents were treated as inconsistent.",
+    "source_title": "Illustrative case, not a cited decision",
+    "source_url": "",
+    "year": null,
+    "tags": ["name_mismatch", "preliminary_evaluation"],
+    "illustrative": true
+  },
+  {
+    "doc_type": "business_registration",
+    "reason": "The certificate of incorporation was submitted as an unreadable photocopy, so the evaluation committee could not verify the registration number.",
+    "source_title": "Illustrative case, not a cited decision",
+    "source_url": "",
+    "year": null,
+    "tags": ["illegible", "preliminary_evaluation"],
+    "illustrative": true
+  },
+  {
+    "doc_type": "bank_statement",
+    "reason": "The bank statements were not certified by the bank as the tender required, so they were not accepted as proof of financial capacity.",
+    "source_title": "Illustrative case, not a cited decision",
+    "source_url": "",
+    "year": null,
+    "tags": ["uncertified", "financial"],
+    "illustrative": true
+  }
+]
