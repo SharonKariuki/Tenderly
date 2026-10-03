@@ -8,7 +8,7 @@ A business owner uploads her compliance documents and a tender. TenderReady extr
 
 The full sprint plan is in [tenerlymd.md](tenerlymd.md). It is the source of truth; this README is the short version.
 
-> This branch holds the project shell only: empty apps, configuration and `/api/health/`. Models, endpoints and logic arrive through the task issues.
+> The foundation is in place: every model with its first migration, `core/contracts.py`, real register and login, and every endpoint registered with a stub view returning canned JSON. The logic behind the stubs arrives through the task issues.
 
 ## Setup
 
