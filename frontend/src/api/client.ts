@@ -1,4 +1,9 @@
 import axios, { AxiosInstance } from 'axios';
+import { readStoredString } from '../lib/storage';
+
+export const TOKEN_KEY = 'tr_token';
+// Set when a trusted helper works for an owner (access app, X-Acting-For).
+export const ACTING_FOR_KEY = 'tr_acting_for';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 const USE_MOCKS = import.meta.env.VITE_USE_MOCKS === 'true';
@@ -16,6 +21,10 @@ apiClient.interceptors.request.use((config) => {
       config.headers['X-CSRFToken'] = csrfToken;
     }
   }
+  const token = readStoredString(TOKEN_KEY);
+  if (token) config.headers['Authorization'] = `Token ${token}`;
+  const actingFor = readStoredString(ACTING_FOR_KEY);
+  if (actingFor) config.headers['X-Acting-For'] = actingFor;
   return config;
 });
 
@@ -85,4 +94,22 @@ export const assistantApi = {
   ask: async (question: string) => {
     return apiClient.post('/assistant/ask/', { question });
   },
+};
+
+export const accessApi = {
+  getPrefs: () => apiClient.get('/access/prefs/'),
+  savePrefs: (prefs: object) => apiClient.put('/access/prefs/', prefs),
+  getAgpo: () => apiClient.get('/access/agpo/'),
+  setAgpoCategory: (agpo_category: string) => apiClient.put('/access/agpo/', { agpo_category }),
+  listHelpers: () => apiClient.get('/access/helpers/'),
+  inviteHelper: (data: object) => apiClient.post('/access/helpers/', data),
+  setHelperPermission: (id: number, permission: string) =>
+    apiClient.patch(`/access/helpers/${id}/`, { permission }),
+  removeHelper: (id: number) => apiClient.delete(`/access/helpers/${id}/`),
+  acceptInvite: (token: string) => apiClient.post('/access/helpers/accept/', { token }),
+  helperActivity: () => apiClient.get('/access/helpers/activity/'),
+  listLetters: () => apiClient.get('/access/letters/'),
+  draftLetter: (data: object) => apiClient.post('/access/letters/', data),
+  saveLetter: (id: number, letter_text: string) =>
+    apiClient.patch(`/access/letters/${id}/`, { letter_text }),
 };

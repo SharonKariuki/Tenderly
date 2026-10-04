@@ -8,14 +8,14 @@ export function Map() {
   const [zoom, setZoom] = useState(1);
 
   const sectors = [
-    { id: 'it', name: 'IT & Tech', match: 94, tenders: 12, color: '#C8B6E2' },
-    { id: 'construction', name: 'Construction', match: 65, tenders: 8, color: '#C8B6E2' },
-    { id: 'health', name: 'Healthcare', match: 55, tenders: 6, color: '#C8B6E2' },
-    { id: 'education', name: 'Education', match: 78, tenders: 14, color: '#C8B6E2' },
-    { id: 'cleaning', name: 'Cleaning', match: 88, tenders: 11, color: '#C8B6E2' },
-    { id: 'energy', name: 'Energy', match: 45, tenders: 5, color: '#C8B6E2' },
-    { id: 'agriculture', name: 'Agriculture', match: 62, tenders: 9, color: '#C8B6E2' },
-    { id: 'transport', name: 'Transport', match: 72, tenders: 10, color: '#C8B6E2' },
+    { id: 'it', name: 'IT & Tech', match: 94, tenders: 12, color: '#7FA58F' },
+    { id: 'construction', name: 'Construction', match: 65, tenders: 8, color: '#7FA58F' },
+    { id: 'health', name: 'Healthcare', match: 55, tenders: 6, color: '#7FA58F' },
+    { id: 'education', name: 'Education', match: 78, tenders: 14, color: '#7FA58F' },
+    { id: 'cleaning', name: 'Cleaning', match: 88, tenders: 11, color: '#7FA58F' },
+    { id: 'energy', name: 'Energy', match: 45, tenders: 5, color: '#7FA58F' },
+    { id: 'agriculture', name: 'Agriculture', match: 62, tenders: 9, color: '#7FA58F' },
+    { id: 'transport', name: 'Transport', match: 72, tenders: 10, color: '#7FA58F' },
   ];
 
   const closingOptions = [
@@ -35,7 +35,7 @@ export function Map() {
     : [];
 
   return (
-    <div className="h-[calc(100vh-65px)] bg-[#140A18] relative overflow-hidden">
+    <div className="h-[calc(100vh-65px)] bg-[#5B1A33] relative overflow-hidden">
       {/* SVG Map */}
       <svg
         className="absolute inset-0 w-full h-full"
@@ -45,12 +45,12 @@ export function Map() {
         {/* Background glows */}
         <defs>
           <radialGradient id="plumGlow" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#3D1F47" stopOpacity="0.2" />
-            <stop offset="100%" stopColor="#3D1F47" stopOpacity="0" />
+            <stop offset="0%" stopColor="#5B1A33" stopOpacity="0.2" />
+            <stop offset="100%" stopColor="#5B1A33" stopOpacity="0" />
           </radialGradient>
           <radialGradient id="coralGlow" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#E8505B" stopOpacity="0.1" />
-            <stop offset="100%" stopColor="#E8505B" stopOpacity="0" />
+            <stop offset="0%" stopColor="#E5484D" stopOpacity="0.1" />
+            <stop offset="100%" stopColor="#E5484D" stopOpacity="0" />
           </radialGradient>
         </defs>
 
@@ -59,14 +59,14 @@ export function Map() {
         <circle cx="600" cy="300" r="150" fill="url(#plumGlow)" />
 
         {/* Center orb */}
-        <circle cx="600" cy="300" r="40" fill="#E8505B" opacity="0.8" className="animate-orbit" />
-        <circle cx="600" cy="300" r="60" fill="none" stroke="#E8505B" strokeWidth="2" opacity="0.4" />
+        <circle cx="600" cy="300" r="40" fill="#E5484D" opacity="0.8" className="animate-orbit" />
+        <circle cx="600" cy="300" r="60" fill="none" stroke="#E5484D" strokeWidth="2" opacity="0.4" />
         <circle
           cx="600"
           cy="300"
           r="80"
           fill="none"
-          stroke="#E8505B"
+          stroke="#E5484D"
           strokeWidth="2"
           opacity="0.2"
           className="animate-flow"
@@ -87,7 +87,7 @@ export function Map() {
                 y1="300"
                 x2={x}
                 y2={y}
-                stroke="#E8505B"
+                stroke="#E5484D"
                 strokeWidth="2"
                 opacity="0.3"
                 className="animate-flow"
@@ -117,12 +117,12 @@ export function Map() {
 
                 return (
                   <g key={`tender-${dotI}`}>
-                    <circle cx={dotX} cy={dotY} r="6" fill={days > 10 ? '#C8B6E2' : '#E9A23B'} opacity="0.9" />
+                    <circle cx={dotX} cy={dotY} r="6" fill={days > 10 ? '#7FA58F' : '#E3A12F'} opacity="0.9" />
                     <text
                       x={dotX}
                       y={dotY - 12}
                       fontSize="10"
-                      fill="#E8505B"
+                      fill="#FFFAF9"
                       textAnchor="middle"
                       opacity="0.7"
                     >
@@ -141,7 +141,7 @@ export function Map() {
           y="310"
           fontSize="14"
           fontWeight="600"
-          fill="#F9D5DC"
+          fill="#FBE4E6"
           textAnchor="middle"
         >
           Your profile
@@ -150,7 +150,7 @@ export function Map() {
 
       {/* Left Panel - Closing Window */}
       <div className="absolute left-6 top-6 max-w-xs">
-        <Card className="bg-white/5 backdrop-blur-xl border border-white/30 p-6 shadow-2xl">
+        <Card hero className="p-6">
           <h3 className="text-sm font-bold text-white mb-4 flex items-center gap-2">
             ⏳ Closing within <ChevronDown size={16} />
           </h3>
@@ -161,7 +161,7 @@ export function Map() {
                 onClick={() => setClosingWindow(opt.id)}
                 className={`w-full text-left px-4 py-3 rounded-lg text-xs font-medium transition-all ${
                   closingWindow === opt.id
-                    ? 'bg-gradient-to-r from-coral to-coral-wine text-white shadow-lg'
+                    ? 'bg-plum border border-coral/30 text-white shadow-lg'
                     : 'bg-white/10 text-white/90 hover:bg-white/20'
                 }`}
               >
@@ -198,7 +198,7 @@ export function Map() {
           <div className="space-y-6 mb-8">
             <div className="p-4 rounded-lg bg-gradient-to-br from-ok-bg/30 to-ok-bg/10">
               <p className="text-xs text-plum-muted font-medium mb-2">Match score</p>
-              <p className="text-4xl font-light bg-gradient-to-r from-ok-solid to-ok-solid bg-clip-text text-transparent">
+              <p className="text-4xl font-light text-plum-ink">
                 {sectors.find((s) => s.id === selectedSector)?.match}%
               </p>
             </div>
@@ -230,7 +230,7 @@ export function Map() {
 
       {/* Bottom Legend */}
       <div className="absolute bottom-6 left-6 right-6">
-        <Card className="bg-white/10 backdrop-blur border border-white/20 p-4">
+        <Card hero className="p-4">
           <div className="grid grid-cols-3 gap-4 text-xs text-white">
             <label className="flex items-center gap-2 cursor-pointer">
               <input type="checkbox" defaultChecked className="rounded" />

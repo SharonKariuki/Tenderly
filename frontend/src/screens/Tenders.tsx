@@ -28,7 +28,7 @@ export function Tenders() {
           <p className="text-lg text-plum-soft">Ranked for your business, with the reasons why.</p>
         </div>
         <Card className="bg-gradient-to-r from-white/60 to-white/40 p-4 flex flex-col lg:flex-row items-start lg:items-center gap-4 border border-white/30">
-          <div className="flex items-center gap-2 text-coral font-medium">
+          <div className="flex items-center gap-2 text-plum font-medium">
             <span className="w-2 h-2 rounded-full bg-coral animate-pulsering"></span>
             <span className="text-sm font-semibold">67% ready</span>
           </div>
@@ -83,7 +83,7 @@ export function Tenders() {
             onClick={() => setFilter(f.id)}
             className={`rounded-full px-5 py-2.5 text-sm font-medium transition-all duration-300 ${
               filter === f.id
-                ? 'bg-gradient-to-r from-plum to-coral text-white shadow-lg'
+                ? 'bg-plum text-white shadow-lg'
                 : 'bg-white/60 text-plum hover:bg-white/80 border border-white/40'
             }`}
           >
@@ -106,7 +106,7 @@ export function Tenders() {
               <div
                 className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 font-bold text-sm shadow-md transition-all ${
                   index === 0
-                    ? 'bg-gradient-to-br from-plum to-coral text-white'
+                    ? 'bg-plum text-white'
                     : index < 3
                     ? 'bg-gradient-to-br from-blush to-lilac/30 text-plum'
                     : 'bg-gray-100 text-plum-muted'
@@ -120,7 +120,7 @@ export function Tenders() {
                 <div className="flex items-start justify-between gap-3 mb-2">
                   <h3 className="font-semibold text-plum-ink truncate group-hover:text-plum transition-colors">{tender.title}</h3>
                   {tender.topPick && (
-                    <span className="bg-gradient-to-r from-coral to-coral-wine text-white text-xs font-bold px-3 py-1 rounded-full flex-shrink-0 shadow-md">
+                    <span className="bg-plum text-white text-xs font-bold px-3 py-1 rounded-full flex-shrink-0 shadow-md">
                       ⭐ Top pick
                     </span>
                   )}

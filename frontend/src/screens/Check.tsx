@@ -277,7 +277,7 @@ export function Check() {
                   y="10"
                   width="100"
                   height="100"
-                  fill="white"
+                  fill="#FFFAF9"
                   rx="8"
                   opacity="0.3"
                 />
@@ -286,7 +286,7 @@ export function Check() {
                   y="10"
                   width={(checkStep || 0) * 33.33}
                   height="100"
-                  fill="#E8505B"
+                  fill="#E5484D"
                   rx="8"
                   className="transition-all duration-500"
                 />
@@ -304,7 +304,7 @@ export function Check() {
                   checkStep === step.id
                     ? 'bg-plum text-white'
                     : checkStep && checkStep > step.id
-                    ? 'bg-ok-bg text-ok-solid'
+                    ? 'bg-ok-bg text-plum-ink'
                     : 'bg-gray-100 text-plum-muted'
                 }`}
               >

@@ -105,8 +105,8 @@ export function MatchRing({ score, size = 'sm' }: MatchRingProps) {
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (score / 100) * circumference;
 
-  const color = score >= 80 ? '#1A8168' : score >= 50 ? '#E9A23B' : '#C8B6E2';
-  const bgColor = score >= 80 ? '#D9F0EC' : score >= 50 ? '#FDF3E6' : '#EDE4F4';
+  const color = score >= 80 ? '#2F8F6B' : score >= 50 ? '#E3A12F' : '#7FA58F';
+  const bgColor = '#FBE4E6';
 
   return (
     <div className={`${sizeClass} relative flex items-center justify-center bg-gradient-to-br ${score >= 80 ? 'from-ok-bg/30 to-ok-bg/10' : score >= 50 ? 'from-warn-bg/30 to-warn-bg/10' : 'from-lilac-light/30 to-lilac-light/10'} rounded-full`}>
@@ -125,7 +125,7 @@ export function MatchRing({ score, size = 'sm' }: MatchRingProps) {
           className="transition-all duration-700"
         />
       </svg>
-      <div className={`${fontSize} font-semibold bg-gradient-to-r ${score >= 80 ? 'from-ok-solid to-ok-solid' : score >= 50 ? 'from-warn-solid to-warn-solid' : 'from-lilac to-lilac'} bg-clip-text text-transparent text-center`}>{score}%</div>
+      <div className={`${fontSize} font-semibold text-plum-ink text-center`}>{score}%</div>
     </div>
   );
 }
@@ -139,7 +139,7 @@ interface ProgressBarProps {
 export function ProgressBar({ value, max = 100 }: ProgressBarProps) {
   const percentage = (value / max) * 100;
   return (
-    <div className="progress-track rounded-full bg-[#F3E4EC] h-2">
+    <div className="progress-track rounded-full bg-blush h-2">
       <div
         className="h-full bg-gradient-to-r from-plum to-coral rounded-full transition-all duration-500"
         style={{ width: `${percentage}%` }}
@@ -162,8 +162,8 @@ export function CountdownRing({ daysRemaining, deadline }: CountdownRingProps) {
   return (
     <div className="w-[180px] h-[180px] relative flex flex-col items-center justify-center">
       <svg className="absolute" width="180" height="180" viewBox="0 0 180 180">
-        <circle cx="90" cy="90" r="84" fill="none" stroke="#4A2556" strokeWidth="1" strokeDasharray="4 4" opacity="0.3" />
-        <circle cx="90" cy="90" r="84" fill="none" stroke="#E8505B" strokeWidth="12" strokeDasharray={circumference} strokeDashoffset={offset} strokeLinecap="round" />
+        <circle cx="90" cy="90" r="84" fill="none" stroke="#5B1A33" strokeWidth="1" strokeDasharray="4 4" opacity="0.3" />
+        <circle cx="90" cy="90" r="84" fill="none" stroke="#E5484D" strokeWidth="12" strokeDasharray={circumference} strokeDashoffset={offset} strokeLinecap="round" />
       </svg>
       <div className="text-center">
         <div className="text-4xl font-light text-coral">{daysRemaining}</div>
@@ -195,5 +195,5 @@ export function HelpText({ children, className = '' }: { children: React.ReactNo
 
 // Badge
 export function Badge({ children, className = '' }: { children: React.ReactNode; className?: string }) {
-  return <span className={`inline-flex items-center px-3 py-1 rounded-pill bg-coral text-white text-xs font-bold animate-pop ${className}`}>{children}</span>;
+  return <span className={`inline-flex items-center px-3 py-1 rounded-pill border border-coral/30 bg-blush text-plum-ink text-xs font-bold animate-pop ${className}`}>{children}</span>;
 }

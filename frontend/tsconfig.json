@@ -19,7 +19,10 @@
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+
+    /* AGPO rules are shared with Django (vite.config.js) */
+    "paths": { "@agpo-rules": ["../access/agpo_rules.json"] }
   },
   "include": ["src"],
   "references": [{ "path": "./tsconfig.node.json" }]

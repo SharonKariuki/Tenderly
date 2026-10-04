@@ -1,4 +1,4 @@
-import { Tender, BusinessDocument, Alert } from '../lib/types';
+import { Tender, BusinessDocument, Alert, TenderEvent } from '../lib/types';
 
 export const mockTenders: Tender[] = [
   {
@@ -11,6 +11,11 @@ export const mockTenders: Tender[] = [
     matchScore: 94,
     status: 'ready',
     reservedFor: 'Women-owned SMEs',
+    reservation: 'women',
+    purpose: 'Desks, chairs and cupboards for schools.',
+    purposeSw: 'Madawati, viti na makabati kwa shule.',
+    requiredDocs: ['Tax compliance certificate', 'Business registration certificate', 'AGPO certificate'],
+    missingDocs: [],
     bidProgress: 45,
     topPick: true,
   },
@@ -24,6 +29,11 @@ export const mockTenders: Tender[] = [
     matchScore: 78,
     status: 'actionNeeded',
     reservedFor: 'All businesses',
+    reservation: 'open',
+    purpose: 'Cleaning the county offices every day.',
+    purposeSw: 'Kusafisha ofisi za kaunti kila siku.',
+    requiredDocs: ['Tax compliance certificate', 'Business registration certificate', 'Business insurance certificate'],
+    missingDocs: ['Business insurance certificate'],
     bidProgress: 20,
   },
   {
@@ -36,6 +46,11 @@ export const mockTenders: Tender[] = [
     matchScore: 65,
     status: 'actionNeeded',
     reservedFor: 'Youth-led enterprises',
+    reservation: 'youth',
+    purpose: 'Fixing computers and networks in county offices.',
+    purposeSw: 'Kurekebisha kompyuta na mitandao katika ofisi za kaunti.',
+    requiredDocs: ['Tax compliance certificate', 'AGPO certificate', 'CR12'],
+    missingDocs: ['CR12'],
     bidProgress: 10,
   },
   {
@@ -48,6 +63,11 @@ export const mockTenders: Tender[] = [
     matchScore: 55,
     status: 'missing',
     reservedFor: 'PWD-owned businesses',
+    reservation: 'pwd',
+    purpose: 'Pens, paper and other office supplies for health offices.',
+    purposeSw: 'Kalamu, karatasi na vifaa vingine vya ofisi kwa ofisi za afya.',
+    requiredDocs: ['Tax compliance certificate', 'AGPO certificate', 'NCPWD registration document'],
+    missingDocs: ['NCPWD registration document'],
     bidProgress: 0,
   },
 ];
@@ -164,5 +184,39 @@ export const mockAlerts: Alert[] = [
     description: 'Similar tender to "IT Support Services" flagged for unpaid fees',
     isRead: true,
     timestamp: '2026-10-02T16:45',
+  },
+];
+
+// Briefings and site visits from the tenders above. Ids are stable: they key access support requests.
+export const mockEvents: TenderEvent[] = [
+  {
+    id: 'tender-4-briefing',
+    kind: 'briefing',
+    tenderId: 4,
+    title: 'Stationery and office supplies',
+    entity: 'State Department of Health',
+    reference: 'SDOH/2026/RFQ/034',
+    startsAt: '2026-10-07T10:00:00+03:00',
+    venue: 'Afya House, 3rd floor boardroom, Nairobi',
+  },
+  {
+    id: 'tender-2-site-visit',
+    kind: 'site_visit',
+    tenderId: 2,
+    title: 'Cleaning and sanitation services',
+    entity: 'Nairobi City County',
+    reference: 'NCC/2026/RFQ/045',
+    startsAt: '2026-10-08T09:00:00+03:00',
+    venue: 'City Hall annex, Nairobi',
+  },
+  {
+    id: 'tender-1-briefing',
+    kind: 'briefing',
+    tenderId: 1,
+    title: 'Office furniture and fittings',
+    entity: 'State Department of Education',
+    reference: 'SDOE/2026/RFQ/001',
+    startsAt: '2026-10-09T11:00:00+03:00',
+    venue: 'Jogoo House, Nairobi',
   },
 ];

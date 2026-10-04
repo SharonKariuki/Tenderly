@@ -70,7 +70,7 @@ export function Documents() {
                     </div>
                     <span className="font-semibold text-sm text-plum-ink">{doc.name}</span>
                   </div>
-                  <span className="text-xs text-warn-solid font-semibold">
+                  <span className="text-xs text-plum-ink font-semibold">
                     Expires {new Date(doc.expiryDate || '').toLocaleDateString()}
                   </span>
                 </div>
@@ -92,7 +92,7 @@ export function Documents() {
             onClick={() => setFilter(f.id)}
             className={`rounded-full px-5 py-2.5 text-sm font-medium transition-all duration-300 ${
               filter === f.id
-                ? 'bg-gradient-to-r from-plum to-coral text-white shadow-lg'
+                ? 'bg-plum text-white shadow-lg'
                 : 'bg-white/60 text-plum hover:bg-white/80 border border-white/40'
             }`}
           >
@@ -117,13 +117,7 @@ export function Documents() {
           >
             {/* Header */}
             <div
-              className={`p-8 text-white ${
-                doc.status === 'ready'
-                  ? 'bg-gradient-to-br from-ok-solid to-ok-solid/80'
-                  : doc.status === 'actionNeeded'
-                  ? 'bg-gradient-to-br from-warn-solid to-warn-solid/80'
-                  : 'bg-gradient-to-br from-coral to-coral-wine'
-              } relative overflow-hidden`}
+              className="p-8 bg-plum text-white relative overflow-hidden"
             >
               <div className="absolute inset-0 opacity-10">
                 <div className="absolute bottom-0 right-0 w-32 h-32 rounded-full blur-2xl" style={{background: 'radial-gradient(circle, white, transparent)'}}></div>

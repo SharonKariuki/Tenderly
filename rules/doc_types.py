@@ -11,6 +11,7 @@ DOC_TYPE_LABELS: dict[DocType, str] = {
     DocType.AUDITED_ACCOUNTS: "audited accounts",
     DocType.BANK_STATEMENT: "bank statement",
     DocType.BUSINESS_PERMIT: "business permit",
+    DocType.NCPWD_REGISTRATION: "NCPWD registration document",
 }
 
 # Types issued for a fixed period. A confirmed document of one of these types with no expiry

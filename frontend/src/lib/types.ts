@@ -1,5 +1,10 @@
 export type Status = 'ready' | 'actionNeeded' | 'notEligible' | 'missing' | 'optional';
 
+export type AgpoCategory = 'women' | 'youth' | 'pwd' | 'none';
+// Who may bid, as in access/agpo_rules.json "reservations".
+export type Reservation = 'open' | 'agpo' | 'women' | 'youth' | 'pwd';
+export type Lang = 'en' | 'sw';
+
 export interface Tender {
   id: number;
   title: string;
@@ -10,13 +15,33 @@ export interface Tender {
   matchScore: number;
   status: Status;
   reservedFor: string;
+  reservation: Reservation;
   bidProgress: number;
   topPick?: boolean;
+  // Plain words for the easy read summary.
+  purpose: string;
+  purposeSw: string;
+  requiredDocs: string[];
+  missingDocs: string[];
+}
+
+export type EventKind = 'briefing' | 'site_visit';
+
+export interface TenderEvent {
+  // Also the event_key of an access support request.
+  id: string;
+  kind: EventKind;
+  tenderId: number;
+  title: string;
+  entity: string;
+  reference: string;
+  startsAt: string;
+  venue: string;
 }
 
 export interface BusinessDocument {
   id: number;
-  category: 'crb' | 'taxCompliance' | 'tin' | 'businessRegistration' | 'insurance' | 'bank' | 'other';
+  category: 'crb' | 'taxCompliance' | 'tin' | 'businessRegistration' | 'insurance' | 'bank' | 'ncpwd' | 'other';
   name: string;
   status: Status;
   issueDate: string | null;
@@ -69,7 +94,7 @@ export interface BusinessProfile {
   businessName: string;
   sector: string;
   county: string;
-  agpoCategory: 'women' | 'youth' | 'pwd' | 'none';
+  agpoCategory: AgpoCategory;
   documentsReady: number;
 }
 

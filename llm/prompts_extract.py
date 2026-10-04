@@ -4,8 +4,9 @@ changes, so cached answers of the old prompt are not reused (R11)."""
 DOCUMENT_PROMPT_VERSION = "v2"
 DOCUMENT_PROMPT = """You read one business document from a Kenyan supplier, such as a tax \
 compliance certificate, a certificate of incorporation or business registration, an AGPO \
-certificate, a CR12, a national identity card, audited accounts, a bank statement or a \
-county business permit.
+certificate, a CR12, a national identity card, audited accounts, a bank statement, a \
+county business permit or a registration document from the National Council for Persons \
+with Disabilities (NCPWD).
 
 Report only what is printed in the document.
 - document_type: the type of the document. Use "other" when it is none of the listed types.

@@ -93,7 +93,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                 onClick={onClose}
                 className={`flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 group ${
                   active
-                    ? 'bg-gradient-to-r from-coral to-coral-wine text-white shadow-lg'
+                    ? 'bg-plum border border-coral/30 text-white shadow-lg'
                     : 'text-white/70 hover:text-white hover:bg-white/10'
                 }`}
               >

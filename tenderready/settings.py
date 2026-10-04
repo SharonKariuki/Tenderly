@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     "versions",
     "alerts",
     "insight",
+    "access",
 ]
 
 MIDDLEWARE = [
