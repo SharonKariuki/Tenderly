@@ -13,23 +13,23 @@ function AppLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-white/50 via-white/30 to-white/40">
+    <div className="flex h-screen overflow-hidden bg-gradient-to-br from-white/50 via-white/30 to-white/40">
       <a href="#main-content" className="skip-link">
         Skip to main content
       </a>
 
-      {/* Sidebar */}
+      {/* Sidebar - Hidden on mobile, visible on lg+ */}
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden lg:ml-0">
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col overflow-hidden w-full">
         {/* Header */}
         <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
 
         {/* Page Content */}
-        <main
+        <div
           id="main-content"
-          className="flex-1 overflow-y-auto"
+          className="flex-1 overflow-y-auto overflow-x-hidden"
         >
           <Routes>
             <Route path="/" element={<Today />} />
@@ -39,7 +39,7 @@ function AppLayout() {
             <Route path="/map" element={<Map />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
-        </main>
+        </div>
       </div>
     </div>
   );
