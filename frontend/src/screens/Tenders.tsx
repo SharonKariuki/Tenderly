@@ -20,7 +20,7 @@ export function Tenders() {
   });
 
   return (
-    <main className="flex-1 max-w-7xl mx-auto px-6 py-12">
+    <div className="max-w-7xl mx-auto px-6 py-12 pb-20">
       {/* Page Intro */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-8 mb-12">
         <div>
@@ -151,6 +151,6 @@ export function Tenders() {
       <p className="text-xs text-plum-muted text-center mt-6">
         Your match score combines sector fit, location, AGPO eligibility and document readiness.
       </p>
-    </main>
+    </div>
   );
 }

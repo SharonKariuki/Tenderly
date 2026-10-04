@@ -12,7 +12,7 @@ export function Today() {
   const recentAlerts = mockAlerts.slice(0, 4);
 
   return (
-    <main className="flex-1 max-w-7xl mx-auto px-6 py-12">
+    <div className="max-w-7xl mx-auto px-6 py-12 pb-20">
       {/* Greeting Row */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-12 mb-12">
         <div className="flex-1">
@@ -200,6 +200,6 @@ export function Today() {
           </div>
         </Card>
       </div>
-    </main>
+    </div>
   );
 }

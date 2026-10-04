@@ -35,7 +35,7 @@ export function Map() {
     : [];
 
   return (
-    <main className="flex-1 bg-[#140A18] relative overflow-hidden">
+    <div className="h-[calc(100vh-65px)] bg-[#140A18] relative overflow-hidden">
       {/* SVG Map */}
       <svg
         className="absolute inset-0 w-full h-full"
@@ -248,6 +248,6 @@ export function Map() {
           <p className="text-xs text-white/60 mt-3">💡 Tap a sector to see its tenders</p>
         </Card>
       </div>
-    </main>
+    </div>
   );
 }

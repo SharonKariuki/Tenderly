@@ -19,15 +19,15 @@ body {
               linear-gradient(135deg, #FAFBFC 0%, #F5F2F8 50%, #FAF7FB 100%);
   color: #1A0F1F;
   font-family: 'Plus Jakarta Sans', sans-serif;
-  min-height: 100vh;
+  height: 100vh;
   margin: 0;
   padding: 0;
+  overflow: hidden;
 }
 
 #root {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
+  height: 100vh;
+  width: 100vw;
 }
 
 /* Headings */
