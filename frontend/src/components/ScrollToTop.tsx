@@ -7,7 +7,6 @@ const TITLES: [RegExp, string][] = [
   [/^\/tenders/, 'Tenders'],
   [/^\/ask/, 'Ask a question'],
   [/^\/check\/message/, 'Check a message'],
-  [/^\/check\/result/, 'Check result'],
   [/^\/check/, 'Check a tender'],
   [/^\/documents\/\d+/, 'Document'],
   [/^\/documents/, 'Documents'],

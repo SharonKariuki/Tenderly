@@ -9,7 +9,6 @@ import { MapSector } from './screens/MapSector';
 import { TenderDetail } from './screens/TenderDetail';
 import { DocumentDetail } from './screens/DocumentDetail';
 import { CheckMessage } from './screens/CheckMessage';
-import { CheckResult } from './screens/CheckResult';
 import { Alerts } from './screens/Alerts';
 import { Bids } from './screens/Bids';
 import { Meetings } from './screens/Meetings';
@@ -39,7 +38,6 @@ function App() {
                   <Route path="/ask" element={<Ask />} />
                   <Route path="/check" element={<Check />} />
                   <Route path="/check/message" element={<CheckMessage />} />
-                  <Route path="/check/result/:type" element={<CheckResult />} />
                   <Route path="/documents" element={<Documents />} />
                   <Route path="/documents/:id" element={<DocumentDetail />} />
                   <Route path="/map" element={<Map />} />
