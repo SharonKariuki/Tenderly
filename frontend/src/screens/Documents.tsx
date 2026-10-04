@@ -27,43 +27,50 @@ export function Documents() {
   };
 
   return (
-    <main className="flex-1 max-w-7xl mx-auto px-6 py-8">
+    <main className="flex-1 max-w-7xl mx-auto px-6 py-12">
       {/* Page Intro */}
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-4 mb-8">
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-8 mb-12">
         <div>
-          <h1 className="h1 text-plum">Documents</h1>
-          <p className="text-intro text-plum-soft">Keep your paperwork ready, and opportunities unlock.</p>
+          <h1 className="h1 mb-3">Documents</h1>
+          <p className="text-lg text-plum-soft">Keep your paperwork ready, and opportunities unlock.</p>
         </div>
-        <Button variant="primary">+ Add document</Button>
+        <Button variant="primary" size="lg">+ Add document</Button>
       </div>
 
       {/* Health Card & Coming Up Row */}
-      <div className="grid lg:grid-cols-3 gap-6 mb-8">
+      <div className="grid lg:grid-cols-3 gap-8 mb-12">
         {/* Document Health */}
-        <Card className="card-hero p-8 lg:col-span-1">
-          <h3 className="h2 text-white mb-4">Document health</h3>
-          <p className="text-4xl font-light text-white mb-2">{readyCount}</p>
-          <p className="text-sm opacity-90 mb-6">of 7 required ready</p>
-          <div>
-            <ProgressBar value={readyCount} max={7} />
+        <Card className="card-hero p-10 lg:col-span-1 relative overflow-hidden">
+          <div className="absolute inset-0 opacity-5">
+            <div className="absolute bottom-0 right-0 w-48 h-48 rounded-full blur-3xl" style={{background: 'radial-gradient(circle, white, transparent)'}}></div>
+          </div>
+          <div className="relative z-10">
+            <h3 className="h2 text-white mb-6">Document health</h3>
+            <p className="text-5xl font-light text-white mb-2">{readyCount}</p>
+            <p className="text-base opacity-90 mb-8">of 7 required ready</p>
+            <div>
+              <ProgressBar value={readyCount} max={7} />
+            </div>
           </div>
         </Card>
 
         {/* Coming Up */}
-        <Card className="p-6 lg:col-span-2">
-          <h3 className="h2 mb-4">Coming up</h3>
-          <div className="space-y-2">
+        <Card className="p-10 lg:col-span-2">
+          <h3 className="h2 mb-6">Expiring soon</h3>
+          <div className="space-y-3">
             {mockDocuments
               .filter((d) => d.expiryDate)
               .sort((a, b) => new Date(a.expiryDate || '').getTime() - new Date(b.expiryDate || '').getTime())
               .slice(0, 3)
               .map((doc) => (
-                <div key={doc.id} className="flex items-center justify-between p-3 bg-warn-bg/50 rounded-tile">
+                <div key={doc.id} className="flex items-center justify-between p-4 bg-gradient-to-r from-warn-bg/40 to-warn-bg/20 rounded-lg border border-warn-bg hover:shadow-md transition-all">
                   <div className="flex items-center gap-3">
-                    <Calendar size={16} className="text-warn-text" />
+                    <div className="w-8 h-8 rounded-lg bg-warn-solid/20 flex items-center justify-center flex-shrink-0">
+                      <Calendar size={18} className="text-warn-solid" />
+                    </div>
                     <span className="font-semibold text-sm text-plum-ink">{doc.name}</span>
                   </div>
-                  <span className="text-xs text-warn-text font-semibold">
+                  <span className="text-xs text-warn-solid font-semibold">
                     Expires {new Date(doc.expiryDate || '').toLocaleDateString()}
                   </span>
                 </div>
@@ -73,7 +80,7 @@ export function Documents() {
       </div>
 
       {/* Filters */}
-      <div className="flex gap-2 mb-6 flex-wrap">
+      <div className="flex gap-3 mb-8 flex-wrap">
         {[
           { id: 'all', label: 'All', count: mockDocuments.length },
           { id: 'action', label: 'Needs action', count: needsActionCount },
@@ -83,8 +90,10 @@ export function Documents() {
           <button
             key={f.id}
             onClick={() => setFilter(f.id)}
-            className={`rounded-pill px-4 py-2 text-sm font-medium transition ${
-              filter === f.id ? 'bg-plum text-white' : 'bg-white/65 text-plum hover:bg-white/85'
+            className={`rounded-full px-5 py-2.5 text-sm font-medium transition-all duration-300 ${
+              filter === f.id
+                ? 'bg-gradient-to-r from-plum to-coral text-white shadow-lg'
+                : 'bg-white/60 text-plum hover:bg-white/80 border border-white/40'
             }`}
           >
             {f.label} {f.count > 0 && <span className="ml-2 opacity-75">({f.count})</span>}
@@ -93,31 +102,40 @@ export function Documents() {
       </div>
 
       {/* Search */}
-      <div className="mb-6">
+      <div className="mb-8">
         <input type="text" placeholder="Search documents..." className="input max-w-md" />
       </div>
 
       {/* Documents Grid */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
         {filteredDocs.map((doc) => (
           <Card
             key={doc.id}
-            className={`overflow-hidden flex flex-col ${
-              doc.status === 'missing' ? 'border-2 border-coral' : ''
-            } ${doc.displayStatus === 'expiring' ? 'border-2 border-warn-solid' : ''}`}
+            className={`overflow-hidden flex flex-col transition-all group ${
+              doc.status === 'missing' ? 'ring-2 ring-coral/50 ring-offset-2' : ''
+            } ${doc.displayStatus === 'expiring' ? 'ring-2 ring-warn-solid/50 ring-offset-2' : ''}`}
           >
             {/* Header */}
             <div
-              className={`p-6 text-white ${
-                doc.status === 'ready' ? 'bg-ok-solid' : doc.status === 'actionNeeded' ? 'bg-warn-solid' : 'bg-coral'
-              } relative`}
+              className={`p-8 text-white ${
+                doc.status === 'ready'
+                  ? 'bg-gradient-to-br from-ok-solid to-ok-solid/80'
+                  : doc.status === 'actionNeeded'
+                  ? 'bg-gradient-to-br from-warn-solid to-warn-solid/80'
+                  : 'bg-gradient-to-br from-coral to-coral-wine'
+              } relative overflow-hidden`}
             >
-              <div className="text-4xl mb-3">{docIcons[doc.category]}</div>
-              <div className="flex justify-between items-start gap-2">
-                <span className="text-xs font-bold bg-white/20 rounded-pill px-3 py-1">
-                  {doc.category.replace(/([A-Z])/g, ' $1').trim()}
-                </span>
-                <StatusChip status={doc.status} />
+              <div className="absolute inset-0 opacity-10">
+                <div className="absolute bottom-0 right-0 w-32 h-32 rounded-full blur-2xl" style={{background: 'radial-gradient(circle, white, transparent)'}}></div>
+              </div>
+              <div className="relative z-10">
+                <div className="text-5xl mb-4">{docIcons[doc.category]}</div>
+                <div className="flex justify-between items-start gap-2">
+                  <span className="text-xs font-bold bg-white/20 rounded-full px-3 py-1">
+                    {doc.category.replace(/([A-Z])/g, ' $1').trim()}
+                  </span>
+                  <StatusChip status={doc.status} />
+                </div>
               </div>
             </div>
 
