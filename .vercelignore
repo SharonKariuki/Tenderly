@@ -1,0 +1,10 @@
+# Vercel only builds the frontend; it also reads access/agpo_rules.json. Upload nothing else.
+/*
+!/frontend
+!/access
+!/vercel.json
+/access/*
+!/access/agpo_rules.json
+/frontend/node_modules
+/frontend/dist
+/frontend/.env*
