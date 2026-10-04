@@ -216,7 +216,7 @@ export function Check() {
             before submitting your bid.
           </p>
         </Card>
-      </main>
+      </div>
     );
   }
 
