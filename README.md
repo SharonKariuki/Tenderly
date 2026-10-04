@@ -114,11 +114,6 @@ Touch only the apps you own (G8).
 | `docs/` | validation notes, handoff sheet | shared |
 | `.github/pull_request_template.md` | PR template | A |
 
-| Role | Member | GitHub |
-|---|---|---|
-| **A** (Part 1): lead, core, rules, checks, deploy. The only merger | Sharon Kariuki | @SharonKariuki |
-| **B** (Part 2): AI and documents | Brenda | @Brenda031-create |
-| **C** (Part 3): addenda, alerts, insight | Stephanie | @stephiewahome-hue |
 
 Shared files (`core/contracts.py`, `tenderready/settings.py`, `tenderready/urls.py`, core models) are lead-only: ask in chat and the lead adds it, additive changes only.
 

@@ -44,3 +44,11 @@ Report only what is written in the document.
   what is being bought, who may bid and when it closes.
 
 Anything that is not in the document is null. Never invent a requirement."""
+
+SUMMARY_SW_PROMPT_VERSION = "v1"
+SUMMARY_SW_PROMPT = """Translate the following tender summary into clear, natural Kiswahili for a
+small business owner in Kenya. Keep all dates and facts unchanged. Do not add information or
+omit a requirement. Return the translation in the summary field.
+
+English summary:
+{summary}"""
