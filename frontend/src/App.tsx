@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Header } from './components/Header';
 import { Sidebar } from './components/Sidebar';
@@ -8,12 +8,14 @@ import { Check } from './screens/Check';
 import { Documents } from './screens/Documents';
 import { Map } from './screens/Map';
 import { AppProvider } from './context/AppState';
+import { AccessibilityProvider } from './context/Accessibility';
+import { SpeechProvider } from './context/Speech';
 
 function AppLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gradient-to-br from-white/50 via-white/30 to-white/40">
+    <div className="flex h-screen overflow-hidden">
       <a href="#main-content" className="skip-link">
         Skip to main content
       </a>
@@ -24,7 +26,7 @@ function AppLayout() {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
-        <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
+        <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} menuOpen={sidebarOpen} />
 
         {/* Page Content */}
         <div
@@ -48,9 +50,13 @@ function AppLayout() {
 function App() {
   return (
     <AppProvider>
-      <Router>
-        <AppLayout />
-      </Router>
+      <AccessibilityProvider>
+        <SpeechProvider>
+          <Router>
+            <AppLayout />
+          </Router>
+        </SpeechProvider>
+      </AccessibilityProvider>
     </AppProvider>
   );
 }

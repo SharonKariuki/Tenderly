@@ -1,319 +1,333 @@
-import React, { useState } from 'react';
-import { Card, Button, StatusChip, ProgressBar } from '../components/ui';
-import { Upload, AlertCircle, CheckCircle, Shield, XCircle } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { Card, Button, ProgressBar } from '../components/ui';
+import { tendersApi } from '../api/client';
+import { AlertTriangle, CheckCircle, Shield, Upload, XCircle } from 'lucide-react';
+
+type Result = 'genuine' | 'suspicious';
+
+const STEPS = ['Read the tender text', 'Look for fraud signals', 'Check your eligibility'];
+
+const SIGNALS: { label: string; genuine: string; suspicious: string | null }[] = [
+  { label: 'Listed on the official portal', genuine: 'Found on tenders.go.ke', suspicious: 'Not found on the official portal' },
+  { label: 'Official contact address', genuine: 'Contacts use .go.ke addresses', suspicious: 'Contact is a personal email' },
+  { label: 'No fee paid to a person', genuine: 'No personal fees mentioned', suspicious: 'Asks for KES 5,000 to confirm the bid' },
+  { label: 'Bid security paid to the institution', genuine: 'Bond payable to the county', suspicious: 'Bond payable to a personal M-Pesa number' },
+  { label: 'Reasonable timeline', genuine: '16 days to deadline', suspicious: null },
+];
+
+const REQUIREMENTS = [
+  { label: 'Tax compliance certificate', met: true },
+  { label: 'Business registration', met: true },
+  { label: 'CRB report', met: true },
+  { label: 'KRA PIN certificate', met: true },
+  { label: 'Insurance certificate', met: false },
+  { label: 'Bank reference', met: false },
+];
+
+// Quick red flags in pasted text. Guidance only; the full check runs on an uploaded PDF.
+const TEXT_FLAGS: { test: RegExp; flag: string }[] = [
+  { test: /m-?pesa|till\s*(no|number)|paybill/i, flag: 'Asks for payment by M-Pesa, till or paybill' },
+  { test: /@(gmail|yahoo|outlook|hotmail)\./i, flag: 'Uses a personal email address' },
+  { test: /(fee|pay|deposit).{0,30}(confirm|secure|process|register)/i, flag: 'Asks for a fee to confirm or secure the bid' },
+  { test: /urgent|today only|within 24 ?h/i, flag: 'Pushes you to act very fast' },
+];
 
 export function Check() {
-  const [uploadMode, setUploadMode] = useState<'upload' | 'demo' | 'suspicious' | 'results'>('upload');
-  const [checking, setChecking] = useState(false);
-  const [checkStep, setCheckStep] = useState<number | null>(null);
+  const navigate = useNavigate();
+  const [result, setResult] = useState<Result | null>(null);
+  const [step, setStep] = useState<number | null>(null);
+  const [dragging, setDragging] = useState(false);
+  const [notice, setNotice] = useState<string | null>(null);
+  const [pasted, setPasted] = useState('');
+  const [textFlags, setTextFlags] = useState<string[] | null>(null);
+  const fileInput = useRef<HTMLInputElement>(null);
+  const timer = useRef<number | undefined>(undefined);
 
-  const steps = [
-    { id: 1, label: 'Extract tender text' },
-    { id: 2, label: 'Check for fraud signals' },
-    { id: 3, label: 'Verify your eligibility' },
-  ];
+  useEffect(() => () => window.clearInterval(timer.current), []);
 
-  const handleDemo = (type: 'genuine' | 'suspicious') => {
-    setChecking(true);
-    setCheckStep(1);
-    let step = 1;
-    const interval = setInterval(() => {
-      step++;
-      setCheckStep(step);
-      if (step > 3) {
-        clearInterval(interval);
-        setChecking(false);
-        setUploadMode(type === 'genuine' ? 'results' : 'results');
-      }
-    }, 1500);
+  const runDemo = (type: Result) => {
+    setNotice(null);
+    setStep(0);
+    window.clearInterval(timer.current);
+    timer.current = window.setInterval(() => {
+      setStep((s) => {
+        const next = (s ?? 0) + 1;
+        if (next >= STEPS.length) {
+          window.clearInterval(timer.current);
+          setResult(type);
+          return null;
+        }
+        return next;
+      });
+    }, 900);
   };
 
-  if (uploadMode === 'results') {
-    const isGenuine = uploadMode === 'results';
+  const uploadPdf = async (file: File) => {
+    if (file.type !== 'application/pdf') {
+      setNotice('Please choose a PDF file.');
+      return;
+    }
+    setNotice(`Uploading ${file.name}…`);
+    try {
+      await tendersApi.upload(file);
+      setNotice(`${file.name} uploaded. Its check will appear under Tenders.`);
+    } catch (err) {
+      const status = axios.isAxiosError(err) ? err.response?.status : undefined;
+      setNotice(
+        status === 401
+          ? 'Sign in to check your own PDF. Your file was not sent. Meanwhile, try a demo tender.'
+          : `Could not upload ${file.name}. Check your connection and try again.`,
+      );
+    }
+  };
+
+  const reset = () => {
+    setResult(null);
+    setNotice(null);
+    setTextFlags(null);
+  };
+
+  if (result) {
+    const genuine = result === 'genuine';
+    const met = REQUIREMENTS.filter((r) => r.met).length;
     return (
-      <div className="max-w-4xl mx-auto px-6 py-12 pb-20">
-        {/* Results Card */}
-        <Card
-          className={`p-10 mb-10 relative overflow-hidden ${isGenuine ? 'card-hero' : 'card-scam'}`}
-        >
-          <div className="absolute inset-0 opacity-5">
-            <div className="absolute top-0 right-0 w-64 h-64 rounded-full blur-3xl" style={{background: 'radial-gradient(circle, white, transparent)'}}></div>
-          </div>
-          <div className="flex items-start gap-6 mb-8 relative z-10">
-            <div className={`w-16 h-16 rounded-2xl flex items-center justify-center flex-shrink-0 ${isGenuine ? 'bg-white/20' : 'bg-white/10'}`}>
-              {isGenuine ? (
-                <Shield size={32} className="text-white" />
-              ) : (
-                <AlertCircle size={32} className="text-white" />
-              )}
-            </div>
-            <div className="flex-1">
-              <h2 className="text-4xl font-semibold text-white mb-2">
-                {isGenuine ? '✓ Tender looks genuine' : '⚠️ Suspicious tender'}
-              </h2>
-              <p className="text-lg text-white/85">
-                {isGenuine
-                  ? 'Source: Official portal • Nairobi City County • Oct 20, 2026'
-                  : 'Source: Email • Unverified sender • Requests upfront fee'}
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 pb-16">
+        <Card scam={!genuine} hero={genuine} className="p-6 sm:p-8 mb-6">
+          <div className="relative z-10 flex items-start gap-4 sm:gap-6">
+            <span className="w-14 h-14 rounded-2xl bg-white/15 flex items-center justify-center flex-shrink-0">
+              {genuine ? <Shield size={28} aria-hidden /> : <AlertTriangle size={28} aria-hidden />}
+            </span>
+            <div>
+              <h1 className="text-2xl sm:text-4xl font-semibold mb-2">
+                {genuine ? 'This tender looks genuine' : 'This tender looks suspicious'}
+              </h1>
+              <p className="text-white/85">
+                {genuine
+                  ? 'Source: official portal · Nairobi City County · closes 20 Oct 2026'
+                  : 'Source: email · unverified sender · asks for an upfront fee'}
               </p>
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-6 text-white relative z-10">
-            <div>
-              <p className="text-sm opacity-75 mb-2">Estimated value</p>
-              <p className="text-2xl font-light">KES 500K - 1M</p>
-            </div>
-            <div>
-              <p className="text-sm opacity-75 mb-2">Your bid progress</p>
-              <p className="text-2xl font-light">20%</p>
-            </div>
-          </div>
         </Card>
 
-        {/* Actions Row */}
-        <div className="flex gap-4 mb-10 flex-wrap">
-          {isGenuine ? (
-            <>
-              <Button variant="primary" size="lg">Save to my tenders</Button>
-              <Button variant="outlined" size="lg">Check another</Button>
-            </>
+        <div className="flex gap-3 mb-8 flex-wrap">
+          {genuine ? (
+            <Button variant="primary" onClick={() => navigate('/tenders')}>
+              Go to my tenders
+            </Button>
           ) : (
-            <>
-              <Button variant="coral" size="lg">Report suspected fraud</Button>
-              <Button variant="outlined" size="lg">Check another</Button>
-            </>
+            <a
+              href="https://ppra.go.ke/"
+              target="_blank"
+              rel="noreferrer"
+              className="btn btn-coral"
+            >
+              Report it to PPRA
+            </a>
           )}
+          <Button variant="outlined" onClick={reset}>
+            Check another
+          </Button>
         </div>
 
-        {/* Details Grid */}
-        <div className="grid lg:grid-cols-2 gap-8 mb-10">
-          {/* Fraud Signals */}
-          <Card className="p-8">
-            <h3 className="h2 mb-6">Is it genuine?</h3>
-            <div className="space-y-3">
-              {[
-                {
-                  label: 'Listed on official portal',
-                  status: isGenuine ? 'ok' : 'flag',
-                  detail: isGenuine
-                    ? 'Found on procurement.go.ke'
-                    : 'Not found on official portal',
-                },
-                {
-                  label: 'Official contact domain',
-                  status: isGenuine ? 'ok' : 'flag',
-                  detail: isGenuine
-                    ? 'Contacts use .go.ke addresses'
-                    : 'Contact is personal email',
-                },
-                {
-                  label: 'No fee to a person',
-                  status: isGenuine ? 'ok' : 'flag',
-                  detail: isGenuine
-                    ? 'No personal fees mentioned'
-                    : 'Requests KES 5,000 to confirm bid',
-                },
-                {
-                  label: 'Bid security to institution',
-                  status: isGenuine ? 'ok' : 'flag',
-                  detail: isGenuine
-                    ? 'Bond payable to county'
-                    : 'Bond payable to personal M-Pesa',
-                },
-                {
-                  label: 'Reasonable timeline',
-                  status: isGenuine ? 'ok' : 'ok',
-                  detail: isGenuine ? '16 days to deadline' : '16 days to deadline',
-                },
-              ].map((signal, i) => (
-                <div
-                  key={i}
-                  className={`p-4 rounded-lg transition-all ${
-                    signal.status === 'ok'
-                      ? 'bg-gradient-to-r from-ok-bg/40 to-ok-bg/20'
-                      : 'bg-gradient-to-r from-coral/15 to-coral/5'
-                  }`}
-                >
-                  <div className="flex gap-3 items-start">
-                    {signal.status === 'ok' ? (
-                      <div className="w-6 h-6 rounded-full bg-ok-solid/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <CheckCircle size={16} className="text-ok-solid" />
-                      </div>
+        <div className="grid lg:grid-cols-2 gap-6 mb-8">
+          <Card className="p-6">
+            <h2 className="h2 mb-4">Is it genuine?</h2>
+            <ul className="space-y-2">
+              {SIGNALS.map((s) => {
+                const flagged = !genuine && s.suspicious !== null;
+                return (
+                  <li key={s.label} className={`flex gap-3 rounded-tile p-3 ${flagged ? 'bg-coral/10' : 'bg-ok-solid/10'}`}>
+                    {flagged ? (
+                      <XCircle size={20} className="text-coral flex-shrink-0 mt-0.5" aria-label="Warning" />
                     ) : (
-                      <div className="w-6 h-6 rounded-full bg-coral/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <XCircle size={16} className="text-coral" />
-                      </div>
+                      <CheckCircle size={20} className="text-ok-solid flex-shrink-0 mt-0.5" aria-label="OK" />
                     )}
-                    <div className="flex-1">
-                      <p className="font-semibold text-sm text-plum-ink">{signal.label}</p>
-                      <p className="text-xs text-plum-muted mt-1">{signal.detail}</p>
+                    <div>
+                      <p className="font-semibold text-sm text-plum-ink">{s.label}</p>
+                      <p className="text-sm text-plum-muted">{flagged ? s.suspicious : s.genuine}</p>
                     </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+                  </li>
+                );
+              })}
+            </ul>
           </Card>
 
-          {/* Eligibility */}
-          <Card className={`p-6 ${isGenuine ? '' : 'opacity-50'}`}>
-            <h3 className="h2 mb-4">Do you qualify?</h3>
-            <div className="mb-6">
-              <p className="text-4xl font-light text-plum">4</p>
-              <p className="text-plum-muted text-sm">of 6 requirements met</p>
-              <div className="mt-3">
-                <ProgressBar value={4} max={6} />
-              </div>
-            </div>
-            <div className="space-y-2">
-              {[
-                { label: 'Tax Compliance Certificate', status: 'ready' },
-                { label: 'Business Registration', status: 'ready' },
-                { label: 'CRB Report', status: 'ready' },
-                { label: 'TIN Certificate', status: 'ready' },
-                { label: 'Insurance Certificate', status: 'missing' },
-                { label: 'Bank Reference', status: 'missing' },
-              ].map((req, i) => (
-                <div key={i} className="flex items-center gap-3 p-2">
-                  {req.status === 'ready' ? (
-                    <CheckCircle size={16} className="text-ok-solid flex-shrink-0" />
-                  ) : (
-                    <XCircle size={16} className="text-coral flex-shrink-0" />
-                  )}
-                  <span className="text-sm text-plum-ink">{req.label}</span>
-                  {req.status === 'missing' && (
-                    <Button variant="secondary" size="sm" className="ml-auto">
-                      Upload
-                    </Button>
-                  )}
+          <Card className="p-6">
+            <h2 className="h2 mb-4">Do you qualify?</h2>
+            {genuine ? (
+              <>
+                <p className="text-4xl font-light text-plum tabular-nums">
+                  {met} <span className="text-xl text-plum-muted">of {REQUIREMENTS.length} requirements met</span>
+                </p>
+                <div className="mt-3 mb-4">
+                  <ProgressBar value={met} max={REQUIREMENTS.length} />
                 </div>
-              ))}
-            </div>
+                <ul className="space-y-1">
+                  {REQUIREMENTS.map((r) => (
+                    <li key={r.label} className="flex min-h-[44px] items-center gap-3">
+                      {r.met ? (
+                        <CheckCircle size={18} className="text-ok-solid flex-shrink-0" aria-label="Met" />
+                      ) : (
+                        <XCircle size={18} className="text-coral flex-shrink-0" aria-label="Missing" />
+                      )}
+                      <span className="text-sm text-plum-ink">{r.label}</span>
+                      {!r.met && (
+                        <Button variant="secondary" size="sm" className="ml-auto" onClick={() => navigate('/documents')}>
+                          Upload
+                        </Button>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </>
+            ) : (
+              <p className="text-plum-soft">
+                We did not check eligibility because this tender shows fraud signals. Do not pay anything until you
+                confirm it on the official portal.
+              </p>
+            )}
           </Card>
         </div>
 
-        {/* How It Works */}
-        <div className="mb-8">
-          <h3 className="h2 mb-4">How we check</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {steps.map((step) => (
-              <Card key={step.id} className="p-4 text-center">
-                <div className="w-8 h-8 rounded-full bg-ok-bg text-ok-solid font-bold mx-auto mb-2">
-                  ✓
-                </div>
-                <p className="text-sm font-semibold text-plum">{step.label}</p>
-              </Card>
-            ))}
-          </div>
-        </div>
-
-        {/* Disclaimer */}
-        <Card className="bg-lilac/20 border-2 border-lilac p-4 text-center">
-          <p className="text-xs text-plum-ink">
-            <strong>Guidance only.</strong> This check is not an official decision. Always confirm on{' '}
-            <a href="#" className="text-plum font-semibold hover:underline">
-              the official portal
-            </a>{' '}
-            before submitting your bid.
-          </p>
-        </Card>
+        <p className="rounded-tile border border-plum/15 bg-white/70 p-4 text-sm text-plum-ink">
+          <strong>Guidance only.</strong> This check is not an official decision. Always confirm on{' '}
+          <a href="https://tenders.go.ke/" target="_blank" rel="noreferrer" className="font-semibold text-plum underline">
+            the official portal
+          </a>{' '}
+          before you submit a bid.
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-6 py-12 pb-20">
-      {/* Page Intro */}
-      <div>
-        <h1 className="h1 mb-2">Check a tender</h1>
-        <p className="text-lg text-plum-soft mb-8">
-          Before you spend time and money, check if you qualify and if it's real.
-        </p>
-      </div>
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 pb-16">
+      <h1 className="h1 mb-2">Check a tender</h1>
+      <p className="text-lg text-plum-soft mb-8">Before you spend time and money, check that it is real and that you qualify.</p>
 
-      {/* Upload Card */}
-      <Card className="p-8 mb-8">
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-blush rounded-full flex items-center justify-center mx-auto mb-4 animate-floaty">
-            <Upload size={32} className="text-plum" />
-          </div>
-          <h2 className="h2 mb-2">Drag and drop your tender PDF here</h2>
-          <p className="text-plum-muted text-sm">Or browse files from your device</p>
+      {step !== null && (
+        <Card className="p-6 mb-6">
+          <h2 className="h2 mb-4">Checking…</h2>
+          <ol className="space-y-2" aria-live="polite">
+            {STEPS.map((label, i) => (
+              <li
+                key={label}
+                className={`flex items-center gap-3 rounded-tile p-3 text-sm ${
+                  i === step ? 'bg-plum text-white' : i < step ? 'bg-ok-solid/10 text-plum-ink' : 'bg-blush/50 text-plum-muted'
+                }`}
+              >
+                {i < step ? <CheckCircle size={18} aria-hidden /> : <span className="w-[18px] text-center tabular-nums">{i + 1}</span>}
+                {label}
+              </li>
+            ))}
+          </ol>
+        </Card>
+      )}
+
+      <input
+        ref={fileInput}
+        type="file"
+        accept="application/pdf"
+        className="sr-only"
+        tabIndex={-1}
+        aria-hidden
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) uploadPdf(file);
+          e.target.value = '';
+        }}
+      />
+
+      <Card className="p-6 sm:p-8 mb-6">
+        <div
+          onDragOver={(e) => {
+            e.preventDefault();
+            setDragging(true);
+          }}
+          onDragLeave={() => setDragging(false)}
+          onDrop={(e) => {
+            e.preventDefault();
+            setDragging(false);
+            const file = e.dataTransfer.files?.[0];
+            if (file) uploadPdf(file);
+          }}
+          className={`rounded-card border-2 border-dashed p-6 sm:p-8 text-center transition-colors ${
+            dragging ? 'border-plum bg-blush/60' : 'border-plum/20'
+          }`}
+        >
+          <span className="w-14 h-14 bg-blush rounded-full flex items-center justify-center mx-auto mb-3">
+            <Upload size={26} className="text-plum" aria-hidden />
+          </span>
+          <h2 className="h2 mb-1">Drop your tender PDF here</h2>
+          <p className="text-plum-muted text-sm mb-5">or choose it from your device</p>
+          <Button variant="primary" onClick={() => fileInput.current?.click()}>
+            Browse files
+          </Button>
         </div>
-
-        <div className="border-2 border-dashed border-line rounded-card p-8 text-center mb-6 hover:border-plum transition cursor-pointer">
-          <p className="text-plum-muted">📄 Drop PDF here</p>
-        </div>
-
-        <div className="flex gap-3 justify-center">
-          <Button variant="primary">Browse files</Button>
-          <Button variant="outlined">Use demo tender</Button>
-          <Button variant="coral" onClick={() => handleDemo('suspicious')}>
+        {notice && (
+          <p className="mt-4 rounded-tile bg-blush p-3 text-sm text-plum-ink" role="status">
+            {notice}
+          </p>
+        )}
+        <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
+          <span className="text-sm text-plum-muted">No PDF to hand?</span>
+          <Button variant="outlined" size="sm" disabled={step !== null} onClick={() => runDemo('genuine')}>
+            Use a demo tender
+          </Button>
+          <Button variant="outlined" size="sm" disabled={step !== null} onClick={() => runDemo('suspicious')}>
             Try a suspicious one
           </Button>
         </div>
       </Card>
 
-      {/* Text Input Option */}
-      <Card className="p-6 mb-8">
-        <h3 className="h2 mb-4">Got it on WhatsApp or by email?</h3>
-        <div className="flex gap-3">
-          <input
-            type="text"
-            placeholder="Paste the tender details or link here..."
-            className="input flex-1"
+      <Card className="p-6">
+        <h2 className="h2 mb-1">Got it on WhatsApp or by email?</h2>
+        <p className="text-sm text-plum-muted mb-4">Paste the message for a quick check for common scam signs.</p>
+        <form
+          className="flex flex-col sm:flex-row gap-3"
+          onSubmit={(e) => {
+            e.preventDefault();
+            setTextFlags(TEXT_FLAGS.filter((f) => f.test.test(pasted)).map((f) => f.flag));
+          }}
+        >
+          <label htmlFor="pasted-tender" className="sr-only">
+            Tender message
+          </label>
+          <textarea
+            id="pasted-tender"
+            rows={3}
+            placeholder="Paste the tender details or link here"
+            value={pasted}
+            onChange={(e) => {
+              setPasted(e.target.value);
+              setTextFlags(null);
+            }}
+            className="input flex-1 min-w-0 resize-y"
           />
-          <Button variant="coral">Check it</Button>
-        </div>
+          <Button type="submit" variant="primary" disabled={!pasted.trim()} className="sm:self-start">
+            Check it
+          </Button>
+        </form>
+        {textFlags && (
+          <div className={`mt-4 rounded-tile p-4 text-sm ${textFlags.length ? 'bg-coral/10' : 'bg-ok-solid/10'}`} role="status">
+            {textFlags.length ? (
+              <>
+                <p className="font-semibold text-plum-ink mb-1">Be careful. We found {textFlags.length} warning sign{textFlags.length > 1 ? 's' : ''}:</p>
+                <ul className="list-disc pl-5 text-plum-ink">
+                  {textFlags.map((f) => (
+                    <li key={f}>{f}</li>
+                  ))}
+                </ul>
+              </>
+            ) : (
+              <p className="text-plum-ink">No common scam signs found. Still confirm it on the official portal before you pay or submit anything.</p>
+            )}
+          </div>
+        )}
       </Card>
-
-      {/* Checking State */}
-      {checking && (
-        <Card className="p-8 text-center">
-          <div className="mb-6">
-            <div className="relative w-32 h-32 mx-auto">
-              <svg className="w-full h-full" viewBox="0 0 120 120">
-                <rect
-                  x="10"
-                  y="10"
-                  width="100"
-                  height="100"
-                  fill="#FFFAF9"
-                  rx="8"
-                  opacity="0.3"
-                />
-                <rect
-                  x="10"
-                  y="10"
-                  width={(checkStep || 0) * 33.33}
-                  height="100"
-                  fill="#E5484D"
-                  rx="8"
-                  className="transition-all duration-500"
-                />
-              </svg>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-2xl">{checkStep}/3</span>
-              </div>
-            </div>
-          </div>
-          <div className="space-y-2">
-            {steps.map((step) => (
-              <div
-                key={step.id}
-                className={`p-3 rounded-tile text-left transition ${
-                  checkStep === step.id
-                    ? 'bg-plum text-white'
-                    : checkStep && checkStep > step.id
-                    ? 'bg-ok-bg text-plum-ink'
-                    : 'bg-gray-100 text-plum-muted'
-                }`}
-              >
-                {step.label}
-              </div>
-            ))}
-          </div>
-        </Card>
-      )}
     </div>
   );
 }

@@ -1,252 +1,256 @@
-import React, { useState } from 'react';
-import { Card, Button } from '../components/ui';
-import { ChevronDown, ZoomIn, ZoomOut } from 'lucide-react';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Button } from '../components/ui';
+import { Toggle } from '../components/access/Toggle';
+import { X, ZoomIn, ZoomOut } from 'lucide-react';
+
+type Window = 'week' | 'month' | 'quarter' | 'all';
+
+const WINDOWS: { id: Window; label: string; maxDays: number }[] = [
+  { id: 'week', label: 'This week', maxDays: 7 },
+  { id: 'month', label: 'This month', maxDays: 30 },
+  { id: 'quarter', label: 'This quarter', maxDays: 90 },
+  { id: 'all', label: 'All open', maxDays: Infinity },
+];
+
+const SECTORS = [
+  { id: 'it', name: 'IT & Tech', match: 94, tenders: 12 },
+  { id: 'construction', name: 'Construction', match: 65, tenders: 8 },
+  { id: 'health', name: 'Healthcare', match: 55, tenders: 6 },
+  { id: 'education', name: 'Education', match: 78, tenders: 14 },
+  { id: 'cleaning', name: 'Cleaning', match: 88, tenders: 11 },
+  { id: 'energy', name: 'Energy', match: 45, tenders: 5 },
+  { id: 'agriculture', name: 'Agriculture', match: 62, tenders: 9 },
+  { id: 'transport', name: 'Transport', match: 72, tenders: 10 },
+].map((sector, i) => ({
+  ...sector,
+  // Illustrative closing days for each open tender in the sector, nearest first.
+  closingDays: Array.from({ length: sector.tenders }, (_, k) => 2 + ((i * 7 + k * 11) % 85)).sort((a, b) => a - b),
+}));
+
+const hubColor = (match: number) => (match >= 80 ? '#2F8F6B' : match >= 60 ? '#5E8C72' : '#7A6670');
+
+// Map geometry, in viewBox units.
+const W = 800;
+const H = 640;
+const CX = W / 2;
+const CY = H / 2;
+const RING = 220;
 
 export function Map() {
-  const [closingWindow, setClosingWindow] = useState('all');
-  const [selectedSector, setSelectedSector] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const [windowId, setWindowId] = useState<Window>('all');
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [zoom, setZoom] = useState(1);
+  const [showHubs, setShowHubs] = useState(true);
+  const [showTenders, setShowTenders] = useState(true);
+  const [showDays, setShowDays] = useState(true);
 
-  const sectors = [
-    { id: 'it', name: 'IT & Tech', match: 94, tenders: 12, color: '#7FA58F' },
-    { id: 'construction', name: 'Construction', match: 65, tenders: 8, color: '#7FA58F' },
-    { id: 'health', name: 'Healthcare', match: 55, tenders: 6, color: '#7FA58F' },
-    { id: 'education', name: 'Education', match: 78, tenders: 14, color: '#7FA58F' },
-    { id: 'cleaning', name: 'Cleaning', match: 88, tenders: 11, color: '#7FA58F' },
-    { id: 'energy', name: 'Energy', match: 45, tenders: 5, color: '#7FA58F' },
-    { id: 'agriculture', name: 'Agriculture', match: 62, tenders: 9, color: '#7FA58F' },
-    { id: 'transport', name: 'Transport', match: 72, tenders: 10, color: '#7FA58F' },
-  ];
-
-  const closingOptions = [
-    { id: 'week', label: 'This week', tenders: 3 },
-    { id: 'month', label: 'This month', tenders: 12 },
-    { id: 'quarter', label: 'This quarter', tenders: 28 },
-    { id: 'all', label: 'All open', tenders: 67 },
-  ];
-
-  const sectorTenders = selectedSector
-    ? [
-        { id: 1, days: 5, title: 'Office supplies' },
-        { id: 2, days: 8, title: 'Cleaning services' },
-        { id: 3, days: 12, title: 'IT support' },
-        { id: 4, days: 15, title: 'Furniture' },
-      ]
-    : [];
+  const maxDays = WINDOWS.find((w) => w.id === windowId)!.maxDays;
+  const inWindow = (days: number[]) => days.filter((d) => d <= maxDays);
+  const countFor = (w: (typeof WINDOWS)[number]) =>
+    SECTORS.reduce((n, s) => n + s.closingDays.filter((d) => d <= w.maxDays).length, 0);
+  const selected = SECTORS.find((s) => s.id === selectedId) ?? null;
+  const toggleSector = (id: string) => setSelectedId((current) => (current === id ? null : id));
 
   return (
-    <div className="h-[calc(100vh-65px)] bg-[#5B1A33] relative overflow-hidden">
-      {/* SVG Map */}
-      <svg
-        className="absolute inset-0 w-full h-full"
-        viewBox="0 0 1200 600"
-        preserveAspectRatio="xMidYMid meet"
-      >
-        {/* Background glows */}
-        <defs>
-          <radialGradient id="plumGlow" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#5B1A33" stopOpacity="0.2" />
-            <stop offset="100%" stopColor="#5B1A33" stopOpacity="0" />
-          </radialGradient>
-          <radialGradient id="coralGlow" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#E5484D" stopOpacity="0.1" />
-            <stop offset="100%" stopColor="#E5484D" stopOpacity="0" />
-          </radialGradient>
-        </defs>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 pb-16">
+      <div className="mb-6">
+        <h1 className="h1 mb-2">Map</h1>
+        <p className="text-lg text-plum-soft">Where your open tenders sit, by sector and by how soon they close.</p>
+      </div>
 
-        {/* Center glow */}
-        <circle cx="600" cy="300" r="200" fill="url(#coralGlow)" />
-        <circle cx="600" cy="300" r="150" fill="url(#plumGlow)" />
+      {/* Controls */}
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+        <div className="flex flex-wrap gap-2" role="group" aria-label="Closing within">
+          {WINDOWS.map((w) => (
+            <button
+              key={w.id}
+              type="button"
+              aria-pressed={windowId === w.id}
+              onClick={() => setWindowId(w.id)}
+              className={`focus-ring min-h-[44px] rounded-pill px-4 text-sm font-medium transition-colors ${
+                windowId === w.id ? 'bg-plum text-white' : 'bg-white/70 text-plum border border-plum/15 hover:border-plum'
+              }`}
+            >
+              {w.label} <span className="opacity-75 tabular-nums">({countFor(w)})</span>
+            </button>
+          ))}
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outlined" size="sm" aria-label="Zoom in" disabled={zoom >= 1.6} onClick={() => setZoom((z) => Math.min(1.6, +(z + 0.2).toFixed(1)))}>
+            <ZoomIn size={18} aria-hidden />
+          </Button>
+          <Button variant="outlined" size="sm" aria-label="Zoom out" disabled={zoom <= 0.8} onClick={() => setZoom((z) => Math.max(0.8, +(z - 0.2).toFixed(1)))}>
+            <ZoomOut size={18} aria-hidden />
+          </Button>
+        </div>
+      </div>
 
-        {/* Center orb */}
-        <circle cx="600" cy="300" r="40" fill="#E5484D" opacity="0.8" className="animate-orbit" />
-        <circle cx="600" cy="300" r="60" fill="none" stroke="#E5484D" strokeWidth="2" opacity="0.4" />
-        <circle
-          cx="600"
-          cy="300"
-          r="80"
-          fill="none"
-          stroke="#E5484D"
-          strokeWidth="2"
-          opacity="0.2"
-          className="animate-flow"
-        />
-
-        {/* Sector nodes */}
-        {sectors.map((sector, i) => {
-          const angle = (i / sectors.length) * Math.PI * 2 - Math.PI / 2;
-          const distance = 200;
-          const x = 600 + Math.cos(angle) * distance;
-          const y = 300 + Math.sin(angle) * distance;
-
-          return (
-            <g key={sector.id}>
-              {/* Connection line */}
-              <line
-                x1="600"
-                y1="300"
-                x2={x}
-                y2={y}
-                stroke="#E5484D"
-                strokeWidth="2"
-                opacity="0.3"
-                className="animate-flow"
-                strokeDasharray="10,5"
-              />
-
-              {/* Sector node */}
-              <circle
-                cx={x}
-                cy={y}
-                r="30"
-                fill={sector.color}
-                opacity="0.8"
-                style={{ cursor: 'pointer' }}
-                onClick={() => setSelectedSector(selectedSector === sector.id ? null : sector.id)}
-              >
-                <title>{sector.name}</title>
-              </circle>
-
-              {/* Tender dots around sector */}
-              {[...Array(Math.min(sector.tenders, 4))].map((_, dotI) => {
-                const dotAngle = angle + (dotI / 4) * (Math.PI / 2);
-                const dotDistance = 55;
-                const dotX = x + Math.cos(dotAngle) * dotDistance;
-                const dotY = y + Math.sin(dotAngle) * dotDistance;
-                const days = 5 + dotI * 3;
-
+      <div className="grid lg:grid-cols-[1fr_20rem] gap-4">
+        {/* Map */}
+        <div className="card-hero overflow-hidden">
+          <svg
+            viewBox={`0 0 ${W} ${H}`}
+            className="block w-full h-auto"
+            role="group"
+            aria-label="Sector map. Each circle is a sector; dots are its open tenders."
+          >
+            <g transform={`translate(${CX} ${CY}) scale(${zoom}) translate(${-CX} ${-CY})`}>
+              <circle cx={CX} cy={CY} r={RING} fill="none" stroke="#FBE4E6" strokeOpacity="0.15" strokeDasharray="6 8" />
+              {SECTORS.map((sector, i) => {
+                const angle = (i / SECTORS.length) * Math.PI * 2 - Math.PI / 2;
+                const x = CX + Math.cos(angle) * RING;
+                const y = CY + Math.sin(angle) * RING;
+                const dots = inWindow(sector.closingDays).slice(0, 5);
+                const active = selectedId === sector.id;
+                // Dots fan outwards; the name sits on the inner side so the two never meet.
+                const cos = Math.cos(angle);
+                const sin = Math.sin(angle);
+                const anchor = cos > 0.3 ? 'end' : cos < -0.3 ? 'start' : 'middle';
+                const nameGap = anchor === 'middle' ? 66 : 52;
+                const nameX = x - cos * nameGap;
+                const nameY = y - sin * nameGap + 6;
                 return (
-                  <g key={`tender-${dotI}`}>
-                    <circle cx={dotX} cy={dotY} r="6" fill={days > 10 ? '#7FA58F' : '#E3A12F'} opacity="0.9" />
-                    <text
-                      x={dotX}
-                      y={dotY - 12}
-                      fontSize="10"
-                      fill="#FFFAF9"
-                      textAnchor="middle"
-                      opacity="0.7"
-                    >
-                      {days}d
-                    </text>
+                  <g key={sector.id}>
+                    <line x1={CX} y1={CY} x2={x} y2={y} stroke="#E5484D" strokeOpacity="0.35" strokeWidth="2" strokeDasharray="8 6" />
+                    {showTenders &&
+                      dots.map((days, k) => {
+                        const a = angle + (k - (dots.length - 1) / 2) * 0.32;
+                        const dx = x + Math.cos(a) * 88;
+                        const dy = y + Math.sin(a) * 88;
+                        return (
+                          <g key={k}>
+                            <circle cx={dx} cy={dy} r="13" fill={days <= 7 ? '#E5484D' : days <= 30 ? '#E3A12F' : '#5E8C72'} />
+                            {showDays && (
+                              <text x={dx} y={dy + 4} fontSize="11" fontWeight="700" fill="#FFFAF9" textAnchor="middle">
+                                {days}
+                              </text>
+                            )}
+                          </g>
+                        );
+                      })}
+                    {showHubs && (
+                      <g
+                        role="button"
+                        tabIndex={0}
+                        aria-pressed={active}
+                        aria-label={`${sector.name}: ${sector.match}% match, ${inWindow(sector.closingDays).length} open tenders in this window`}
+                        onClick={() => toggleSector(sector.id)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            toggleSector(sector.id);
+                          }
+                        }}
+                        className="map-hub cursor-pointer"
+                      >
+                        <circle cx={x} cy={y} r="42" fill={hubColor(sector.match)} stroke={active ? '#FFFAF9' : 'none'} strokeWidth="4" />
+                        <text x={x} y={y + 7} fontSize="20" fontWeight="700" fill="#FFFAF9" textAnchor="middle">
+                          {sector.match}%
+                        </text>
+                        <text x={nameX} y={nameY} fontSize="17" fontWeight="600" fill="#FBE4E6" textAnchor={anchor}>
+                          {sector.name}
+                        </text>
+                      </g>
+                    )}
                   </g>
                 );
               })}
+              <circle cx={CX} cy={CY} r="56" fill="#E5484D" />
+              <text x={CX} y={CY + 6} fontSize="17" fontWeight="700" fill="#FFFAF9" textAnchor="middle">
+                Your profile
+              </text>
             </g>
-          );
-        })}
+          </svg>
 
-        {/* Center label */}
-        <text
-          x="600"
-          y="310"
-          fontSize="14"
-          fontWeight="600"
-          fill="#FBE4E6"
-          textAnchor="middle"
-        >
-          Your profile
-        </text>
-      </svg>
-
-      {/* Left Panel - Closing Window */}
-      <div className="absolute left-6 top-6 max-w-xs">
-        <Card hero className="p-6">
-          <h3 className="text-sm font-bold text-white mb-4 flex items-center gap-2">
-            ⏳ Closing within <ChevronDown size={16} />
-          </h3>
-          <div className="space-y-2">
-            {closingOptions.map((opt) => (
-              <button
-                key={opt.id}
-                onClick={() => setClosingWindow(opt.id)}
-                className={`w-full text-left px-4 py-3 rounded-lg text-xs font-medium transition-all ${
-                  closingWindow === opt.id
-                    ? 'bg-plum border border-coral/30 text-white shadow-lg'
-                    : 'bg-white/10 text-white/90 hover:bg-white/20'
-                }`}
-              >
-                {opt.label} <span className="opacity-60">({opt.tenders})</span>
-              </button>
-            ))}
-          </div>
-        </Card>
-      </div>
-
-      {/* Right Panel - Zoom Controls */}
-      <div className="absolute right-6 top-6 flex flex-col gap-2">
-        <button
-          onClick={() => setZoom(Math.min(2, zoom + 0.2))}
-          className="w-12 h-12 rounded-xl bg-white/10 backdrop-blur-xl border border-white/30 flex items-center justify-center text-white hover:bg-white/20 transition-all shadow-lg"
-        >
-          <ZoomIn size={20} />
-        </button>
-        <button
-          onClick={() => setZoom(Math.max(0.5, zoom - 0.2))}
-          className="w-12 h-12 rounded-xl bg-white/10 backdrop-blur-xl border border-white/30 flex items-center justify-center text-white hover:bg-white/20 transition-all shadow-lg"
-        >
-          <ZoomOut size={20} />
-        </button>
-      </div>
-
-      {/* Right Sidebar - Sector Details */}
-      {selectedSector && (
-        <div className="absolute right-0 top-0 bottom-0 w-80 bg-gradient-to-b from-white/98 to-white/95 backdrop-blur-xl p-8 border-l border-white/50 overflow-y-auto shadow-2xl">
-          <h3 className="h2 mb-6">
-            {sectors.find((s) => s.id === selectedSector)?.name}
-          </h3>
-
-          <div className="space-y-6 mb-8">
-            <div className="p-4 rounded-lg bg-gradient-to-br from-ok-bg/30 to-ok-bg/10">
-              <p className="text-xs text-plum-muted font-medium mb-2">Match score</p>
-              <p className="text-4xl font-light text-plum-ink">
-                {sectors.find((s) => s.id === selectedSector)?.match}%
-              </p>
+          {/* Legend */}
+          <div className="relative z-10 border-t border-white/10 px-4 py-3 text-white">
+            <div className="flex flex-wrap gap-x-4 gap-y-1">
+              <Toggle dark checked={showHubs} onChange={setShowHubs}>
+                Sector hubs
+              </Toggle>
+              <Toggle dark checked={showTenders} onChange={setShowTenders}>
+                Open tenders
+              </Toggle>
+              <Toggle dark checked={showDays} onChange={setShowDays}>
+                Days left on dots
+              </Toggle>
             </div>
-            <div className="p-4 rounded-lg bg-gradient-to-br from-lilac-light/30 to-lilac-light/10">
-              <p className="text-xs text-plum-muted font-medium mb-2">Tenders available</p>
-              <p className="text-4xl font-light bg-gradient-to-r from-plum to-coral bg-clip-text text-transparent">
-                {sectors.find((s) => s.id === selectedSector)?.tenders}
-              </p>
-            </div>
+            <p className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-white/85">
+              <span className="flex items-center gap-2">
+                <span className="h-3 w-3 rounded-full bg-coral" aria-hidden /> closes within 7 days
+              </span>
+              <span className="flex items-center gap-2">
+                <span className="h-3 w-3 rounded-full bg-warn-solid" aria-hidden /> within 30 days
+              </span>
+              <span className="flex items-center gap-2">
+                <span className="h-3 w-3 rounded-full bg-lilac" aria-hidden /> later
+              </span>
+            </p>
           </div>
-
-          <div className="mb-6">
-            <h4 className="font-semibold text-plum mb-3 text-sm">Latest tenders</h4>
-            <div className="space-y-2">
-              {sectorTenders.map((tender) => (
-                <div key={tender.id} className="p-3 bg-blush/30 rounded-tile">
-                  <p className="text-sm font-medium text-plum">{tender.title}</p>
-                  <p className="text-xs text-plum-muted">{tender.days} days left</p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <Button variant="secondary" className="w-full">
-            See these tenders
-          </Button>
         </div>
-      )}
 
-      {/* Bottom Legend */}
-      <div className="absolute bottom-6 left-6 right-6">
-        <Card hero className="p-4">
-          <div className="grid grid-cols-3 gap-4 text-xs text-white">
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" defaultChecked className="rounded" />
-              <span>Sector hubs</span>
-            </label>
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" defaultChecked className="rounded" />
-              <span>Open tenders</span>
-            </label>
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" defaultChecked className="rounded" />
-              <span>Deadline window</span>
-            </label>
-          </div>
-          <p className="text-xs text-white/60 mt-3">💡 Tap a sector to see its tenders</p>
-        </Card>
+        {/* Sector list and details */}
+        <aside className="card p-5 self-start">
+          {selected ? (
+            <>
+              <div className="flex items-start justify-between gap-3 mb-4">
+                <h2 className="h2">{selected.name}</h2>
+                <button
+                  type="button"
+                  onClick={() => setSelectedId(null)}
+                  aria-label="Close sector details"
+                  className="focus-ring -m-2 flex h-11 w-11 items-center justify-center rounded-full text-plum hover:bg-blush"
+                >
+                  <X size={18} aria-hidden />
+                </button>
+              </div>
+              <dl className="grid grid-cols-2 gap-3 mb-4">
+                <div className="rounded-tile bg-blush/60 p-3">
+                  <dt className="text-sm text-plum-muted">Match</dt>
+                  <dd className="text-3xl font-light text-plum-ink tabular-nums">{selected.match}%</dd>
+                </div>
+                <div className="rounded-tile bg-blush/60 p-3">
+                  <dt className="text-sm text-plum-muted">Open now</dt>
+                  <dd className="text-3xl font-light text-plum-ink tabular-nums">{inWindow(selected.closingDays).length}</dd>
+                </div>
+              </dl>
+              <p className="text-sm text-plum-soft mb-4">
+                {inWindow(selected.closingDays).length
+                  ? `The nearest closes in ${inWindow(selected.closingDays)[0]} days.`
+                  : 'Nothing closes in this window. Try a longer one.'}
+              </p>
+              <Button variant="primary" className="w-full" onClick={() => navigate('/tenders')}>
+                See these tenders
+              </Button>
+            </>
+          ) : (
+            <>
+              <h2 className="h2 mb-1">Sectors</h2>
+              <p className="text-sm text-plum-muted mb-3">Pick one to see its tenders.</p>
+              <ul className="space-y-1">
+                {SECTORS.map((s) => (
+                  <li key={s.id}>
+                    <button
+                      type="button"
+                      onClick={() => toggleSector(s.id)}
+                      className="focus-ring flex w-full min-h-[44px] items-center justify-between gap-3 rounded-tile px-3 text-left hover:bg-blush/60"
+                    >
+                      <span className="flex items-center gap-2 font-medium text-plum-ink">
+                        <span className="h-3 w-3 rounded-full" style={{ background: hubColor(s.match) }} aria-hidden />
+                        {s.name}
+                      </span>
+                      <span className="text-sm text-plum-muted tabular-nums">
+                        {s.match}% · {inWindow(s.closingDays).length} open
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+        </aside>
       </div>
     </div>
   );

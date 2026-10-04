@@ -1,5 +1,5 @@
 import React from 'react';
-import { Check, Clock, X, AlertCircle, Zap } from 'lucide-react';
+import { Check, Clock, X, AlertCircle } from 'lucide-react';
 
 // Status Chips
 export function StatusChip({ status }: { status: 'ready' | 'actionNeeded' | 'notEligible' | 'missing' | 'optional' }) {
@@ -96,36 +96,48 @@ export function Input({ className = '', ...props }: InputProps) {
 interface MatchRingProps {
   score: number;
   size?: 'sm' | 'lg';
+  /** 'dark' when the ring sits on a plum card. */
+  tone?: 'light' | 'dark';
 }
 
-export function MatchRing({ score, size = 'sm' }: MatchRingProps) {
-  const sizeClass = size === 'lg' ? 'w-[180px] h-[180px]' : 'w-[56px] h-[56px]';
-  const fontSize = size === 'lg' ? 'text-4xl' : 'text-lg';
-  const radius = size === 'lg' ? 90 : 28;
-  const circumference = 2 * Math.PI * radius;
-  const offset = circumference - (score / 100) * circumference;
-
-  const color = score >= 80 ? '#2F8F6B' : score >= 50 ? '#E3A12F' : '#7FA58F';
-  const bgColor = '#FBE4E6';
+export function MatchRing({ score, size = 'sm', tone = 'light' }: MatchRingProps) {
+  const box = size === 'lg' ? 144 : 64;
+  const stroke = size === 'lg' ? 12 : 6;
+  const r = (box - stroke) / 2;
+  const circumference = 2 * Math.PI * r;
+  const offset = circumference * (1 - Math.min(Math.max(score, 0), 100) / 100);
+  const color = score >= 80 ? '#2F8F6B' : score >= 50 ? '#E3A12F' : '#7A6670';
+  const track = tone === 'dark' ? 'rgba(255, 250, 249, 0.2)' : 'rgba(91, 26, 51, 0.1)';
 
   return (
-    <div className={`${sizeClass} relative flex items-center justify-center bg-gradient-to-br ${score >= 80 ? 'from-ok-bg/30 to-ok-bg/10' : score >= 50 ? 'from-warn-bg/30 to-warn-bg/10' : 'from-lilac-light/30 to-lilac-light/10'} rounded-full`}>
-      <svg className="absolute transform -rotate-90" width="100%" height="100%" viewBox={`0 0 ${radius * 2} ${radius * 2}`}>
-        <circle cx={radius} cy={radius} r={radius - 6} fill="none" stroke={bgColor} strokeWidth="7" />
+    <div
+      className="relative flex flex-shrink-0 items-center justify-center"
+      style={{ width: box, height: box }}
+      role="img"
+      aria-label={`${score}% match`}
+    >
+      <svg className="absolute inset-0 -rotate-90" width={box} height={box} viewBox={`0 0 ${box} ${box}`} aria-hidden>
+        <circle cx={box / 2} cy={box / 2} r={r} fill="none" stroke={track} strokeWidth={stroke} />
         <circle
-          cx={radius}
-          cy={radius}
-          r={radius - 6}
+          cx={box / 2}
+          cy={box / 2}
+          r={r}
           fill="none"
           stroke={color}
-          strokeWidth="7"
+          strokeWidth={stroke}
           strokeDasharray={circumference}
           strokeDashoffset={offset}
           strokeLinecap="round"
-          className="transition-all duration-700"
+          className="transition-[stroke-dashoffset] duration-700"
         />
       </svg>
-      <div className={`${fontSize} font-semibold text-plum-ink text-center`}>{score}%</div>
+      <span
+        className={`${size === 'lg' ? 'text-3xl' : 'text-sm'} font-semibold tabular-nums ${
+          tone === 'dark' ? 'text-white' : 'text-plum-ink'
+        }`}
+      >
+        {score}%
+      </span>
     </div>
   );
 }
@@ -134,14 +146,21 @@ export function MatchRing({ score, size = 'sm' }: MatchRingProps) {
 interface ProgressBarProps {
   value: number;
   max?: number;
+  tone?: 'light' | 'dark';
 }
 
-export function ProgressBar({ value, max = 100 }: ProgressBarProps) {
-  const percentage = (value / max) * 100;
+export function ProgressBar({ value, max = 100, tone = 'light' }: ProgressBarProps) {
+  const percentage = max ? Math.min((value / max) * 100, 100) : 0;
   return (
-    <div className="progress-track rounded-full bg-blush h-2">
+    <div
+      className={`h-2 overflow-hidden rounded-full ${tone === 'dark' ? 'bg-white/20' : 'bg-plum/10'}`}
+      role="progressbar"
+      aria-valuenow={value}
+      aria-valuemin={0}
+      aria-valuemax={max}
+    >
       <div
-        className="h-full bg-gradient-to-r from-plum to-coral rounded-full transition-all duration-500"
+        className={`h-full rounded-full transition-[width] duration-500 ${tone === 'dark' ? 'bg-white' : 'bg-plum'}`}
         style={{ width: `${percentage}%` }}
       />
     </div>
@@ -151,24 +170,44 @@ export function ProgressBar({ value, max = 100 }: ProgressBarProps) {
 // Countdown Ring
 interface CountdownRingProps {
   daysRemaining: number;
-  deadline: string;
+  /** Days the full ring stands for. */
+  window?: number;
+  tone?: 'light' | 'dark';
 }
 
-export function CountdownRing({ daysRemaining, deadline }: CountdownRingProps) {
-  const radius = 90;
-  const circumference = 2 * Math.PI * radius;
-  const offset = circumference - (daysRemaining / 30) * circumference;
+export function CountdownRing({ daysRemaining, window = 30, tone = 'light' }: CountdownRingProps) {
+  const box = 112;
+  const stroke = 10;
+  const r = (box - stroke) / 2;
+  const circumference = 2 * Math.PI * r;
+  const offset = circumference * (1 - Math.min(Math.max(daysRemaining, 0), window) / window);
+  const track = tone === 'dark' ? 'rgba(255, 250, 249, 0.2)' : 'rgba(91, 26, 51, 0.1)';
 
   return (
-    <div className="w-[180px] h-[180px] relative flex flex-col items-center justify-center">
-      <svg className="absolute" width="180" height="180" viewBox="0 0 180 180">
-        <circle cx="90" cy="90" r="84" fill="none" stroke="#5B1A33" strokeWidth="1" strokeDasharray="4 4" opacity="0.3" />
-        <circle cx="90" cy="90" r="84" fill="none" stroke="#E5484D" strokeWidth="12" strokeDasharray={circumference} strokeDashoffset={offset} strokeLinecap="round" />
+    <div
+      className="relative flex flex-shrink-0 flex-col items-center justify-center"
+      style={{ width: box, height: box }}
+      role="img"
+      aria-label={`${daysRemaining} days left`}
+    >
+      <svg className="absolute inset-0 -rotate-90" width={box} height={box} viewBox={`0 0 ${box} ${box}`} aria-hidden>
+        <circle cx={box / 2} cy={box / 2} r={r} fill="none" stroke={track} strokeWidth={stroke} />
+        <circle
+          cx={box / 2}
+          cy={box / 2}
+          r={r}
+          fill="none"
+          stroke="#E5484D"
+          strokeWidth={stroke}
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
+          strokeLinecap="round"
+        />
       </svg>
-      <div className="text-center">
-        <div className="text-4xl font-light text-coral">{daysRemaining}</div>
-        <div className="text-xs text-plum-muted">days left</div>
-      </div>
+      <span className={`text-3xl font-semibold leading-none tabular-nums ${tone === 'dark' ? 'text-white' : 'text-coral'}`}>
+        {daysRemaining}
+      </span>
+      <span className={`mt-1 text-xs ${tone === 'dark' ? 'text-white/80' : 'text-plum-muted'}`}>days left</span>
     </div>
   );
 }

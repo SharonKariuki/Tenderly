@@ -6,11 +6,9 @@ export const TOKEN_KEY = 'tr_token';
 export const ACTING_FOR_KEY = 'tr_acting_for';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
-const USE_MOCKS = import.meta.env.VITE_USE_MOCKS === 'true';
 
 const apiClient: AxiosInstance = axios.create({
   baseURL: API_BASE,
-  withCredentials: true,
 });
 
 // Add CSRF token to POST/PUT requests
@@ -70,14 +68,11 @@ export const tendersApi = {
   detail: async (id: number) => {
     return apiClient.get(`/tenders/${id}/`);
   },
-  check: async (tenderOrText: File | string) => {
+  // Uploads a tender PDF; the backend extracts it and runs the readiness check.
+  upload: async (file: File) => {
     const formData = new FormData();
-    if (tenderOrText instanceof File) {
-      formData.append('file', tenderOrText);
-    } else {
-      formData.append('text', tenderOrText);
-    }
-    return apiClient.post('/tender-checks/', formData);
+    formData.append('file', file);
+    return apiClient.post('/tenders/', formData);
   },
 };
 

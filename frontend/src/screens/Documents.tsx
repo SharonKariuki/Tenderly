@@ -1,194 +1,240 @@
-import React, { useState } from 'react';
+import { useRef, useState } from 'react';
+import axios from 'axios';
 import { Card, Button, StatusChip, ProgressBar } from '../components/ui';
 import { mockDocuments } from '../data/mock';
-import { Calendar, Upload, AlertCircle } from 'lucide-react';
+import { documentsApi } from '../api/client';
+import { BusinessDocument } from '../lib/types';
+import { daysUntil, formatDate } from '../lib/format';
+import { Accessibility, Banknote, Building2, Calendar, FileCheck, FileText, Landmark, Search, ShieldCheck, Upload } from 'lucide-react';
+
+type Filter = 'all' | 'action' | 'ready' | 'optional';
+
+const CATEGORY: Record<BusinessDocument['category'], { label: string; icon: typeof FileText }> = {
+  crb: { label: 'Credit report', icon: FileText },
+  taxCompliance: { label: 'Tax', icon: FileCheck },
+  tin: { label: 'KRA PIN', icon: Landmark },
+  businessRegistration: { label: 'Registration', icon: Building2 },
+  insurance: { label: 'Insurance', icon: ShieldCheck },
+  bank: { label: 'Bank', icon: Banknote },
+  ncpwd: { label: 'NCPWD', icon: Accessibility },
+  other: { label: 'Other', icon: FileText },
+};
+
+// The backend's DocType for each card (core/contracts.py).
+function docTypeFor(doc: BusinessDocument): string {
+  if (/agpo/i.test(doc.name)) return 'agpo_certificate';
+  return (
+    {
+      taxCompliance: 'kra_tax_compliance',
+      businessRegistration: 'business_registration',
+      bank: 'bank_statement',
+      ncpwd: 'ncpwd_registration',
+    } as Record<string, string>
+  )[doc.category] ?? 'other';
+}
+
+const needsAction = (d: BusinessDocument) => d.status === 'actionNeeded' || d.status === 'missing';
 
 export function Documents() {
-  const [filter, setFilter] = useState('all');
+  const [filter, setFilter] = useState<Filter>('all');
+  const [query, setQuery] = useState('');
+  const [notice, setNotice] = useState<string | null>(null);
+  const fileInput = useRef<HTMLInputElement>(null);
+  const uploadFor = useRef<BusinessDocument | null>(null);
 
-  const readyCount = mockDocuments.filter((d) => d.status === 'ready').length;
-  const needsActionCount = mockDocuments.filter((d) => d.status === 'actionNeeded').length;
+  const required = mockDocuments.filter((d) => !d.isOptional);
+  const readyCount = required.filter((d) => d.status === 'ready').length;
 
   const filteredDocs = mockDocuments.filter((d) => {
+    if (query && !d.name.toLowerCase().includes(query.toLowerCase())) return false;
     if (filter === 'ready') return d.status === 'ready';
-    if (filter === 'action') return d.status === 'actionNeeded';
+    if (filter === 'action') return needsAction(d);
     if (filter === 'optional') return d.isOptional;
     return true;
   });
 
-  const docIcons: { [key: string]: string } = {
-    crb: '📊',
-    taxCompliance: '✓',
-    tin: '🏛️',
-    businessRegistration: '📋',
-    insurance: '🛡️',
-    bank: '🏦',
-    other: '📄',
+  const expiring = mockDocuments
+    .filter((d) => d.expiryDate)
+    .sort((a, b) => (a.expiryDate ?? '').localeCompare(b.expiryDate ?? ''))
+    .slice(0, 3);
+
+  const pickFile = (doc: BusinessDocument | null) => {
+    uploadFor.current = doc;
+    fileInput.current?.click();
+  };
+
+  const upload = async (file: File) => {
+    const doc = uploadFor.current;
+    setNotice(`Uploading ${file.name}…`);
+    try {
+      await documentsApi.upload(file, doc ? docTypeFor(doc) : 'other');
+      setNotice(`${file.name} uploaded. We will read it and update this page.`);
+    } catch (err) {
+      const status = axios.isAxiosError(err) ? err.response?.status : undefined;
+      setNotice(
+        status === 401
+          ? 'Sign in to upload documents. Your file was not sent.'
+          : `Could not upload ${file.name}. Check your connection and try again.`,
+      );
+    }
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-12 pb-20">
-      {/* Page Intro */}
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-8 mb-12">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 pb-16">
+      <input
+        ref={fileInput}
+        type="file"
+        accept="application/pdf,image/*"
+        className="sr-only"
+        tabIndex={-1}
+        aria-hidden
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) upload(file);
+          e.target.value = '';
+        }}
+      />
+
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6 mb-8">
         <div>
-          <h1 className="h1 mb-3">Documents</h1>
+          <h1 className="h1 mb-2">Documents</h1>
           <p className="text-lg text-plum-soft">Keep your paperwork ready, and opportunities unlock.</p>
         </div>
-        <Button variant="primary" size="lg">+ Add document</Button>
+        <Button variant="primary" onClick={() => pickFile(null)}>
+          <Upload size={18} aria-hidden /> Add document
+        </Button>
       </div>
 
-      {/* Health Card & Coming Up Row */}
-      <div className="grid lg:grid-cols-3 gap-8 mb-12">
-        {/* Document Health */}
-        <Card className="card-hero p-10 lg:col-span-1 relative overflow-hidden">
-          <div className="absolute inset-0 opacity-5">
-            <div className="absolute bottom-0 right-0 w-48 h-48 rounded-full blur-3xl" style={{background: 'radial-gradient(circle, white, transparent)'}}></div>
-          </div>
+      {notice && (
+        <p className="mb-6 rounded-tile bg-blush p-4 text-sm text-plum-ink" role="status">
+          {notice}
+        </p>
+      )}
+
+      <div className="grid lg:grid-cols-3 gap-6 mb-8">
+        <Card hero className="p-6">
           <div className="relative z-10">
-            <h3 className="h2 text-white mb-6">Document health</h3>
-            <p className="text-5xl font-light text-white mb-2">{readyCount}</p>
-            <p className="text-base opacity-90 mb-8">of 7 required ready</p>
-            <div>
-              <ProgressBar value={readyCount} max={7} />
-            </div>
+            <h2 className="h2 text-white mb-4">Document health</h2>
+            <p className="text-5xl font-light tabular-nums">
+              {readyCount}
+              <span className="text-2xl text-white/70"> / {required.length}</span>
+            </p>
+            <p className="text-white/85 mb-5">required documents ready</p>
+            <ProgressBar value={readyCount} max={required.length} tone="dark" />
           </div>
         </Card>
 
-        {/* Coming Up */}
-        <Card className="p-10 lg:col-span-2">
-          <h3 className="h2 mb-6">Expiring soon</h3>
-          <div className="space-y-3">
-            {mockDocuments
-              .filter((d) => d.expiryDate)
-              .sort((a, b) => new Date(a.expiryDate || '').getTime() - new Date(b.expiryDate || '').getTime())
-              .slice(0, 3)
-              .map((doc) => (
-                <div key={doc.id} className="flex items-center justify-between p-4 bg-gradient-to-r from-warn-bg/40 to-warn-bg/20 rounded-lg border border-warn-bg hover:shadow-md transition-all">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-warn-solid/20 flex items-center justify-center flex-shrink-0">
-                      <Calendar size={18} className="text-warn-solid" />
-                    </div>
-                    <span className="font-semibold text-sm text-plum-ink">{doc.name}</span>
-                  </div>
-                  <span className="text-xs text-plum-ink font-semibold">
-                    Expires {new Date(doc.expiryDate || '').toLocaleDateString()}
+        <Card className="p-6 lg:col-span-2">
+          <h2 className="h2 mb-4">Expiry dates</h2>
+          <ul className="space-y-2">
+            {expiring.map((doc) => {
+              const left = daysUntil(doc.expiryDate!);
+              return (
+                <li key={doc.id} className="flex flex-wrap items-center justify-between gap-2 rounded-tile bg-blush/50 p-3">
+                  <span className="flex items-center gap-3 font-semibold text-sm text-plum-ink">
+                    <Calendar size={18} className={left < 0 ? 'text-coral' : 'text-warn-solid'} aria-hidden />
+                    {doc.name}
                   </span>
-                </div>
-              ))}
-          </div>
+                  <span className={`text-sm font-semibold ${left < 0 ? 'text-coral' : left <= 30 ? 'text-plum-ink' : 'text-plum-muted'}`}>
+                    {left < 0 ? `Expired ${formatDate(doc.expiryDate!)}` : `Expires ${formatDate(doc.expiryDate!)}`}
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
         </Card>
       </div>
 
-      {/* Filters */}
-      <div className="flex gap-3 mb-8 flex-wrap">
-        {[
-          { id: 'all', label: 'All', count: mockDocuments.length },
-          { id: 'action', label: 'Needs action', count: needsActionCount },
-          { id: 'ready', label: 'Ready', count: readyCount },
-          { id: 'optional', label: 'Optional', count: mockDocuments.filter((d) => d.isOptional).length },
-        ].map((f) => (
-          <button
-            key={f.id}
-            onClick={() => setFilter(f.id)}
-            className={`rounded-full px-5 py-2.5 text-sm font-medium transition-all duration-300 ${
-              filter === f.id
-                ? 'bg-plum text-white shadow-lg'
-                : 'bg-white/60 text-plum hover:bg-white/80 border border-white/40'
-            }`}
-          >
-            {f.label} {f.count > 0 && <span className="ml-2 opacity-75">({f.count})</span>}
-          </button>
-        ))}
-      </div>
-
-      {/* Search */}
-      <div className="mb-8">
-        <input type="text" placeholder="Search documents..." className="input max-w-md" />
-      </div>
-
-      {/* Documents Grid */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {filteredDocs.map((doc) => (
-          <Card
-            key={doc.id}
-            className={`overflow-hidden flex flex-col transition-all group ${
-              doc.status === 'missing' ? 'ring-2 ring-coral/50 ring-offset-2' : ''
-            } ${doc.displayStatus === 'expiring' ? 'ring-2 ring-warn-solid/50 ring-offset-2' : ''}`}
-          >
-            {/* Header */}
-            <div
-              className="p-8 bg-plum text-white relative overflow-hidden"
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+        <div className="flex gap-2 flex-wrap" role="group" aria-label="Filter documents">
+          {(
+            [
+              { id: 'all', label: 'All', count: mockDocuments.length },
+              { id: 'action', label: 'Needs action', count: mockDocuments.filter(needsAction).length },
+              { id: 'ready', label: 'Ready', count: mockDocuments.filter((d) => d.status === 'ready').length },
+              { id: 'optional', label: 'Optional', count: mockDocuments.filter((d) => d.isOptional).length },
+            ] as const
+          ).map((f) => (
+            <button
+              key={f.id}
+              type="button"
+              aria-pressed={filter === f.id}
+              onClick={() => setFilter(f.id)}
+              className={`focus-ring min-h-[44px] rounded-pill px-4 text-sm font-medium transition-colors ${
+                filter === f.id ? 'bg-plum text-white' : 'bg-white/70 text-plum border border-plum/15 hover:border-plum'
+              }`}
             >
-              <div className="absolute inset-0 opacity-10">
-                <div className="absolute bottom-0 right-0 w-32 h-32 rounded-full blur-2xl" style={{background: 'radial-gradient(circle, white, transparent)'}}></div>
+              {f.label} <span className="opacity-75 tabular-nums">({f.count})</span>
+            </button>
+          ))}
+        </div>
+        <label className="relative block md:w-72">
+          <span className="sr-only">Search documents</span>
+          <Search size={18} className="pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2 text-plum-muted" aria-hidden />
+          <input
+            type="search"
+            placeholder="Search documents"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            className="input pl-10"
+          />
+        </label>
+      </div>
+
+      <ul className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {filteredDocs.map((doc) => {
+          const { icon: Icon } = CATEGORY[doc.category];
+          const label = /agpo/i.test(doc.name) ? 'AGPO' : CATEGORY[doc.category].label;
+          const expired = doc.expiryDate ? daysUntil(doc.expiryDate) < 0 : false;
+          return (
+            <li key={doc.id} className={`card p-5 flex flex-col ${needsAction(doc) ? 'border-coral/50' : ''}`}>
+              <div className="flex items-start justify-between gap-3 mb-3">
+                <span className="w-11 h-11 rounded-xl bg-blush flex items-center justify-center flex-shrink-0">
+                  <Icon size={22} className="text-plum" aria-hidden />
+                </span>
+                <StatusChip status={doc.status} />
               </div>
-              <div className="relative z-10">
-                <div className="text-5xl mb-4">{docIcons[doc.category]}</div>
-                <div className="flex justify-between items-start gap-2">
-                  <span className="text-xs font-bold bg-white/20 rounded-full px-3 py-1">
-                    {doc.category.replace(/([A-Z])/g, ' $1').trim()}
-                  </span>
-                  <StatusChip status={doc.status} />
+              <p className="text-xs font-semibold uppercase tracking-wide text-plum-muted">{label}</p>
+              <h3 className="font-semibold text-plum-ink mb-3">{doc.name}</h3>
+              <dl className="text-sm text-plum-muted space-y-0.5 mb-4">
+                {doc.issueDate && (
+                  <div className="flex gap-1">
+                    <dt>Issued</dt>
+                    <dd>{formatDate(doc.issueDate)}</dd>
+                  </div>
+                )}
+                {doc.expiryDate && (
+                  <div className={`flex gap-1 ${expired ? 'text-coral font-semibold' : ''}`}>
+                    <dt>{expired ? 'Expired' : 'Expires'}</dt>
+                    <dd>{formatDate(doc.expiryDate)}</dd>
+                  </div>
+                )}
+                <div className="flex gap-1">
+                  <dt className="sr-only">Required by</dt>
+                  <dd>
+                    Needed for {doc.requiredByCount} tender{doc.requiredByCount !== 1 ? 's' : ''}
+                  </dd>
                 </div>
-              </div>
-            </div>
-
-            {/* Content */}
-            <div className="p-6 flex-1 flex flex-col">
-              <h3 className="font-semibold text-plum mb-4">{doc.name}</h3>
-
-              {/* Dates */}
-              {doc.issueDate && (
-                <div className="text-xs text-plum-muted mb-3">
-                  <p>Issued: {new Date(doc.issueDate).toLocaleDateString()}</p>
-                  {doc.expiryDate && <p>Expires: {new Date(doc.expiryDate).toLocaleDateString()}</p>}
-                </div>
-              )}
-
-              {/* Required By */}
-              <div className="flex items-center gap-2 text-xs text-plum-muted mb-4">
-                <AlertCircle size={14} />
-                <span>Required by {doc.requiredByCount} tender{doc.requiredByCount !== 1 ? 's' : ''}</span>
-              </div>
-
-              {/* Buttons */}
+              </dl>
               <div className="flex gap-2 mt-auto">
                 {doc.status === 'ready' ? (
-                  <>
-                    <Button variant="secondary" size="sm" className="flex-1">
-                      View
-                    </Button>
-                    <Button variant="outlined" size="sm" className="flex-1">
-                      Replace
-                    </Button>
-                  </>
+                  <Button variant="outlined" size="sm" className="flex-1" onClick={() => pickFile(doc)}>
+                    Replace
+                  </Button>
                 ) : (
-                  <>
-                    {doc.status === 'actionNeeded' && (
-                      <Button variant="coral" size="sm" className="flex-1">
-                        Renew
-                      </Button>
-                    )}
-                    {doc.status === 'missing' && (
-                      <Button variant="primary" size="sm" className="flex-1">
-                        Upload
-                      </Button>
-                    )}
-                    <Button variant="outlined" size="sm" className="flex-1">
-                      {doc.status === 'actionNeeded' ? 'Skip' : 'Skip'}
-                    </Button>
-                  </>
+                  <Button variant="primary" size="sm" className="flex-1" onClick={() => pickFile(doc)}>
+                    {doc.status === 'missing' ? 'Upload' : 'Renew'}
+                  </Button>
                 )}
               </div>
-            </div>
-          </Card>
-        ))}
-      </div>
+            </li>
+          );
+        })}
+      </ul>
 
-      {/* Empty State */}
       {filteredDocs.length === 0 && (
-        <Card className="p-12 text-center">
-          <p className="text-plum-muted">No documents to show</p>
+        <Card className="p-10 text-center">
+          <p className="text-plum-muted">No documents match{query ? ` "${query}"` : ' this filter'}.</p>
         </Card>
       )}
     </div>

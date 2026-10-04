@@ -26,284 +26,287 @@ body {
 
 #root {
   height: 100vh;
-  width: 100vw;
-}
-
-/* Headings */
-.h1 {
-  font-size: 2rem;
-  font-weight: 600;
-  line-height: 1.2;
-  color: #2B1B22;
-}
-
-.h2 {
-  font-size: 1.25rem;
-  font-weight: 600;
-  line-height: 1.3;
-}
-
-@media (min-width: 768px) {
-  .h1 {
-    font-size: 2.25rem;
-  }
-}
-
-/* Cards */
-.card {
-  border-radius: 24px;
-  background: rgba(255, 250, 249, 0.85);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(251, 228, 230, 0.5);
-  box-shadow: 0 2px 8px rgba(43, 27, 34, 0.04),
-              0 8px 24px rgba(43, 27, 34, 0.08),
-              inset 0 1px 0 rgba(255, 250, 249, 0.8);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.card:hover {
-  box-shadow: 0 4px 16px rgba(43, 27, 34, 0.08),
-              0 12px 32px rgba(43, 27, 34, 0.12),
-              inset 0 1px 0 rgba(255, 250, 249, 0.9);
-  transform: translateY(-2px);
-}
-
-.card-hero {
-  border-radius: 28px;
-  background: #5B1A33;
-  box-shadow: 0 8px 32px rgba(229, 72, 77, 0.2),
-              0 16px 48px rgba(43, 27, 34, 0.25),
-              inset 0 1px 0 rgba(255, 250, 249, 0.1);
-  color: #FFFAF9;
-  border: 1px solid rgba(255, 250, 249, 0.1);
-  position: relative;
-  overflow: hidden;
-}
-
-.card-hero::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at 100% 0%, rgba(229, 72, 77, 0.3), transparent 60%);
-  pointer-events: none;
-}
-
-.card-scam {
-  border-radius: 28px;
-  background: #5B1A33;
-  box-shadow: 0 8px 32px rgba(229, 72, 77, 0.3),
-              0 16px 48px rgba(91, 26, 51, 0.3);
-  color: #FFFAF9;
-  border: 1px solid rgba(255, 250, 249, 0.15);
-}
-
-/* Chips */
-.chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  border-radius: 12px;
-  padding: 0.5rem 1rem;
-  font-size: 0.8rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(251, 228, 230, 0.5);
-  transition: all 0.2s;
-}
-
-.chip-ok {
-  background: rgba(47, 143, 107, 0.1);
-  color: #2B1B22;
-  border-color: rgba(47, 143, 107, 0.25);
-}
-
-.chip-ok svg {
-  color: #2F8F6B;
-}
-
-.chip-warn {
-  background: rgba(227, 161, 47, 0.12);
-  color: #2B1B22;
-  border-color: rgba(227, 161, 47, 0.3);
-}
-
-.chip-warn svg {
-  color: #E3A12F;
-}
-
-.chip-not-eligible {
-  background: rgba(138, 131, 144, 0.1);
-  color: #2B1B22;
-  border-color: rgba(138, 131, 144, 0.3);
-}
-
-.chip-not-eligible svg {
-  color: #8A8390;
-}
-
-.chip-missing {
-  background: rgba(229, 72, 77, 0.12);
-  color: #2B1B22;
-  border-color: rgba(229, 72, 77, 0.3);
-}
-
-.chip-missing svg {
-  color: #E5484D;
-}
-
-.chip-optional {
-  background: rgba(251, 228, 230, 0.6);
-  color: #2B1B22;
-  border: 1px solid rgba(91, 26, 51, 0.15);
-}
-
-.bg-plum .chip {
-  background: #FBE4E6;
-  border-color: #FBE4E6;
-  color: #2B1B22;
-}
-
-/* Buttons */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  border-radius: 14px;
-  padding: 0.75rem 1.5rem;
-  font-weight: 600;
-  font-size: 0.95rem;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  border: none;
-  cursor: pointer;
-  min-height: 44px;
-  letter-spacing: 0.01em;
-  position: relative;
-  overflow: hidden;
-}
-
-.btn::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: rgba(255, 250, 249, 0.2);
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-
-.btn:hover::before {
-  opacity: 1;
-}
-
-.btn:focus {
-  outline: 2px solid #E5484D;
-  outline-offset: 2px;
-}
-
-.btn-primary {
-  background: #5B1A33;
-  color: #FFFAF9;
-  box-shadow: 0 4px 12px rgba(91, 26, 51, 0.2);
-  border: 1px solid rgba(255, 250, 249, 0.1);
-}
-
-.btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(91, 26, 51, 0.3);
-}
-
-.btn-secondary {
-  background: #FBE4E6;
-  color: #5B1A33;
-  border: 1px solid rgba(127, 165, 143, 0.5);
-  backdrop-filter: blur(10px);
-}
-
-.btn-secondary:hover {
-  border-color: #7FA58F;
-  background: rgba(251, 228, 230, 0.7);
-  transform: translateY(-2px);
-}
-
-.btn-outlined {
-  border: 2px solid rgba(91, 26, 51, 0.3);
-  color: #5B1A33;
-  background-color: rgba(255, 250, 249, 0.8);
-  backdrop-filter: blur(10px);
-}
-
-.btn-outlined:hover {
-  background-color: #FBE4E6;
-  border-color: #5B1A33;
-  transform: translateY(-2px);
-}
-
-.btn-coral {
-  background: #5B1A33;
-  color: #FFFAF9;
-  box-shadow: 0 4px 12px rgba(229, 72, 77, 0.25);
-  border: 1px solid #E5484D;
-}
-
-.btn-coral:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(229, 72, 77, 0.35);
-}
-
-/* Inputs */
-.input {
   width: 100%;
-  padding: 0.75rem 1rem;
-  border-radius: 12px;
-  border: 1.5px solid rgba(91, 26, 51, 0.15);
-  background: rgba(255, 250, 249, 0.7);
-  color: #2B1B22;
-  font-family: inherit;
-  backdrop-filter: blur(10px);
-  transition: all 0.3s;
 }
 
-.input::placeholder {
-  color: #7A6670;
-}
+/* Component classes live in a layer so Tailwind utilities on the same element win. */
+@layer components {
+  /* Headings */
+  .h1 {
+    font-size: 2rem;
+    font-weight: 600;
+    line-height: 1.2;
+    color: #2B1B22;
+  }
 
-.input:focus {
-  outline: none;
-  border-color: #E5484D;
-  background: rgba(255, 250, 249, 0.9);
-  box-shadow: 0 0 0 3px rgba(229, 72, 77, 0.1);
-}
+  .h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    line-height: 1.3;
+  }
 
-/* Progress bar */
-.progress-bar {
-  height: 0.6rem;
-  border-radius: 9999px;
-  background: linear-gradient(90deg, #5B1A33 0%, #E5484D 100%);
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(229, 72, 77, 0.2);
-}
+  @media (min-width: 768px) {
+    .h1 {
+      font-size: 2.25rem;
+    }
+  }
 
-.progress-track {
-  height: 100%;
-  background-color: rgba(91, 26, 51, 0.1);
-}
+  /* Cards */
+  .card {
+    border-radius: 24px;
+    background: rgba(255, 250, 249, 0.85);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(251, 228, 230, 0.5);
+    box-shadow: 0 2px 8px rgba(43, 27, 34, 0.04),
+                0 8px 24px rgba(43, 27, 34, 0.08),
+                inset 0 1px 0 rgba(255, 250, 249, 0.8);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
 
-/* Skip link */
-.skip-link {
-  position: absolute;
-  left: 0;
-  top: 0;
-  transform: translateY(-100%);
-  border-bottom-left-radius: 9999px;
-  border-bottom-right-radius: 9999px;
-  background-color: #5B1A33;
-  padding: 0.5rem 1rem;
-  color: #FFFAF9;
-}
+  .card:hover {
+    box-shadow: 0 4px 16px rgba(43, 27, 34, 0.08),
+                0 12px 32px rgba(43, 27, 34, 0.12),
+                inset 0 1px 0 rgba(255, 250, 249, 0.9);
+  }
 
-.skip-link:focus {
-  transform: translateY(0);
+  .card-hero {
+    border-radius: 28px;
+    background: #5B1A33;
+    box-shadow: 0 8px 32px rgba(229, 72, 77, 0.2),
+                0 16px 48px rgba(43, 27, 34, 0.25),
+                inset 0 1px 0 rgba(255, 250, 249, 0.1);
+    color: #FFFAF9;
+    border: 1px solid rgba(255, 250, 249, 0.1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 100% 0%, rgba(229, 72, 77, 0.3), transparent 60%);
+    pointer-events: none;
+  }
+
+  .card-scam {
+    border-radius: 28px;
+    background: #5B1A33;
+    box-shadow: 0 8px 32px rgba(229, 72, 77, 0.3),
+                0 16px 48px rgba(91, 26, 51, 0.3);
+    color: #FFFAF9;
+    border: 1px solid rgba(255, 250, 249, 0.15);
+  }
+
+  /* Chips */
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-radius: 12px;
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(251, 228, 230, 0.5);
+    transition: all 0.2s;
+  }
+
+  .chip-ok {
+    background: rgba(47, 143, 107, 0.1);
+    color: #2B1B22;
+    border-color: rgba(47, 143, 107, 0.25);
+  }
+
+  .chip-ok svg {
+    color: #2F8F6B;
+  }
+
+  .chip-warn {
+    background: rgba(227, 161, 47, 0.12);
+    color: #2B1B22;
+    border-color: rgba(227, 161, 47, 0.3);
+  }
+
+  .chip-warn svg {
+    color: #E3A12F;
+  }
+
+  .chip-not-eligible {
+    background: rgba(138, 131, 144, 0.1);
+    color: #2B1B22;
+    border-color: rgba(138, 131, 144, 0.3);
+  }
+
+  .chip-not-eligible svg {
+    color: #8A8390;
+  }
+
+  .chip-missing {
+    background: rgba(229, 72, 77, 0.12);
+    color: #2B1B22;
+    border-color: rgba(229, 72, 77, 0.3);
+  }
+
+  .chip-missing svg {
+    color: #E5484D;
+  }
+
+  .chip-optional {
+    background: rgba(251, 228, 230, 0.6);
+    color: #2B1B22;
+    border: 1px solid rgba(91, 26, 51, 0.15);
+  }
+
+  .bg-plum .chip {
+    background: #FBE4E6;
+    border-color: #FBE4E6;
+    color: #2B1B22;
+  }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 14px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: none;
+    cursor: pointer;
+    min-height: 44px;
+    letter-spacing: 0.01em;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 250, 249, 0.2);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .btn:hover::before {
+    opacity: 1;
+  }
+
+  .btn:focus-visible,
+  .focus-ring:focus-visible,
+  .focus-within-ring:focus-within {
+    outline: 3px solid #E5484D;
+    outline-offset: 2px;
+  }
+
+  .btn-primary {
+    background: #5B1A33;
+    color: #FFFAF9;
+    box-shadow: 0 4px 12px rgba(91, 26, 51, 0.2);
+    border: 1px solid rgba(255, 250, 249, 0.1);
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(91, 26, 51, 0.3);
+  }
+
+  .btn-secondary {
+    background: #FBE4E6;
+    color: #5B1A33;
+    border: 1px solid rgba(127, 165, 143, 0.5);
+    backdrop-filter: blur(10px);
+  }
+
+  .btn-secondary:hover {
+    border-color: #7FA58F;
+    background: rgba(251, 228, 230, 0.7);
+    transform: translateY(-2px);
+  }
+
+  .btn-outlined {
+    border: 2px solid rgba(91, 26, 51, 0.3);
+    color: #5B1A33;
+    background-color: rgba(255, 250, 249, 0.8);
+    backdrop-filter: blur(10px);
+  }
+
+  .btn-outlined:hover {
+    background-color: #FBE4E6;
+    border-color: #5B1A33;
+    transform: translateY(-2px);
+  }
+
+  .btn-coral {
+    background: #5B1A33;
+    color: #FFFAF9;
+    box-shadow: 0 4px 12px rgba(229, 72, 77, 0.25);
+    border: 1px solid #E5484D;
+  }
+
+  .btn-coral:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(229, 72, 77, 0.35);
+  }
+
+  /* Inputs */
+  .input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    border: 1.5px solid rgba(91, 26, 51, 0.15);
+    background: rgba(255, 250, 249, 0.7);
+    color: #2B1B22;
+    font-family: inherit;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s;
+  }
+
+  .input::placeholder {
+    color: #7A6670;
+  }
+
+  .input:focus {
+    outline: none;
+    border-color: #E5484D;
+    background: rgba(255, 250, 249, 0.9);
+    box-shadow: 0 0 0 3px rgba(229, 72, 77, 0.1);
+  }
+
+  /* Progress bar */
+  .progress-bar {
+    height: 0.6rem;
+    border-radius: 9999px;
+    background: linear-gradient(90deg, #5B1A33 0%, #E5484D 100%);
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(229, 72, 77, 0.2);
+  }
+
+  .progress-track {
+    background-color: rgba(91, 26, 51, 0.1);
+  }
+
+  /* Skip link */
+  .skip-link {
+    position: absolute;
+    left: 0;
+    top: 0;
+    transform: translateY(-100%);
+    border-bottom-left-radius: 9999px;
+    border-bottom-right-radius: 9999px;
+    background-color: #5B1A33;
+    padding: 0.5rem 1rem;
+    color: #FFFAF9;
+  }
+
+  .skip-link:focus {
+    transform: translateY(0);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -312,4 +315,61 @@ body {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* Sector hubs on the map are SVG groups; outline does not draw on them reliably. */
+.map-hub:focus {
+  outline: none;
+}
+
+.map-hub:focus-visible > circle {
+  stroke: #e5484d;
+  stroke-width: 6px;
+}
+
+/* Accessibility preferences, set as data attributes on <html> by AccessibilityProvider. */
+html[data-text-size='large'] {
+  font-size: 112.5%;
+}
+
+html[data-text-size='larger'] {
+  font-size: 125%;
+}
+
+html[data-contrast='high'] body {
+  background: #fffaf9;
+  color: #1a0f14;
+}
+
+html[data-contrast='high'] .card,
+html[data-contrast='high'] .input,
+html[data-contrast='high'] .chip {
+  background: #fffaf9;
+  border-color: #2b1b22;
+  backdrop-filter: none;
+}
+
+html[data-contrast='high'] .text-plum-muted,
+html[data-contrast='high'] .text-plum-soft {
+  color: #2b1b22;
+}
+
+html[data-motion='reduce'] *,
+html[data-motion='reduce'] *::before,
+html[data-motion='reduce'] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+html[data-dyslexia='on'] body {
+  letter-spacing: 0.05em;
+  word-spacing: 0.12em;
+  line-height: 1.7;
+}
+
+html[data-dyslexia='on'] p,
+html[data-dyslexia='on'] li {
+  text-align: left;
 }

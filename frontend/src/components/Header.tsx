@@ -1,5 +1,4 @@
 import { useEffect, useId, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { AccessibilitySettings } from './access/AccessibilitySettings';
 import { ActingForChip } from './access/ActingForChip';
@@ -104,13 +103,6 @@ export function Header({ onMenuClick, menuOpen = false }: HeaderProps) {
                   <X size={18} aria-hidden />
                 </button>
               </div>
-              <Link
-                to="/profile"
-                onClick={() => setOpen(false)}
-                className="focus-ring mb-5 flex min-h-[44px] items-center rounded-tile bg-gray-100 px-4 text-sm font-semibold text-plum hover:bg-gray-200"
-              >
-                Business profile
-              </Link>
               <h2 id={headingId} className="mb-3 text-base font-bold text-plum-ink">
                 Accessibility
               </h2>
