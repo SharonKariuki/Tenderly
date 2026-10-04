@@ -22,7 +22,7 @@ function AppLayout() {
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col overflow-hidden w-full">
+      <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
         <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
 
