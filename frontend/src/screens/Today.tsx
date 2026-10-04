@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Card, StatusChip, ProgressBar, Page, SectionHeading, Notice } from '../components/ui';
 import { ReadinessChart } from '../components/charts';
 import { UploadButton } from '../components/UploadButton';
-import { mockTenders, mockDocuments, mockEvents, BID_STEPS, BID_TENDER_ID } from '../data/mock';
+import { mockDocuments, mockEvents, BID_STEPS, BID_TENDER_ID } from '../data/mock';
 import { useApp } from '../context/AppState';
 import { daysUntil, formatShortDate, formatTime } from '../lib/format';
 import { ArrowRight, ChevronRight, Upload } from 'lucide-react';
@@ -24,16 +24,16 @@ function GlanceRow({ to, label, children }: { to: string; label: string; childre
 }
 
 export function Today() {
-  const { profile, alerts, bidSteps } = useApp();
+  const { profile, alerts, bidSteps, watchedTenders: tenders } = useApp();
   const firstName = profile.ownerName.split(' ')[0];
   const [message, setMessage] = useState<{ text: string; tone: 'info' | 'ok' | 'warn' } | null>(null);
 
-  const topTender = mockTenders[0];
-  const bidTender = mockTenders.find((t) => t.id === BID_TENDER_ID)!;
-  const eligibleCount = mockTenders.filter((t) => t.status === 'ready').length;
+  const topTender = tenders[0];
+  const bidTender = tenders.find((t) => t.id === BID_TENDER_ID)!;
+  const eligibleCount = tenders.filter((t) => t.status === 'ready').length;
   const docsReady = mockDocuments.filter((d) => d.status === 'ready').length;
   const readyPercent = Math.round((docsReady / mockDocuments.length) * 100);
-  const nextTender = [...mockTenders]
+  const nextTender = [...tenders]
     .filter((t) => daysUntil(t.closingDate) >= 0)
     .sort((a, b) => a.closingDate.localeCompare(b.closingDate))[0];
   const daysLeft = Math.max(daysUntil(topTender.closingDate), 0);
@@ -174,7 +174,7 @@ export function Today() {
         </Link>
       </SectionHeading>
       <ol className="divide-y divide-line border-y border-line">
-        {mockTenders.slice(0, 4).map((t, i) => (
+        {tenders.slice(0, 4).map((t, i) => (
           <li key={t.id}>
             <Link
               to={`/tenders/${t.id}`}

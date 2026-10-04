@@ -2,7 +2,8 @@ import { createContext, useContext, useEffect, useState, ReactNode } from 'react
 import { Tender, BusinessDocument, Alert, User, AgpoCategory, Lang } from '../lib/types';
 import { accessApi } from '../api/client';
 import { readStored, writeStored } from '../lib/storage';
-import { mockAlerts, BID_STEPS } from '../data/mock';
+import { mockAddenda, mockAlerts, mockTenders, BID_STEPS } from '../data/mock';
+import { withAddendum } from '../lib/addenda';
 
 interface Profile {
   ownerName: string;
@@ -38,6 +39,12 @@ interface AppContextType {
   /** Done or not, for each step in BID_STEPS. */
   bidSteps: boolean[];
   toggleBidStep: (index: number) => void;
+  /** Ids of the tenders whose addendum the Addendum Watcher has picked up. */
+  appliedAddenda: number[];
+  applyAddendum: (tenderId: number) => void;
+  resetAddendum: (tenderId: number) => void;
+  /** The mock tenders with any picked-up addendum applied. */
+  watchedTenders: Tender[];
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -75,6 +82,34 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const markAllAlertsRead = () => setAlerts((list) => list.map((a) => ({ ...a, isRead: true })));
   const toggleBidStep = (index: number) => setBidSteps((steps) => steps.map((done, i) => (i === index ? !done : done)));
 
+  // In memory only, so a page refresh resets the demo.
+  const [appliedAddenda, setAppliedAddenda] = useState<number[]>([]);
+  const watchedTenders = mockTenders.map((t) => withAddendum(t, appliedAddenda));
+
+  const applyAddendum = (tenderId: number) => {
+    const addendum = mockAddenda[tenderId];
+    const tender = mockTenders.find((t) => t.id === tenderId);
+    if (!addendum || !tender || appliedAddenda.includes(tenderId)) return;
+    setAppliedAddenda((ids) => [...ids, tenderId]);
+    setAlerts((list) => [
+      {
+        id: Date.now(),
+        type: 'tenderChanged',
+        tenderId,
+        title: `Tender changed: ${tender.title}`,
+        description: `Addendum ${addendum.number} made ${addendum.changes.length} changes. ${addendum.flips.length} of your documents are affected.`,
+        isRead: false,
+        timestamp: new Date().toISOString(),
+      },
+      ...list,
+    ]);
+  };
+
+  const resetAddendum = (tenderId: number) => {
+    setAppliedAddenda((ids) => ids.filter((id) => id !== tenderId));
+    setAlerts((list) => list.filter((a) => !(a.type === 'tenderChanged' && a.tenderId === tenderId)));
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -94,6 +129,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
         markAllAlertsRead,
         bidSteps,
         toggleBidStep,
+        appliedAddenda,
+        applyAddendum,
+        resetAddendum,
+        watchedTenders,
       }}
     >
       {children}

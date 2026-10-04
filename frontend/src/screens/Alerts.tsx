@@ -4,21 +4,23 @@ import { Button, Card, Page, PageHeading } from '../components/ui';
 import { useApp } from '../context/AppState';
 import { BID_TENDER_ID } from '../data/mock';
 import { Alert } from '../lib/types';
-import { AlertCircle, ChevronRight, Clock, Megaphone, Star } from 'lucide-react';
+import { AlertCircle, ChevronRight, Clock, FileDiff, Megaphone, Star } from 'lucide-react';
 
 const icon: Record<Alert['type'], ReactNode> = {
   newMatch: <Star size={18} aria-hidden />,
   expiringDoc: <Clock size={18} aria-hidden />,
   briefing: <Megaphone size={18} aria-hidden />,
   scamWarning: <AlertCircle size={18} aria-hidden />,
+  tenderChanged: <FileDiff size={18} aria-hidden />,
 };
 
 // The page each alert opens.
-const target: Record<Alert['type'], string> = {
-  newMatch: `/tenders/${BID_TENDER_ID}`,
-  expiringDoc: '/documents/2',
-  briefing: '/meetings',
-  scamWarning: '/check',
+const target: Record<Alert['type'], (alert: Alert) => string> = {
+  newMatch: () => `/tenders/${BID_TENDER_ID}`,
+  expiringDoc: () => '/documents/2',
+  briefing: () => '/meetings',
+  scamWarning: () => '/check',
+  tenderChanged: (alert) => `/tenders/${alert.tenderId}`,
 };
 
 const when = (iso: string) =>
@@ -45,13 +47,17 @@ export function Alerts() {
                 type="button"
                 onClick={() => {
                   markAlertRead(alert.id);
-                  navigate(target[alert.type]);
+                  navigate(target[alert.type](alert));
                 }}
                 className="flex w-full items-center gap-4 rounded-xl p-3 text-left transition hover:bg-brand-50"
               >
                 <span
                   className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${
-                    alert.type === 'scamWarning' ? 'bg-danger-50 text-danger-600' : 'bg-brand-100 text-brand-600'
+                    alert.type === 'scamWarning'
+                      ? 'bg-danger-50 text-danger-600'
+                      : alert.type === 'tenderChanged'
+                        ? 'bg-warn-50 text-warn-700'
+                        : 'bg-brand-100 text-brand-600'
                   }`}
                 >
                   {icon[alert.type]}

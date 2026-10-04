@@ -1,12 +1,15 @@
 import { Link, useParams } from 'react-router-dom';
 import { BackLink, Card, CountdownRing, MatchRing, NotFound, Page, StatusChip } from '../components/ui';
-import { mockDocuments, mockEvents, mockTenders } from '../data/mock';
+import { AddendumWatcher } from '../components/AddendumWatcher';
+import { useApp } from '../context/AppState';
+import { mockDocuments, mockEvents } from '../data/mock';
 import { daysUntil, formatDate, formatTime } from '../lib/format';
-import { CalendarDays, CheckCircle, XCircle } from 'lucide-react';
+import { CalendarDays, CheckCircle, Clock, XCircle } from 'lucide-react';
 
 export function TenderDetail() {
   const { id } = useParams();
-  const tender = mockTenders.find((t) => t.id === Number(id));
+  const { watchedTenders } = useApp();
+  const tender = watchedTenders.find((t) => t.id === Number(id));
   if (!tender) return <NotFound what="tender" back="/tenders" backLabel="Back to tenders" />;
 
   const events = mockEvents.filter((e) => e.tenderId === tender.id);
@@ -56,11 +59,14 @@ export function TenderDetail() {
           <ul className="space-y-1">
             {tender.requiredDocs.map((name) => {
               const missing = tender.missingDocs.includes(name);
+              const expiring = tender.expiringDocs?.includes(name);
               const doc = docFor(name);
               return (
                 <li key={name} className="flex min-h-11 items-center gap-3 text-sm">
                   {missing ? (
                     <XCircle size={18} className="shrink-0 text-danger-600" aria-label="Missing" />
+                  ) : expiring ? (
+                    <Clock size={18} className="shrink-0 text-warn-500" aria-label="Expires before closing" />
                   ) : (
                     <CheckCircle size={18} className="shrink-0 text-ok-500" aria-label="You have it" />
                   )}
@@ -76,6 +82,8 @@ export function TenderDetail() {
           </ul>
         </Card>
       </div>
+
+      <AddendumWatcher tenderId={tender.id} />
 
       {events.length > 0 && (
         <Card className="mb-6 p-6">

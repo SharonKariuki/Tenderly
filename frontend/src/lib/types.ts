@@ -23,6 +23,8 @@ export interface Tender {
   purposeSw: string;
   requiredDocs: string[];
   missingDocs: string[];
+  // Documents on file that expire before the closing date.
+  expiringDocs?: string[];
 }
 
 export type EventKind = 'briefing' | 'site_visit';
@@ -53,11 +55,42 @@ export interface BusinessDocument {
 
 export interface Alert {
   id: number;
-  type: 'scamWarning' | 'newMatch' | 'expiringDoc' | 'briefing';
+  type: 'scamWarning' | 'newMatch' | 'expiringDoc' | 'briefing' | 'tenderChanged';
   title: string;
   description: string;
   isRead: boolean;
   timestamp: string;
+  // Set on tenderChanged: the tender the alert opens.
+  tenderId?: number;
+}
+
+// The Addendum Watcher: what an addendum changed, and what that means for the owner's documents.
+export type ChangeCategory = 'deadline' | 'required_documents' | 'specifications_quantities';
+export type CheckState = 'met' | 'expiring' | 'missing' | 'new';
+
+export interface TenderChange {
+  category: ChangeCategory;
+  oldQuote: string | null;
+  newQuote: string;
+}
+
+export interface DocumentFlip {
+  document: string;
+  from: CheckState;
+  to: CheckState;
+  reason: string;
+}
+
+export interface Addendum {
+  tenderId: number;
+  number: number;
+  fileName: string;
+  publishedOn: string;
+  newClosingDate: string;
+  addedDocs: string[];
+  changes: TenderChange[];
+  flips: DocumentFlip[];
+  statusAfter: Status;
 }
 
 export interface TenderCheckResult {

@@ -1,6 +1,7 @@
 import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { Card, Button, StatusChip, Page, PageHeading, FilterTabs } from '../components/ui';
-import { mockTenders, mockDocuments } from '../data/mock';
+import { mockDocuments } from '../data/mock';
+import { useApp } from '../context/AppState';
 import { daysUntil, formatDate } from '../lib/format';
 import { ChevronRight } from 'lucide-react';
 
@@ -13,6 +14,7 @@ const FILTERS = [
 
 export function Tenders() {
   const navigate = useNavigate();
+  const { watchedTenders } = useApp();
   const [params, setParams] = useSearchParams();
   const filter = (FILTERS.some((f) => f.id === params.get('filter')) ? params.get('filter') : 'all') as Filter;
   const setFilter = (id: Filter) => setParams(id === 'all' ? {} : { filter: id }, { replace: true });
@@ -21,7 +23,7 @@ export function Tenders() {
   const legacyOpen = params.get('open');
   if (legacyOpen) return <Navigate to={`/tenders/${legacyOpen}`} replace />;
 
-  const filteredTenders = mockTenders.filter((t) => {
+  const filteredTenders = watchedTenders.filter((t) => {
     if (filter === 'eligible') return t.status === 'ready';
     if (filter === 'closing') return daysUntil(t.closingDate) <= 7;
     return true;
