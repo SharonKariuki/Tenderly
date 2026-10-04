@@ -1,49 +1,18 @@
 import { useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { Card, StatusChip, ProgressBar, Page, PageHeading, FilterTabs, Notice } from '../components/ui';
 import { UploadButton } from '../components/UploadButton';
-import { mockDocuments, mockTenders } from '../data/mock';
-import { BusinessDocument } from '../lib/types';
+import { mockDocuments } from '../data/mock';
+import { CATEGORY, docTypeFor, needsAction } from '../lib/documents';
 import { daysUntil, formatDate } from '../lib/format';
-import { Accessibility, Banknote, Building2, Calendar, ChevronDown, FileCheck, FileText, Landmark, Plus, Search, ShieldCheck, Users } from 'lucide-react';
+import { Calendar, ChevronRight, Plus, Search } from 'lucide-react';
 
 type Filter = 'all' | 'action' | 'ready' | 'optional';
-
-const CATEGORY: Record<BusinessDocument['category'], { label: string; icon: typeof FileText; tile: string }> = {
-  crb: { label: 'Shows you pay your debts', icon: FileText, tile: 'bg-ok-50 text-ok-700' },
-  taxCompliance: { label: 'Shows your taxes are paid up', icon: FileCheck, tile: 'bg-accent-50 text-accent-700' },
-  tin: { label: 'Your tax number from KRA', icon: Landmark, tile: 'bg-ok-50 text-ok-700' },
-  businessRegistration: { label: 'Shows your business is registered', icon: Building2, tile: 'bg-ok-50 text-ok-700' },
-  insurance: { label: 'Your business insurance cover', icon: ShieldCheck, tile: 'bg-danger-50 text-danger-600' },
-  bank: { label: 'A letter from your bank', icon: Banknote, tile: 'bg-ok-50 text-ok-700' },
-  ncpwd: { label: 'Proves a disability for reserved tenders', icon: Accessibility, tile: 'bg-brand-50 text-brand-600' },
-  owners: { label: 'Who owns and runs your company', icon: Users, tile: 'bg-brand-50 text-brand-600' },
-  other: { label: 'Lets you bid on tenders kept for these groups', icon: FileText, tile: 'bg-brand-50 text-brand-600' },
-};
-
-// The backend's DocType for each card (core/contracts.py).
-function docTypeFor(doc: BusinessDocument): string {
-  if (doc.category === 'other' && /women|youth|disability/i.test(doc.name)) return 'agpo_certificate';
-  return (
-    {
-      taxCompliance: 'kra_tax_compliance',
-      businessRegistration: 'business_registration',
-      bank: 'bank_statement',
-      ncpwd: 'ncpwd_registration',
-      owners: 'cr12',
-    } as Record<string, string>
-  )[doc.category] ?? 'other';
-}
-
-const needsAction = (d: BusinessDocument) => d.status === 'actionNeeded' || d.status === 'missing';
-const tendersNeeding = (doc: BusinessDocument) =>
-  mockTenders.filter((t) => t.requiredDocs.some((r) => r.toLowerCase() === doc.name.toLowerCase()));
 
 export function Documents() {
   const [params, setParams] = useSearchParams();
   const filter = (['action', 'ready', 'optional'].includes(params.get('filter') ?? '') ? params.get('filter') : 'all') as Filter;
   const [query, setQuery] = useState('');
-  const [openId, setOpenId] = useState<number | null>(null);
   const [message, setMessage] = useState<{ text: string; tone: 'info' | 'ok' | 'warn' } | null>(null);
   const onMessage = (text: string, tone: 'info' | 'ok' | 'warn') => setMessage({ text, tone });
 
@@ -136,8 +105,6 @@ export function Documents() {
         {filteredDocs.map((doc) => {
           const { label, icon: Icon, tile } = CATEGORY[doc.category];
           const expired = doc.expiryDate ? daysUntil(doc.expiryDate) < 0 : false;
-          const open = openId === doc.id;
-          const needing = tendersNeeding(doc);
           return (
             <li
               key={doc.id}
@@ -151,7 +118,11 @@ export function Documents() {
                 </span>
                 <StatusChip status={doc.status} />
               </div>
-              <h3 className="text-sm font-semibold text-ink">{doc.name}</h3>
+              <h3 className="text-sm font-semibold text-ink">
+                <Link to={`/documents/${doc.id}`} className="hover:text-brand-700">
+                  {doc.name}
+                </Link>
+              </h3>
               <p className="mb-3 text-xs text-ink-soft">{label}</p>
               {(doc.issueDate || doc.expiryDate) && (
                 <dl className="mb-3 grid grid-cols-2 gap-2 text-xs">
@@ -170,32 +141,10 @@ export function Documents() {
               <p className="mb-4 text-xs text-ink-soft">
                 Needed for {doc.requiredByCount} tender{doc.requiredByCount !== 1 ? 's' : ''}
               </p>
-              {open && (
-                <div id={`doc-${doc.id}`} className="mb-4 rounded-lg bg-brand-50 p-3 text-xs text-ink">
-                  {needing.length ? (
-                    <>
-                      <p className="mb-1 font-semibold">Your matches that ask for it:</p>
-                      <ul className="list-disc pl-4">
-                        {needing.map((t) => (
-                          <li key={t.id}>{t.title}</li>
-                        ))}
-                      </ul>
-                    </>
-                  ) : (
-                    <p>None of your current matches ask for it, but other tenders do.</p>
-                  )}
-                </div>
-              )}
               <div className="mt-auto flex gap-2">
-                <button
-                  type="button"
-                  aria-expanded={open}
-                  aria-controls={`doc-${doc.id}`}
-                  onClick={() => setOpenId(open ? null : doc.id)}
-                  className="btn btn-secondary flex-1 px-3 text-sm"
-                >
-                  Details <ChevronDown size={16} className={`transition-transform ${open ? 'rotate-180' : ''}`} aria-hidden />
-                </button>
+                <Link to={`/documents/${doc.id}`} className="btn btn-secondary flex-1 px-3 text-sm">
+                  Details <ChevronRight size={16} aria-hidden />
+                </Link>
                 <UploadButton
                   docType={docTypeFor(doc)}
                   name={doc.name.toLowerCase()}

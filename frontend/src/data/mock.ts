@@ -231,3 +231,13 @@ export const mockEvents: TenderEvent[] = [
     venue: 'Jogoo House, Nairobi',
   },
 ];
+
+// Steps for the stationery bid (tender 4), shown on Today and My bids.
+export const BID_TENDER_ID = 4;
+export const BID_STEPS = [
+  'Register on the government tenders website',
+  'Upload your company owners list',
+  'Upload your tax clearance certificate',
+  'Fill in and attach the bid forms',
+  'Check everything and submit',
+];

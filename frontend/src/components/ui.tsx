@@ -1,5 +1,6 @@
 import React from 'react';
-import { Check, Clock, X, AlertCircle } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { ArrowLeft, Check, Clock, X, AlertCircle } from 'lucide-react';
 
 // Status Chips
 export function StatusChip({ status }: { status: 'ready' | 'actionNeeded' | 'notEligible' | 'missing' | 'optional' }) {
@@ -253,5 +254,27 @@ export function Notice({ children, tone = 'info' }: { children: React.ReactNode;
     <p className={`rounded-tile p-4 text-sm ${styles[tone]}`} role="status">
       {children}
     </p>
+  );
+}
+
+// Link back to the page this one belongs to.
+export function BackLink({ to, children }: { to: string; children: React.ReactNode }) {
+  return (
+    <Link to={to} className="mb-4 inline-flex min-h-11 items-center gap-2 rounded-lg pr-3 text-sm font-medium text-brand-700 hover:text-brand-600">
+      <ArrowLeft size={17} aria-hidden />
+      {children}
+    </Link>
+  );
+}
+
+// Shown when an address points at something that does not exist.
+export function NotFound({ what, back, backLabel }: { what: string; back: string; backLabel: string }) {
+  return (
+    <Page>
+      <BackLink to={back}>{backLabel}</BackLink>
+      <Card className="p-8 text-center">
+        <p className="text-ink-soft">We could not find that {what}.</p>
+      </Card>
+    </Page>
   );
 }
