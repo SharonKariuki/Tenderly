@@ -23,7 +23,7 @@ def test_the_rules_record_their_source_and_when_they_were_checked() -> None:
 
 def test_categories_are_women_youth_pwd_and_none() -> None:
     assert agpo.category_ids() == ["women", "youth", "pwd", "none"]
-    assert agpo.category("pwd")["label"] == "Persons with disabilities"
+    assert agpo.category("pwd")["label"] == "People with disabilities"
 
 
 def test_pwd_registration_asks_for_the_ncpwd_document() -> None:

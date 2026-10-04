@@ -41,7 +41,7 @@ export interface TenderEvent {
 
 export interface BusinessDocument {
   id: number;
-  category: 'crb' | 'taxCompliance' | 'tin' | 'businessRegistration' | 'insurance' | 'bank' | 'ncpwd' | 'other';
+  category: 'crb' | 'taxCompliance' | 'tin' | 'businessRegistration' | 'insurance' | 'bank' | 'ncpwd' | 'owners' | 'other';
   name: string;
   status: Status;
   issueDate: string | null;

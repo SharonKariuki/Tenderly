@@ -3,15 +3,15 @@
 from core.contracts import DocType, Requirement
 
 DOC_TYPE_LABELS: dict[DocType, str] = {
-    DocType.KRA_TAX_COMPLIANCE: "tax compliance certificate",
+    DocType.KRA_TAX_COMPLIANCE: "tax clearance certificate",
     DocType.BUSINESS_REGISTRATION: "business registration certificate",
-    DocType.AGPO_CERTIFICATE: "AGPO certificate",
-    DocType.CR12: "CR12",
+    DocType.AGPO_CERTIFICATE: "women, youth and disability certificate",
+    DocType.CR12: "company owners list",
     DocType.NATIONAL_ID: "national ID",
     DocType.AUDITED_ACCOUNTS: "audited accounts",
     DocType.BANK_STATEMENT: "bank statement",
     DocType.BUSINESS_PERMIT: "business permit",
-    DocType.NCPWD_REGISTRATION: "NCPWD registration document",
+    DocType.NCPWD_REGISTRATION: "disability registration card",
 }
 
 # Types issued for a fixed period. A confirmed document of one of these types with no expiry
