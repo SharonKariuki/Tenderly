@@ -16,8 +16,8 @@ from accounts.models import User
 from core.models import StoredFile
 from llm import client as llm_client
 from rules.dates import NAIROBI, parse_deadline
-from tenders.models import Tender, TenderVersion
 from tenders import services as tender_services
+from tenders.models import Tender, TenderVersion
 from tenders.services import (
     RequirementOutput,
     TenderOutput,

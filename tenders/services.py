@@ -19,9 +19,12 @@ from core.contracts import DocType, Requirement, RequirementType, TenderExtracti
 from core.exceptions import Unprocessable
 from core.models import StoredFile
 from llm.client import generate_json
-from llm.prompts_extract import TENDER_PROMPT, TENDER_PROMPT_VERSION
-from llm.client import generate_json
-from llm.prompts_extract import SUMMARY_SW_PROMPT, SUMMARY_SW_PROMPT_VERSION
+from llm.prompts_extract import (
+    SUMMARY_SW_PROMPT,
+    SUMMARY_SW_PROMPT_VERSION,
+    TENDER_PROMPT,
+    TENDER_PROMPT_VERSION,
+)
 from rules.dates import parse_date, parse_deadline
 from tenders.models import Tender, TenderVersion
 from versions.compare import quote_in_text
