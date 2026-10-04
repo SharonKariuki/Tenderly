@@ -57,9 +57,9 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
 
       {/* Sidebar */}
       <aside
-        className={`fixed left-0 top-0 bottom-0 w-64 bg-gradient-to-b from-plum-deep via-plum-deep to-plum z-50 transition-transform duration-300 lg:translate-x-0 ${
-          isOpen ? 'translate-x-0' : '-translate-x-full'
-        } lg:sticky lg:top-0 flex flex-col`}
+        className={`${
+          isOpen ? 'fixed' : 'hidden'
+        } lg:static left-0 top-0 bottom-0 w-64 bg-gradient-to-b from-plum-deep via-plum-deep to-plum z-50 transition-all duration-300 lg:translate-x-0 lg:block flex flex-col`}
       >
         {/* Close button for mobile */}
         <button
