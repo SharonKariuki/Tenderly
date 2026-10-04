@@ -1,0 +1,23 @@
+{
+  "tender": "tender_SIMULATED.pdf",
+  "addendum": "addendum_1_SIMULATED.pdf",
+  "old_deadline": "2026-11-12T11:00:00+03:00",
+  "new_deadline": "2026-11-26T11:00:00+03:00",
+  "changes": [
+    {
+      "category": "deadline",
+      "old_quote": "Completed tenders must be submitted on or before Thursday, 12th November 2026 at 11.00 a.m. East African Time.",
+      "new_quote": "Completed tenders must be submitted on or before Thursday, 26th November 2026 at 11.00 a.m. East African Time."
+    },
+    {
+      "category": "required_documents",
+      "old_quote": null,
+      "new_quote": "MR7. Valid Single Business Permit issued by a County Government."
+    },
+    {
+      "category": "specifications_quantities",
+      "old_quote": "Item 3: School sweaters, maroon, V-neck. Quantity: 400 pieces.",
+      "new_quote": "Item 3: School sweaters, maroon, V-neck. Quantity: 650 pieces."
+    }
+  ]
+}

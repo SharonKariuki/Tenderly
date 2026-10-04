@@ -1,0 +1,59 @@
+{
+  "business_registration_DUMMY.pdf": {
+    "document_type": "business_registration",
+    "holder_name": "Kilele Youth Tech Ltd",
+    "kra_pin": null,
+    "registration_number": "PVT-DEMO0002",
+    "issued_on": "2023-02-07",
+    "expires_on": null,
+    "directors": []
+  },
+  "tax_compliance_DUMMY.pdf": {
+    "document_type": "kra_tax_compliance",
+    "holder_name": "Kilele Youth Tech Ltd",
+    "kra_pin": "P000000002K",
+    "registration_number": null,
+    "issued_on": "2026-04-01",
+    "expires_on": "2027-03-31",
+    "directors": []
+  },
+  "agpo_certificate_DUMMY.pdf": {
+    "document_type": "agpo_certificate",
+    "holder_name": "Kilele Youth Tech Ltd",
+    "kra_pin": null,
+    "registration_number": null,
+    "issued_on": "2025-05-21",
+    "expires_on": "2027-05-20",
+    "directors": []
+  },
+  "cr12_DUMMY.pdf": {
+    "document_type": "cr12",
+    "holder_name": "Kilele Youth Tech Ltd",
+    "kra_pin": null,
+    "registration_number": "PVT-DEMO0002",
+    "issued_on": "2026-08-15",
+    "expires_on": null,
+    "directors": [
+      "Brian Kiprono Rotich",
+      "Faith Njeri Mutua"
+    ]
+  },
+  "national_id_DUMMY.pdf": {
+    "document_type": "national_id",
+    "holder_name": "Rotich Brian Kiprono",
+    "kra_pin": null,
+    "registration_number": null,
+    "issued_on": "2018-11-02",
+    "expires_on": null,
+    "directors": []
+  },
+  "business_permit_DUMMY.pdf": {
+    "document_type": "business_permit",
+    "holder_name": "Kilele Youth Tech Ltd",
+    "kra_pin": null,
+    "registration_number": null,
+    "issued_on": "2026-01-02",
+    "expires_on": "2026-12-31",
+    "directors": []
+  }
+}

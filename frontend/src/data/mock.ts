@@ -1,4 +1,4 @@
-import { Tender, BusinessDocument, Alert, TenderEvent } from '../lib/types';
+import { Tender, BusinessDocument, Alert, TenderEvent, Addendum } from '../lib/types';
 
 export const mockTenders: Tender[] = [
   {
@@ -89,8 +89,8 @@ export const mockDocuments: BusinessDocument[] = [
     category: 'taxCompliance',
     name: 'Tax clearance certificate',
     status: 'actionNeeded',
-    issueDate: '2025-09-10',
-    expiryDate: '2026-09-10',
+    issueDate: '2025-10-29',
+    expiryDate: '2026-10-28',
     requiredByCount: 7,
     isOptional: false,
     displayStatus: 'expiring',
@@ -176,7 +176,7 @@ export const mockAlerts: Alert[] = [
     id: 2,
     type: 'expiringDoc',
     title: 'Document expiring soon',
-    description: 'Tax clearance certificate expires in 6 days',
+    description: 'Tax clearance certificate expires on 28 October',
     isRead: false,
     timestamp: '2026-10-04T07:15',
   },
@@ -230,4 +230,60 @@ export const mockEvents: TenderEvent[] = [
     startsAt: '2026-10-09T11:00:00+03:00',
     venue: 'Jogoo House, Nairobi',
   },
+];
+
+// Addenda the Addendum Watcher can pick up, by tender. Mirrors the backend demo pair
+// (sample_data/tenders/mashariki-cleaning): the deadline moves past the tax certificate's expiry
+// (28 Oct), a business permit is added, and a quantity changes.
+export const mockAddenda: Record<number, Addendum> = {
+  1: {
+    tenderId: 1,
+    number: 1,
+    fileName: 'SDOE-2026-RFQ-001-addendum-1.pdf',
+    publishedOn: '2026-10-04',
+    newClosingDate: '2026-11-03T10:00',
+    addedDocs: ['Single business permit'],
+    changes: [
+      {
+        category: 'deadline',
+        oldQuote: 'Completed tenders must be submitted on or before Tuesday, 20th October 2026 at 10.00 a.m. East African Time.',
+        newQuote: 'Completed tenders must be submitted on or before Tuesday, 3rd November 2026 at 10.00 a.m. East African Time.',
+      },
+      {
+        category: 'required_documents',
+        oldQuote: null,
+        newQuote: 'MR4. Valid Single Business Permit issued by a County Government.',
+      },
+      {
+        category: 'specifications_quantities',
+        oldQuote: 'Item 1: Student desks with storage. Quantity: 400 desks.',
+        newQuote: 'Item 1: Student desks with storage. Quantity: 550 desks.',
+      },
+    ],
+    flips: [
+      {
+        document: 'Tax clearance certificate',
+        from: 'met',
+        to: 'expiring',
+        reason: 'It expires on 28 October, 6 days before the new closing date. Renew it before you bid.',
+      },
+      {
+        document: 'Single business permit',
+        from: 'new',
+        to: 'missing',
+        reason: 'The addendum adds it, and it is not in your documents.',
+      },
+    ],
+    statusAfter: 'actionNeeded',
+  },
+};
+
+// Steps for the stationery bid (tender 4), shown on Today and My bids.
+export const BID_TENDER_ID = 4;
+export const BID_STEPS = [
+  'Register on the government tenders website',
+  'Upload your company owners list',
+  'Upload your tax clearance certificate',
+  'Fill in and attach the bid forms',
+  'Check everything and submit',
 ];

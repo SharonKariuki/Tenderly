@@ -1,5 +1,6 @@
 import React from 'react';
-import { Check, Clock, X, AlertCircle } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { ArrowLeft, Check, Clock, X, AlertCircle } from 'lucide-react';
 
 // Status Chips
 export function StatusChip({ status }: { status: 'ready' | 'actionNeeded' | 'notEligible' | 'missing' | 'optional' }) {
@@ -84,8 +85,8 @@ export function Card({ children, className = '', hero = false, scam = false }: C
 // Page wrapper: the main column inside the app shell
 export function Page({ children, className = '' }: { children: React.ReactNode; className?: string }) {
   return (
-    <main id="main-content" tabIndex={-1} className="flex-1 min-w-0 bg-canvas px-4 py-6 sm:px-8 lg:px-10 lg:py-9 focus:outline-none">
-      <div className={className}>{children}</div>
+    <main id="main-content" tabIndex={-1} className="flex-1 min-w-0 bg-canvas px-4 py-6 sm:px-8 lg:px-12 lg:py-10 focus:outline-none">
+      <div className={`mx-auto ${className.includes('max-w-') ? '' : 'max-w-6xl'} ${className}`}>{children}</div>
     </main>
   );
 }
@@ -181,7 +182,7 @@ export function ProgressBar({ value, max = 100, tone = 'light', label }: Progres
       aria-valuemax={max}
     >
       <div
-        className={`h-full rounded-full transition-[width] duration-500 ${dark ? 'bg-white' : 'bg-linear-to-r from-brand-600 to-accent-500'}`}
+        className={`h-full rounded-full transition-[width] duration-500 ${dark ? 'bg-white' : 'bg-brand-600'}`}
         style={{ width: `${percentage}%` }}
       />
     </div>
@@ -208,7 +209,7 @@ export function CountdownRing({ daysRemaining, window = 30 }: CountdownRingProps
       </svg>
       <div className="text-center leading-tight">
         <div className="text-xl font-semibold text-ink tabular-nums">{daysRemaining}</div>
-        <div className="text-xs text-ink-soft">days left</div>
+        <div className="text-xs text-ink-soft">days</div>
       </div>
     </div>
   );
@@ -227,15 +228,15 @@ export function FilterTabs<T extends string>({
   label: string;
 }) {
   return (
-    <div className="inline-flex flex-wrap gap-1 rounded-2xl bg-white p-1 shadow-card" role="group" aria-label={label}>
+    <div className="inline-flex flex-wrap gap-1 rounded-lg border border-line bg-paper-deep p-1" role="group" aria-label={label}>
       {options.map((o) => (
         <button
           key={o.id}
           type="button"
           aria-pressed={value === o.id}
           onClick={() => onChange(o.id)}
-          className={`min-h-11 rounded-xl px-4 text-sm font-medium transition ${
-            value === o.id ? 'bg-brand-600 text-white shadow-brand' : 'text-ink-soft hover:bg-brand-50 hover:text-brand-700'
+          className={`min-h-10 rounded-md px-4 text-sm transition ${
+            value === o.id ? 'bg-white font-bold text-ink shadow-[0_1px_2px_oklch(0.24_0.025_290/0.12)]' : 'text-ink-soft hover:text-ink'
           }`}
         >
           {o.label}
@@ -253,5 +254,27 @@ export function Notice({ children, tone = 'info' }: { children: React.ReactNode;
     <p className={`rounded-tile p-4 text-sm ${styles[tone]}`} role="status">
       {children}
     </p>
+  );
+}
+
+// Link back to the page this one belongs to.
+export function BackLink({ to, children }: { to: string; children: React.ReactNode }) {
+  return (
+    <Link to={to} className="mb-4 inline-flex min-h-11 items-center gap-2 rounded-lg pr-3 text-sm font-medium text-brand-700 hover:text-brand-600">
+      <ArrowLeft size={17} aria-hidden />
+      {children}
+    </Link>
+  );
+}
+
+// Shown when an address points at something that does not exist.
+export function NotFound({ what, back, backLabel }: { what: string; back: string; backLabel: string }) {
+  return (
+    <Page>
+      <BackLink to={back}>{backLabel}</BackLink>
+      <Card className="p-8 text-center">
+        <p className="text-ink-soft">We could not find that {what}.</p>
+      </Card>
+    </Page>
   );
 }

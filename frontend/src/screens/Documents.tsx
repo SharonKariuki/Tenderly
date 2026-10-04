@@ -1,49 +1,18 @@
 import { useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { Card, StatusChip, ProgressBar, Page, PageHeading, FilterTabs, Notice } from '../components/ui';
 import { UploadButton } from '../components/UploadButton';
-import { mockDocuments, mockTenders } from '../data/mock';
-import { BusinessDocument } from '../lib/types';
+import { mockDocuments } from '../data/mock';
+import { CATEGORY, docTypeFor, needsAction } from '../lib/documents';
 import { daysUntil, formatDate } from '../lib/format';
-import { Accessibility, Banknote, Building2, Calendar, ChevronDown, FileCheck, FileText, Landmark, Plus, Search, ShieldCheck, Users } from 'lucide-react';
+import { Plus, Search } from 'lucide-react';
 
 type Filter = 'all' | 'action' | 'ready' | 'optional';
-
-const CATEGORY: Record<BusinessDocument['category'], { label: string; icon: typeof FileText; tile: string }> = {
-  crb: { label: 'Shows you pay your debts', icon: FileText, tile: 'bg-ok-50 text-ok-700' },
-  taxCompliance: { label: 'Shows your taxes are paid up', icon: FileCheck, tile: 'bg-accent-50 text-accent-700' },
-  tin: { label: 'Your tax number from KRA', icon: Landmark, tile: 'bg-ok-50 text-ok-700' },
-  businessRegistration: { label: 'Shows your business is registered', icon: Building2, tile: 'bg-ok-50 text-ok-700' },
-  insurance: { label: 'Your business insurance cover', icon: ShieldCheck, tile: 'bg-danger-50 text-danger-600' },
-  bank: { label: 'A letter from your bank', icon: Banknote, tile: 'bg-ok-50 text-ok-700' },
-  ncpwd: { label: 'Proves a disability for reserved tenders', icon: Accessibility, tile: 'bg-brand-50 text-brand-600' },
-  owners: { label: 'Who owns and runs your company', icon: Users, tile: 'bg-brand-50 text-brand-600' },
-  other: { label: 'Lets you bid on tenders kept for these groups', icon: FileText, tile: 'bg-brand-50 text-brand-600' },
-};
-
-// The backend's DocType for each card (core/contracts.py).
-function docTypeFor(doc: BusinessDocument): string {
-  if (doc.category === 'other' && /women|youth|disability/i.test(doc.name)) return 'agpo_certificate';
-  return (
-    {
-      taxCompliance: 'kra_tax_compliance',
-      businessRegistration: 'business_registration',
-      bank: 'bank_statement',
-      ncpwd: 'ncpwd_registration',
-      owners: 'cr12',
-    } as Record<string, string>
-  )[doc.category] ?? 'other';
-}
-
-const needsAction = (d: BusinessDocument) => d.status === 'actionNeeded' || d.status === 'missing';
-const tendersNeeding = (doc: BusinessDocument) =>
-  mockTenders.filter((t) => t.requiredDocs.some((r) => r.toLowerCase() === doc.name.toLowerCase()));
 
 export function Documents() {
   const [params, setParams] = useSearchParams();
   const filter = (['action', 'ready', 'optional'].includes(params.get('filter') ?? '') ? params.get('filter') : 'all') as Filter;
   const [query, setQuery] = useState('');
-  const [openId, setOpenId] = useState<number | null>(null);
   const [message, setMessage] = useState<{ text: string; tone: 'info' | 'ok' | 'warn' } | null>(null);
   const onMessage = (text: string, tone: 'info' | 'ok' | 'warn') => setMessage({ text, tone });
 
@@ -77,41 +46,36 @@ export function Documents() {
         </div>
       )}
 
-      <div className="mb-8 grid gap-6 lg:grid-cols-[1fr_2fr]">
-        <Card hero className="relative overflow-hidden p-7">
-          <div className="pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full bg-white/10" aria-hidden />
-          <h2 className="text-base font-semibold">Document health</h2>
-          <p className="mt-3 text-5xl font-light tabular-nums">
+      <section className="mb-8 grid gap-8 border-b border-line pb-8 lg:grid-cols-[1fr_1.6fr]" aria-label="Summary">
+        <div>
+          <p className="font-display text-5xl font-bold tabular-nums text-ink">
             {readyCount}
-            <span className="text-xl text-white/85"> of {required.length} needed are ready</span>
+            <span className="text-2xl text-muted"> / {required.length}</span>
           </p>
-          <div className="mt-6">
-            <ProgressBar value={readyCount} max={required.length} tone="dark" label="Needed documents ready" />
+          <p className="mb-3 text-ink-soft">needed documents are ready</p>
+          <div className="max-w-xs">
+            <ProgressBar value={readyCount} max={required.length} label="Needed documents ready" />
           </div>
-        </Card>
-
-        <Card className="p-6">
-          <h2 className="h2 mb-4">Expiry dates</h2>
-          <ul className="space-y-2">
+        </div>
+        <div>
+          <h2 className="h2 mb-2">Expiry dates</h2>
+          <ul className="divide-y divide-line border-y border-line">
             {expiring.map((doc) => {
               const left = daysUntil(doc.expiryDate!);
               return (
-                <li key={doc.id} className="flex flex-wrap items-center justify-between gap-2 rounded-tile bg-canvas p-3">
-                  <span className="flex items-center gap-3 text-sm font-medium text-ink">
-                    <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent-50 text-accent-600">
-                      <Calendar size={16} aria-hidden />
+                <li key={doc.id}>
+                  <Link to={`/documents/${doc.id}`} className="flex flex-wrap items-center justify-between gap-2 py-3 hover:bg-paper-deep sm:px-2">
+                    <span className="text-sm font-bold text-ink">{doc.name}</span>
+                    <span className={`text-sm font-bold ${left < 0 ? 'text-danger-600' : left <= 60 ? 'text-accent-700' : 'text-ink-soft'}`}>
+                      {left < 0 ? `Expired ${formatDate(doc.expiryDate!)}` : `Expires ${formatDate(doc.expiryDate!)}`}
                     </span>
-                    {doc.name}
-                  </span>
-                  <span className={`text-sm font-semibold ${left < 0 ? 'text-danger-600' : 'text-accent-700'}`}>
-                    {left < 0 ? `Expired ${formatDate(doc.expiryDate!)}` : `Expires ${formatDate(doc.expiryDate!)}`}
-                  </span>
+                  </Link>
                 </li>
               );
             })}
           </ul>
-        </Card>
-      </div>
+        </div>
+      </section>
 
       <div className="mb-6 flex flex-col justify-between gap-4 md:flex-row md:items-center">
         <FilterTabs
@@ -132,76 +96,40 @@ export function Documents() {
         </label>
       </div>
 
-      <ul className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+      <ul className="divide-y divide-line border-y border-line">
         {filteredDocs.map((doc) => {
-          const { label, icon: Icon, tile } = CATEGORY[doc.category];
+          const { label } = CATEGORY[doc.category];
           const expired = doc.expiryDate ? daysUntil(doc.expiryDate) < 0 : false;
-          const open = openId === doc.id;
-          const needing = tendersNeeding(doc);
           return (
-            <li
-              key={doc.id}
-              className={`card flex flex-col p-5 ${
-                doc.status === 'missing' ? 'ring-2 ring-danger-500/40' : doc.status === 'actionNeeded' ? 'ring-2 ring-warn-500/50' : ''
-              }`}
-            >
-              <div className="mb-3 flex items-start justify-between gap-3">
-                <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${tile}`}>
-                  <Icon size={21} aria-hidden />
-                </span>
+            <li key={doc.id} className="grid gap-x-6 gap-y-3 py-4 sm:px-3 md:grid-cols-[1fr_8.5rem_10rem_auto] md:items-center">
+              <div className="min-w-0">
+                <Link to={`/documents/${doc.id}`} className="font-bold text-ink hover:text-brand-700 hover:underline">
+                  {doc.name}
+                </Link>
+                <p className="text-sm text-ink-soft">
+                  {label} · needed for {doc.requiredByCount} tender{doc.requiredByCount !== 1 ? 's' : ''}
+                </p>
+              </div>
+              <div>
                 <StatusChip status={doc.status} />
               </div>
-              <h3 className="text-sm font-semibold text-ink">{doc.name}</h3>
-              <p className="mb-3 text-xs text-ink-soft">{label}</p>
-              {(doc.issueDate || doc.expiryDate) && (
-                <dl className="mb-3 grid grid-cols-2 gap-2 text-xs">
-                  <div className="rounded-lg bg-canvas p-2">
-                    <dt className="text-ink-soft">Issued</dt>
-                    <dd className="font-medium text-ink">{doc.issueDate ? formatDate(doc.issueDate) : 'Not known'}</dd>
-                  </div>
-                  <div className={`rounded-lg p-2 ${expired ? 'bg-danger-50' : 'bg-canvas'}`}>
-                    <dt className={expired ? 'text-danger-600' : 'text-ink-soft'}>{expired ? 'Expired' : 'Expires'}</dt>
-                    <dd className={`font-medium ${expired ? 'text-danger-600' : 'text-ink'}`}>
-                      {doc.expiryDate ? formatDate(doc.expiryDate) : 'Never'}
-                    </dd>
-                  </div>
-                </dl>
-              )}
-              <p className="mb-4 text-xs text-ink-soft">
-                Needed for {doc.requiredByCount} tender{doc.requiredByCount !== 1 ? 's' : ''}
+              <p className={`text-sm ${expired ? 'font-bold text-danger-600' : 'text-ink-soft'}`}>
+                {doc.expiryDate
+                  ? `${expired ? 'Expired' : 'Expires'} ${formatDate(doc.expiryDate)}`
+                  : doc.issueDate
+                    ? 'Does not expire'
+                    : 'Not added yet'}
               </p>
-              {open && (
-                <div id={`doc-${doc.id}`} className="mb-4 rounded-lg bg-brand-50 p-3 text-xs text-ink">
-                  {needing.length ? (
-                    <>
-                      <p className="mb-1 font-semibold">Your matches that ask for it:</p>
-                      <ul className="list-disc pl-4">
-                        {needing.map((t) => (
-                          <li key={t.id}>{t.title}</li>
-                        ))}
-                      </ul>
-                    </>
-                  ) : (
-                    <p>None of your current matches ask for it, but other tenders do.</p>
-                  )}
-                </div>
-              )}
-              <div className="mt-auto flex gap-2">
-                <button
-                  type="button"
-                  aria-expanded={open}
-                  aria-controls={`doc-${doc.id}`}
-                  onClick={() => setOpenId(open ? null : doc.id)}
-                  className="btn btn-secondary flex-1 px-3 text-sm"
-                >
-                  Details <ChevronDown size={16} className={`transition-transform ${open ? 'rotate-180' : ''}`} aria-hidden />
-                </button>
+              <div className="flex gap-2">
+                <Link to={`/documents/${doc.id}`} className="btn btn-outlined px-4 text-sm">
+                  Details
+                </Link>
                 <UploadButton
                   docType={docTypeFor(doc)}
                   name={doc.name.toLowerCase()}
                   onMessage={onMessage}
-                  className={`btn flex-1 px-3 text-sm ${
-                    doc.status === 'ready' ? 'btn-outlined' : doc.status === 'missing' ? 'btn-primary' : 'btn-accent'
+                  className={`btn px-4 text-sm ${
+                    doc.status === 'ready' ? 'btn-secondary' : doc.status === 'missing' ? 'btn-primary' : 'btn-accent'
                   }`}
                 >
                   {doc.status === 'ready' ? 'Replace' : doc.status === 'missing' ? 'Upload' : 'Renew'}
