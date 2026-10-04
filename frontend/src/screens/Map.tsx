@@ -50,7 +50,7 @@ export function Map() {
 
       <div className="grid lg:grid-cols-[1fr_20rem] gap-4">
         {/* Map */}
-        <div className="card overflow-hidden bg-linear-to-br from-white via-brand-50/60 to-accent-50">
+        <div className="card overflow-hidden">
           <svg
             viewBox={`0 0 ${W} ${H}`}
             className="block w-full h-auto"

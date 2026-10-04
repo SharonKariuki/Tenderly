@@ -1,8 +1,8 @@
 import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
-import { Card, Button, StatusChip, MatchRing, Page, PageHeading, FilterTabs } from '../components/ui';
+import { Card, Button, StatusChip, Page, PageHeading, FilterTabs } from '../components/ui';
 import { mockTenders, mockDocuments } from '../data/mock';
 import { daysUntil, formatDate } from '../lib/format';
-import { ChevronRight, MessageCircleQuestion } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 
 type Filter = 'all' | 'eligible' | 'closing';
 const FILTERS = [
@@ -33,7 +33,7 @@ export function Tenders() {
   return (
     <Page>
       <PageHeading title="Tenders" subtitle="Ranked for your business, with the reasons why.">
-        <div className="card flex flex-wrap items-center gap-x-4 gap-y-2 self-start px-4 py-3 sm:self-auto">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 self-start sm:self-auto">
           <span className="flex items-center gap-2 text-sm font-semibold text-accent-700">
             <span className="h-2 w-2 rounded-full bg-accent-500" aria-hidden />
             Documents {readyPercent}% ready
@@ -47,51 +47,44 @@ export function Tenders() {
         </div>
       </PageHeading>
 
-      <Link to="/ask" className="card mb-6 flex items-center gap-4 bg-linear-to-br from-white to-accent-50 p-5 transition hover:shadow-brand">
-        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-600 text-white shadow-brand">
-          <MessageCircleQuestion size={20} aria-hidden />
-        </span>
-        <span className="flex-1">
-          <span className="block text-sm font-semibold text-ink">Have a question about your matches?</span>
-          <span className="block text-sm text-ink-soft">Ask which documents you need, what closes soon and more.</span>
-        </span>
-        <ChevronRight size={18} className="shrink-0 text-ink-soft" aria-hidden />
-      </Link>
+      <p className="mb-6 text-sm text-ink-soft">
+        Not sure what you need?{' '}
+        <Link to="/ask" className="font-bold text-brand-600 underline decoration-brand-200 underline-offset-4 hover:decoration-brand-600">
+          Ask a question about your matches
+        </Link>
+      </p>
 
       <div className="mb-5">
         <FilterTabs label="Filter tenders" options={FILTERS} value={filter} onChange={setFilter} />
       </div>
 
-      <ol className="space-y-3">
+      <ol className="divide-y divide-line border-y border-line">
         {filteredTenders.map((tender, index) => (
           <li key={tender.id}>
             <Link
               to={`/tenders/${tender.id}`}
-              className={`card grid grid-cols-[auto_1fr_auto] items-center gap-x-4 gap-y-3 p-4 transition hover:shadow-brand sm:grid-cols-[auto_1fr_auto_auto_auto] sm:p-5 ${
-                tender.topPick ? 'ring-2 ring-brand-300' : ''
-              }`}
+              className="group grid grid-cols-[2rem_1fr_auto] items-center gap-x-4 gap-y-2 py-4 hover:bg-paper-deep sm:grid-cols-[2rem_1fr_auto_9rem_auto] sm:px-3"
             >
-              <span
-                className={`flex h-10 w-10 items-center justify-center rounded-xl text-sm font-semibold ${
-                  index === 0 ? 'bg-brand-600 text-white shadow-brand' : 'bg-brand-50 text-brand-700'
-                }`}
-              >
-                #{index + 1}
-              </span>
+              <span className="font-display text-lg font-bold text-muted tabular-nums">{index + 1}</span>
               <span className="min-w-0">
                 <span className="flex flex-wrap items-center gap-2">
-                  <span className="text-sm font-semibold text-ink sm:text-base">{tender.title}</span>
-                  {tender.topPick && <span className="rounded-full bg-accent-500 px-2 py-0.5 text-xs font-semibold text-white">Top pick</span>}
+                  <span className="font-bold text-ink">{tender.title}</span>
+                  {tender.topPick && (
+                    <span className="rounded bg-accent-50 px-1.5 py-0.5 text-xs font-bold text-accent-700 ring-1 ring-accent-100">Best match</span>
+                  )}
                 </span>
                 <span className="block text-sm text-ink-soft">
                   {tender.entity} · closes {formatDate(tender.closingDate)}
                 </span>
               </span>
-              <ChevronRight size={20} className="text-ink-soft sm:order-last" aria-hidden />
-              <span className="col-span-3 flex items-center gap-3 sm:col-span-1 sm:contents">
-                <MatchRing score={tender.matchScore} />
+              <span className="text-right sm:text-left">
+                <span className="block font-display text-xl font-bold tabular-nums text-ink">{tender.matchScore}%</span>
+                <span className="block text-xs text-muted">match</span>
+              </span>
+              <span className="col-start-2 sm:col-start-auto">
                 <StatusChip status={tender.status} />
               </span>
+              <ChevronRight size={18} className="hidden text-muted transition group-hover:translate-x-0.5 group-hover:text-ink sm:block" aria-hidden />
             </Link>
           </li>
         ))}

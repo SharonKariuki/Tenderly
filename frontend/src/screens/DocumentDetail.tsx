@@ -24,7 +24,7 @@ export function DocumentDetail() {
 
       <Card className="mb-6 p-6">
         <div className="flex items-start gap-4">
-          <span className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl ${tile}`}>
+          <span className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-lg ${tile}`}>
             <Icon size={26} aria-hidden />
           </span>
           <div className="min-w-0 flex-1">

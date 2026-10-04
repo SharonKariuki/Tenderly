@@ -106,7 +106,7 @@ export function Check() {
             const file = e.dataTransfer.files?.[0];
             if (file) uploadPdf(file);
           }}
-          className={`rounded-2xl border-2 border-dashed p-6 sm:p-8 text-center transition-colors ${
+          className={`rounded-lg border-2 border-dashed p-6 sm:p-8 text-center transition-colors ${
             dragging ? 'border-brand-600 bg-brand-50' : 'border-brand-200'
           }`}
         >
@@ -135,7 +135,7 @@ export function Check() {
         </div>
       </Card>
 
-      <Link to="/check/message" className="card flex items-center gap-4 p-5 transition hover:shadow-brand">
+      <Link to="/check/message" className="card flex items-center gap-4 p-5 transition hover:border-brand-300">
         <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-accent-50 text-accent-600">
           <MessageSquareText size={20} aria-hidden />
         </span>

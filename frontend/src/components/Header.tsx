@@ -45,8 +45,8 @@ function Logo() {
         <path d="M16 5a10 10 0 1 0 0 20" fill="none" stroke="var(--color-brand-600)" strokeWidth="3.5" strokeLinecap="round" />
         <path d="M19 11a5 5 0 0 1 0 8" fill="none" stroke="var(--color-accent-500)" strokeWidth="3.5" strokeLinecap="round" />
       </svg>
-      <span className="text-xl font-semibold tracking-tight text-ink">
-        <span className="text-brand-600">T</span>enderready
+      <span className="font-display text-xl font-bold tracking-tight text-ink">
+        Tender<span className="text-brand-600">ready</span>
       </span>
     </Link>
   );
@@ -59,7 +59,7 @@ function NavLinks() {
     <>
       {sections.map((section) => (
         <div key={section.title}>
-          <p className="mb-2 px-4 text-xs font-semibold uppercase tracking-wide text-ink-soft">{section.title}</p>
+          <p className="mb-1.5 px-3 text-xs font-bold uppercase tracking-[0.08em] text-muted">{section.title}</p>
           <ul className="space-y-1">
             {section.items.map(({ path, label, icon: Icon }) => (
               <li key={path}>
@@ -67,15 +67,15 @@ function NavLinks() {
                   to={path}
                   end={path === '/'}
                   className={({ isActive }) =>
-                    `flex min-h-11 items-center gap-3 rounded-xl px-4 text-sm font-medium transition ${
-                      isActive ? 'bg-brand-600 text-white shadow-brand' : 'text-ink-soft hover:bg-brand-50 hover:text-brand-700'
+                    `flex min-h-11 items-center gap-3 rounded-lg px-3 text-[0.95rem] transition ${
+                      isActive ? 'bg-brand-100 font-bold text-brand-700' : 'text-ink-soft hover:bg-paper-deep hover:text-ink'
                     }`
                   }
                 >
                   <Icon size={19} strokeWidth={1.8} aria-hidden />
                   <span className="flex-1">{label}</span>
                   {path === '/alerts' && unread > 0 && (
-                    <span className="rounded-full bg-accent-500 px-2 py-0.5 text-xs font-semibold text-white">
+                    <span className="rounded-full bg-accent-600 px-2 py-0.5 text-xs font-bold text-white tabular-nums">
                       {unread}
                       <span className="sr-only"> unread</span>
                     </span>
@@ -96,10 +96,10 @@ function ProfileLink() {
     <NavLink
       to="/profile"
       className={({ isActive }) =>
-        `flex min-h-11 items-center gap-3 rounded-xl px-3 py-2 ${isActive ? 'bg-brand-50 ring-1 ring-brand-200' : 'hover:bg-brand-50'}`
+        `flex min-h-11 items-center gap-3 rounded-lg px-3 py-2 ${isActive ? 'bg-brand-100' : 'hover:bg-paper-deep'}`
       }
     >
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent-500 text-xs font-semibold text-white" aria-hidden>
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-ink text-xs font-bold text-white" aria-hidden>
         {initialsOf(profile.ownerName)}
       </span>
       <span className="min-w-0">
@@ -137,13 +137,13 @@ export function Header() {
   return (
     <>
       {/* Phone top bar */}
-      <header className="sticky top-0 z-30 flex items-center justify-between gap-3 border-b border-line bg-white px-4 py-3 lg:hidden">
+      <header className="sticky top-0 z-30 flex items-center justify-between gap-3 border-b border-line bg-canvas px-4 py-3 lg:hidden">
         <Logo />
         <div className="flex items-center gap-2">
           <Link
             to="/profile"
             aria-label="Profile and settings"
-            className="flex h-11 w-11 items-center justify-center rounded-full bg-accent-500 text-sm font-semibold text-white ring-4 ring-brand-100"
+            className="flex h-11 w-11 items-center justify-center rounded-full bg-ink text-sm font-bold text-white"
           >
             {initialsOf(profile.ownerName)}
           </Link>
@@ -171,7 +171,7 @@ export function Header() {
             role="dialog"
             aria-modal="true"
             aria-label="Menu"
-            className="absolute inset-y-0 right-0 flex w-[min(20rem,85vw)] flex-col gap-6 overflow-y-auto bg-white p-5 shadow-shell"
+            className="absolute inset-y-0 right-0 flex w-[min(20rem,85vw)] flex-col gap-6 overflow-y-auto bg-canvas p-5 shadow-shell"
           >
             <div className="flex items-center justify-between">
               <Logo />
@@ -199,7 +199,7 @@ export function Header() {
       )}
 
       {/* Desktop sidebar */}
-      <aside className="hidden w-64 shrink-0 flex-col border-r border-line bg-white px-5 py-8 lg:flex">
+      <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col overflow-y-auto border-r border-line bg-paper-deep px-4 py-7 lg:flex">
         <div className="px-3">
           <Logo />
         </div>
@@ -209,16 +209,8 @@ export function Header() {
         <div className="mt-auto space-y-3 pt-8">
           <ActingForChip />
           <ProfileLink />
-          <Link
-            to="/check"
-            className="flex items-center justify-between gap-3 rounded-2xl bg-brand-50 p-4 text-sm font-semibold leading-snug text-ink transition hover:bg-brand-100"
-          >
-            Check a new
-            <br />
-            tender
-            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-600 text-white shadow-brand" aria-hidden>
-              <Plus size={18} />
-            </span>
+          <Link to="/check" className="btn btn-primary w-full px-4 text-sm">
+            <Plus size={18} aria-hidden /> Check a new tender
           </Link>
         </div>
       </aside>

@@ -30,9 +30,7 @@ function App() {
             <a href="#main-content" className="skip-link">
               Skip to main content
             </a>
-            {/* The app sits in a framed white shell on the lavender page */}
-            <div className="min-h-screen lg:p-6">
-              <div className="mx-auto flex min-h-screen max-w-360 flex-col bg-white lg:min-h-[calc(100vh-3rem)] lg:flex-row lg:overflow-hidden lg:rounded-4xl lg:shadow-shell lg:ring-8 lg:ring-white/50">
+            <div className="flex min-h-screen flex-col lg:flex-row">
                 <Header />
                 <Routes>
                   <Route path="/" element={<Today />} />
@@ -52,7 +50,6 @@ function App() {
                   <Route path="/profile" element={<Profile />} />
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
-              </div>
             </div>
           </Router>
         </SpeechProvider>

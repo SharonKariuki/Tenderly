@@ -30,7 +30,7 @@ export function CheckResult() {
         <BackLink to="/check">Back to Check a tender</BackLink>
         <Card scam={!genuine} hero={genuine} className="p-6 sm:p-8 mb-6">
           <div className="relative z-10 flex items-start gap-4 sm:gap-6">
-            <span className="w-14 h-14 rounded-2xl bg-white/15 flex items-center justify-center flex-shrink-0">
+            <span className="w-14 h-14 rounded-lg bg-white/15 flex items-center justify-center flex-shrink-0">
               {genuine ? <Shield size={28} aria-hidden /> : <AlertTriangle size={28} aria-hidden />}
             </span>
             <div>
