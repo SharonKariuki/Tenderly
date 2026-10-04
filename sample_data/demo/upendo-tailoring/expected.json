@@ -1,0 +1,47 @@
+{
+  "business_registration_DUMMY.pdf": {
+    "document_type": "business_registration",
+    "holder_name": "Upendo Tailoring Enterprises",
+    "kra_pin": null,
+    "registration_number": "BN-DEMO0003",
+    "issued_on": "2021-07-19",
+    "expires_on": null,
+    "directors": []
+  },
+  "tax_compliance_NO_EXPIRY_DUMMY.pdf": {
+    "document_type": "kra_tax_compliance",
+    "holder_name": "Upendo Tailoring Enterprises",
+    "kra_pin": "P000000008M",
+    "registration_number": null,
+    "issued_on": "2026-06-10",
+    "expires_on": null,
+    "directors": []
+  },
+  "agpo_certificate_EXPIRED_DUMMY.pdf": {
+    "document_type": "agpo_certificate",
+    "holder_name": "Upendo Tailoring Enterprises",
+    "kra_pin": null,
+    "registration_number": null,
+    "issued_on": "2024-09-30",
+    "expires_on": "2026-09-29",
+    "directors": []
+  },
+  "disability_card_DUMMY.pdf": {
+    "document_type": "ncpwd_registration",
+    "holder_name": "Mercy Wairimu Odhiambo",
+    "kra_pin": null,
+    "registration_number": null,
+    "issued_on": "2020-03-11",
+    "expires_on": null,
+    "directors": []
+  },
+  "national_id_DUMMY.pdf": {
+    "document_type": "national_id",
+    "holder_name": "Mercy Wairimu Odhiambo",
+    "kra_pin": null,
+    "registration_number": null,
+    "issued_on": "2016-01-14",
+    "expires_on": null,
+    "directors": []
+  }
+}

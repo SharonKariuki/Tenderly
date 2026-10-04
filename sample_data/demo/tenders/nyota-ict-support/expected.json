@@ -1,0 +1,23 @@
+{
+  "tender": "tender_SIMULATED.pdf",
+  "addendum": "addendum_1_SIMULATED.pdf",
+  "old_deadline": "2026-10-29T10:00:00+03:00",
+  "new_deadline": "2027-01-15T10:00:00+03:00",
+  "changes": [
+    {
+      "category": "deadline",
+      "old_quote": "Completed tenders must be submitted on or before Thursday, 29th October 2026 at 10.00 a.m. East African Time.",
+      "new_quote": "Completed tenders must be submitted on or before Friday, 15th January 2027 at 10.00 a.m. East African Time."
+    },
+    {
+      "category": "required_documents",
+      "old_quote": null,
+      "new_quote": "MR7. Audited accounts for the last two (2) financial years."
+    },
+    {
+      "category": "specifications_quantities",
+      "old_quote": "Item 1: On-site ICT support technicians. Quantity: 4 technicians.",
+      "new_quote": "Item 1: On-site ICT support technicians. Quantity: 6 technicians."
+    }
+  ]
+}
