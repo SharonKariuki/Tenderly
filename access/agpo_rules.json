@@ -1,0 +1,77 @@
+{
+  "_about": "AGPO rules. The single source for the backend (access/agpo.py) and the frontend (src/config/agpo.ts). Change a rule only after checking the source, then update last_checked.",
+  "source": {
+    "title": "AGPO registration requirements",
+    "url": "https://agpo.go.ke/pages/agpo-registration-requirements",
+    "last_checked": "2026-10-04"
+  },
+  "legal_basis": {
+    "text": "Public Procurement and Asset Disposal Act 2015, section 157(5): accounting officers reserve not less than 30% of procurement spend for youth, women and persons with disabilities.",
+    "url": "https://agpo.go.ke/pages/about-agpo",
+    "last_checked": "2026-10-04"
+  },
+  "ownership": {
+    "min_membership_percent": 70,
+    "leadership_percent": 100,
+    "text": "At least 70% membership of the group, and leadership 100% from the group.",
+    "source_url": "https://agpo.go.ke/pages/agpo-registration-requirements"
+  },
+  "common_documents": [
+    { "id": "national_id", "doc_type": "national_id", "label": "National ID or Kenyan passport", "label_sw": "Kitambulisho cha taifa au pasipoti ya Kenya", "applies_to": "all" },
+    { "id": "business_registration", "doc_type": "business_registration", "label": "Business registration or incorporation certificate", "label_sw": "Cheti cha usajili wa biashara au cha kampuni", "applies_to": "all" },
+    { "id": "cr12", "doc_type": "cr12", "label": "Company owners list", "label_sw": "Orodha ya wamiliki wa kampuni", "applies_to": "limited_company" },
+    { "id": "partnership_deed", "doc_type": null, "label": "Partnership deed", "label_sw": "Mkataba wa ubia", "applies_to": "partnership" },
+    { "id": "tax_compliance", "doc_type": "kra_tax_compliance", "label": "Tax clearance certificate", "label_sw": "Cheti cha kufuata kodi", "applies_to": "all" }
+  ],
+  "categories": [
+    {
+      "id": "women",
+      "label": "Women",
+      "label_sw": "Wanawake",
+      "extra_documents": []
+    },
+    {
+      "id": "youth",
+      "label": "Youth",
+      "label_sw": "Vijana",
+      "age_min": 18,
+      "age_max": 34,
+      "extra_documents": []
+    },
+    {
+      "id": "pwd",
+      "label": "People with disabilities",
+      "label_sw": "Watu wenye ulemavu",
+      "extra_documents": [
+        {
+          "id": "ncpwd_registration",
+          "doc_type": "ncpwd_registration",
+          "label": "Disability registration card",
+          "label_sw": "Kadi ya usajili wa ulemavu",
+          "issuer": "National Council for Persons with Disabilities",
+          "how_to_get_url": "https://ncpwd.go.ke",
+          "applies_to": "all"
+        }
+      ]
+    },
+    {
+      "id": "none",
+      "label": "None",
+      "label_sw": "Hakuna",
+      "extra_documents": []
+    }
+  ],
+  "reservations": {
+    "_about": "Who can bid on a tender, by its reservation. 'open' is any business, 'agpo' is any of the three groups.",
+    "open": ["women", "youth", "pwd", "none"],
+    "agpo": ["women", "youth", "pwd"],
+    "women": ["women"],
+    "youth": ["youth"],
+    "pwd": ["pwd"]
+  },
+  "todo": [
+    "TODO(verify): how long an AGPO certificate is valid. Not stated on the source page.",
+    "TODO(verify): whether a share of the 30% is set aside for persons with disabilities only. Not stated on the source page.",
+    "TODO(verify): whether the NCPWD document expires. Not stated on the source page."
+  ]
+}

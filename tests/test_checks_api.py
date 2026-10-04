@@ -127,7 +127,7 @@ def test_unconfirmed_documents_do_not_count(client: APIClient, user: User) -> No
     item = client.post(f"/api/tenders/{tender.pk}/check/").json()["items"][0]
 
     assert item["status"] == "missing"
-    assert "Confirm your tax compliance certificate" in item["reason"]
+    assert "Confirm your tax clearance certificate" in item["reason"]
 
 
 def test_ready_when_every_requirement_is_met(client: APIClient, user: User) -> None:

@@ -16,6 +16,7 @@ from accounts.models import User
 from core.models import StoredFile
 from llm import client as llm_client
 from rules.dates import NAIROBI, parse_deadline
+from tenders import services as tender_services
 from tenders.models import Tender, TenderVersion
 from tenders.services import (
     RequirementOutput,
@@ -156,18 +157,34 @@ def test_list_and_detail_show_only_her_tenders(client, model_calls):
     assert other.get(f"/api/tenders/{tender_id}/summary/").status_code == 404
 
 
-def test_summary_is_english_only(client, model_calls):
+def test_summary_supports_english_and_cached_kiswahili(client, model_calls, monkeypatch):
     tender_id = upload(client).json()["id"]
-    expected = {
+    english = {
         "tender_id": tender_id,
         "version_no": 1,
         "lang": "en",
         "summary": TENDER_ANSWER["summary_en"],
         "needs_human_review": False,
     }
+    calls = []
 
-    assert client.get(f"/api/tenders/{tender_id}/summary/").json() == expected
-    assert client.get(f"/api/tenders/{tender_id}/summary/?lang=sw").json() == expected
+    def translate(prompt, schema, cache_key=None):
+        calls.append((prompt, cache_key))
+        return {"summary": "Kaunti inanunua huduma za usafi."}
+
+    monkeypatch.setattr(tender_services, "generate_json", translate)
+
+    assert client.get(f"/api/tenders/{tender_id}/summary/").json() == english
+    kiswahili = client.get(f"/api/tenders/{tender_id}/summary/?lang=sw").json()
+    assert kiswahili == {
+        **english,
+        "lang": "sw",
+        "summary": "Kaunti inanunua huduma za usafi.",
+        "needs_human_review": True,
+    }
+    # Stored on the version after first generation; repeat requests make no model call.
+    assert client.get(f"/api/tenders/{tender_id}/summary/?lang=sw").json() == kiswahili
+    assert len(calls) == 1 and calls[0][1].startswith("summary_sw:v1:")
     assert client.get(f"/api/tenders/{tender_id}/summary/?lang=fr").status_code == 400
 
 

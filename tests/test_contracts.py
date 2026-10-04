@@ -23,6 +23,7 @@ from core import contracts
                 "bank_statement",
                 "business_permit",
                 "other",
+                "ncpwd_registration",
             ],
         ),
         (

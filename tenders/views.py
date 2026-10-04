@@ -21,7 +21,7 @@ from tenders.serializers import (
     TenderListSerializer,
     TenderSerializer,
 )
-from tenders.services import create_tender, latest_version
+from tenders.services import create_tender, latest_version, summary_for_language
 
 
 class TenderListCreateView(OwnedViewMixin, ListAPIView):
@@ -62,14 +62,14 @@ class TenderSummaryView(OwnedViewMixin, GenericAPIView):
         version = latest_version(tender)
         if version is None:
             raise Unprocessable("This tender has no version yet.", code="no_version")
-        # Only the English summary exists. A request for Kiswahili gets the English one,
-        # labelled as English, so nothing unverified is shown as Kiswahili (R14).
+        lang = query.validated_data["lang"]
+        summary, needs_human_review = summary_for_language(version, lang)
         return Response(
             {
                 "tender_id": tender.pk,
                 "version_no": version.version_no,
-                "lang": "en",
-                "summary": version.summary_en,
-                "needs_human_review": False,
+                "lang": lang,
+                "summary": summary,
+                "needs_human_review": needs_human_review,
             }
         )

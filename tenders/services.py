@@ -19,7 +19,12 @@ from core.contracts import DocType, Requirement, RequirementType, TenderExtracti
 from core.exceptions import Unprocessable
 from core.models import StoredFile
 from llm.client import generate_json
-from llm.prompts_extract import TENDER_PROMPT, TENDER_PROMPT_VERSION
+from llm.prompts_extract import (
+    SUMMARY_SW_PROMPT,
+    SUMMARY_SW_PROMPT_VERSION,
+    TENDER_PROMPT,
+    TENDER_PROMPT_VERSION,
+)
 from rules.dates import parse_date, parse_deadline
 from tenders.models import Tender, TenderVersion
 from versions.compare import quote_in_text
@@ -80,6 +85,10 @@ class TenderOutput(BaseModel):
     @classmethod
     def null_summary_is_empty(cls, value: object) -> object:
         return value or ""
+
+
+class KiswahiliSummaryOutput(BaseModel):
+    summary: str
 
 
 @dataclass(frozen=True)
@@ -198,3 +207,24 @@ def create_tender(user: User, file_bytes: bytes, mime: str, filename: str) -> Te
 
 def latest_version(tender: Tender) -> TenderVersion | None:
     return tender.versions.order_by("-version_no").first()
+
+
+def summary_for_language(version: TenderVersion, lang: str) -> tuple[str, bool]:
+    """Return the saved English summary or generate a cached Kiswahili translation.
+
+    Kiswahili is always flagged for a human review (R14). The English summary is the sole
+    source for translation so the model cannot add details absent from the extraction.
+    """
+    if lang == "en":
+        return version.summary_en, False
+    if version.summary_sw:
+        return version.summary_sw, True
+    cache_key = f"summary_sw:{SUMMARY_SW_PROMPT_VERSION}:{version.text_hash}"
+    translated = generate_json(
+        SUMMARY_SW_PROMPT.format(summary=version.summary_en),
+        KiswahiliSummaryOutput,
+        cache_key=cache_key,
+    )["summary"].strip()
+    version.summary_sw = translated
+    version.save(update_fields=["summary_sw"])
+    return translated, True

@@ -15,5 +15,5 @@ select = ["E", "F", "I", "UP", "B", "DJ"]
 [tool.ruff.lint.isort]
 known-first-party = [
     "tenderready", "core", "accounts", "rules", "checks", "llm",
-    "documents", "tenders", "versions", "alerts", "insight",
+    "documents", "tenders", "versions", "alerts", "insight", "access",
 ]
