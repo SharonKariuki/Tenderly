@@ -96,7 +96,7 @@ def test_unconfirmed_document_counts_as_absent() -> None:
     item = check_requirement(requirement(), [document(confirmed=False)], DEADLINE)
 
     assert item.status == CheckStatus.MISSING
-    assert "Confirm your tax compliance certificate" in item.reason
+    assert "Confirm your tax clearance certificate" in item.reason
     assert item.doc_id == 7
 
 

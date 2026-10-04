@@ -65,6 +65,20 @@ def test_quotes_are_found_across_line_breaks_and_case():
     assert not quote_in_text(None, OLD.text)
 
 
+def test_quotes_survive_the_spacing_of_real_pdfs():
+    """Text layers of a real public tender against the quotes a model gave for them."""
+    page = (
+        "MR16 Must attach at least two (2) latest Annual Audited Accounts (not earlier than "
+        "2022)\nof the firm.\nMR17 Must submit one Original Tender document clearly marked "
+        "“ORIGINAL” ; and two\ncopies, each clearly marked “COPY”\nthe evalu-\nation committee"
+    )
+
+    assert quote_in_text("at least two (2)latest Annual Audited Accounts (not earlier", page)
+    assert quote_in_text('clearly marked "ORIGINAL"; and two copies', page)
+    assert quote_in_text("the evaluation committee", page)
+    assert not quote_in_text("at least three (3) latest Annual Audited Accounts", page)
+
+
 def test_changes_keep_only_quotes_that_are_in_the_documents():
     llm = FakeLLM(
         answer(
@@ -104,7 +118,7 @@ def test_cache_key_and_prompt_carry_both_versions():
     compare_versions(OLD, NEW, llm=llm)
 
     call = llm.calls[0]
-    assert call["cache_key"] == "compare:v1:old-hash:new-hash"  # R11
+    assert call["cache_key"] == "compare:v2:old-hash:new-hash"  # R11
     assert call["schema"] is CompareOutput
     assert OLD.text in call["prompt"] and NEW.text in call["prompt"]
 

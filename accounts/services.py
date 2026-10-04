@@ -2,6 +2,7 @@
 
 from django.db import transaction
 
+from access.services import delete_access_data
 from accounts.models import User
 from alerts.models import Alert
 from checks.models import Check
@@ -37,6 +38,9 @@ def delete_user_data(user: User) -> dict[str, int]:
     # Cached LLM results hold what was read from the user's files (R11 keys them by file hash).
     for sha256 in hashes:
         LLMCache.objects.filter(cache_key__contains=sha256).delete()
+
+    # Access support letters and helpers can describe the owner's disability.
+    delete_access_data(user)
 
     for field in PROFILE_FIELDS:
         setattr(user, field, "")

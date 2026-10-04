@@ -5,7 +5,7 @@ view bodies, never the names, so this file does not need to change again.
 """
 
 from django.contrib import admin
-from django.urls import path
+from django.urls import include, path
 from django.views.generic import RedirectView
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
@@ -47,4 +47,6 @@ urlpatterns = [
     path("api/alerts/", AlertListView.as_view(), name="alert-list"),
     path("api/alerts/<int:pk>/read/", AlertReadView.as_view(), name="alert-read"),
     path("api/insight/", InsightListView.as_view(), name="insight-list"),
+    # Accessibility, AGPO rules, trusted helpers, access support letters (B).
+    path("api/access/", include("access.urls")),
 ]

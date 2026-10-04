@@ -9,7 +9,7 @@ services:
     buildCommand: ./build.sh
     # Uploads wait for the AI service (see TIMEOUT_MS in llm/client.py); the default 30 s
     # worker timeout would kill them.
-    startCommand: gunicorn tenderready.wsgi:application --timeout 300
+    startCommand: gunicorn tenderready.wsgi:application --timeout 600
     healthCheckPath: /api/health/
     envVars:
       - key: PYTHON_VERSION

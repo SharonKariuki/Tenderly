@@ -42,6 +42,8 @@ class DocType(models.TextChoices):
     BANK_STATEMENT = "bank_statement"
     BUSINESS_PERMIT = "business_permit"
     OTHER = "other"
+    # Added for persons with disabilities under AGPO (access/agpo_rules.json).
+    NCPWD_REGISTRATION = "ncpwd_registration"
 
 
 class RequirementType(models.TextChoices):

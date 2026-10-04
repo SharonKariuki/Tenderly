@@ -66,6 +66,36 @@ expiring when the addendum moves the deadline to 3 November; the alert is writte
 email sent (console backend); the second upload of the addendum creates nothing. Runs 2
 and 3 reuse cached answers (R11), as the app is designed to.
 
+## Real public tenders
+
+Two real tenders with their real addenda, downloaded from kicd.ac.ke (Kenya Institute of
+Curriculum Development) and walked through the API over HTTP the way the frontend will use
+it, with the dummy business documents. The files are public and are not in the repository.
+
+| Tender | Pages | Tender upload | Requirements kept | Addendum upload | Changes caught |
+|---|---|---|---|---|---|
+| KICD/FC/02/2026/2027, Grade 12 course materials | 139 | 25 s | 21 of 21 | 38 s | 2 of 2 |
+| KICD/FRC/001/2026-2027, curriculum designs | 158 | 37 s | 23 of 23 | 67 s | 6 of 8 (prompt v2) |
+
+- **Deadlines and dates** were read correctly for both (4 September 2026 11:00 and
+  27 July 2026 11:00; issue dates 25 August and 17 July).
+- **Requirements.** Every requirement kept has its quote in the PDF text. Most real
+  requirements are forms the bidder fills in (Form of Tender, self-declarations, price
+  schedule); they map to no document, so the check shows them as unclear with their quote
+  (R6). On the Grade 12 tender: 3 met, 2 missing, 16 unclear.
+- **Quote check fixed for real PDFs.** The first run dropped 2 of 21 real requirements
+  because the PDF has "two (2) latest" where the model wrote "two (2)latest", and
+  `“ORIGINAL” ;` where it wrote `“ORIGINAL”;`. The check now ignores whitespace and
+  hyphens; every other character must still match.
+- **Compare on real addenda.** Prompt v1 caught 4 of the 8 items of the curriculum-designs
+  addendum and missed every pricing item. Prompt v2 tells the model to go through the
+  addendum item by item and counts clarifications and replaced price tables as changes: 6
+  of 8. Still missed: item 1 (the unit of issue is pieces) and item 2 (prices must follow
+  the schedule format). Every new requirement the addendum adds still reaches the checklist
+  through extraction, so the flips and the alert list all seven.
+- **Deadline already passed.** Both tenders had closed before the test. The API checks a
+  closed tender like an open one; the frontend should show the deadline.
+
 ## What went wrong on the way, and what changed
 
 - **Model names.** `gemini-2.5-flash` and `gemini-2.5-flash-lite` are closed to new keys

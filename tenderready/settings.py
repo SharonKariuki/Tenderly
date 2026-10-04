@@ -7,6 +7,7 @@ import os
 from pathlib import Path
 
 import dj_database_url
+from corsheaders.defaults import default_headers
 from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -56,6 +57,7 @@ INSTALLED_APPS = [
     "versions",
     "alerts",
     "insight",
+    "access",
 ]
 
 MIDDLEWARE = [
@@ -148,6 +150,8 @@ SPECTACULAR_SETTINGS = {
 }
 
 CORS_ALLOWED_ORIGINS = env_list("FRONTEND_ORIGIN", "http://localhost:5173")
+# The access app sends X-Acting-For when a trusted helper works for an owner.
+CORS_ALLOW_HEADERS = (*default_headers, "x-acting-for")
 
 EMAIL_BACKEND = os.getenv("EMAIL_BACKEND") or "django.core.mail.backends.console.EmailBackend"
 EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp.gmail.com")
