@@ -72,7 +72,9 @@ For a field error the message starts with the field name, for example `"email: A
 
 ## Endpoint list
 
-Every endpoint is **real**: it reads and writes the database. Uploads are read by the AI service, so they take a few seconds and need `GEMINI_API_KEY` and `LLM_MODEL` set on the server.
+Every endpoint is **real**: it reads and writes the database. Uploads are read by the AI service and need `GEMINI_API_KEY` and `LLM_MODEL` set on the server.
+
+**Uploads are slow; show a progress state and do not time out early.** Measured on real KICD tenders: a document takes 2 to 5 s, a 140 to 160 page tender 25 to 40 s, and an addendum to such a tender 40 to 70 s (it is read and then compared with the whole tender). Give the request at least 3 minutes. The same file uploaded again is answered from the cache in well under a second. Show the tender's `deadline` prominently: a real tender may already be closed, and the API does not reject one.
 
 | Endpoint | Purpose | State at freeze | Screen |
 |---|---|---|---|

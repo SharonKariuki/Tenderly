@@ -31,11 +31,14 @@ class CompareOutput(BaseModel):
 
 
 def normalise(text: str) -> str:
-    """Make a quote comparable with a PDF text layer: line breaks, repeated spaces, curly
-    quotes and case must not decide whether a quote is found."""
+    """Make a quote comparable with a PDF text layer. Every other character must match, but
+    case, curly quotes and spacing must not decide whether a quote is found: real PDFs put
+    spaces where the model leaves none ("two (2) latest" against "two (2)latest"), break
+    lines inside sentences and hyphenate words across lines. So whitespace and hyphens are
+    left out of the comparison."""
     text = text.replace("‘", "'").replace("’", "'")
     text = text.replace("“", '"').replace("”", '"')
-    return re.sub(r"\s+", " ", text).strip().casefold()
+    return re.sub(r"[\s\-­‐‑–—]+", "", text).casefold()
 
 
 def quote_in_text(quote: str | None, text: str) -> bool:

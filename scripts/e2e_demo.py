@@ -35,7 +35,7 @@ PASSWORD = "Tender-demo-2026"
 DOCUMENTS_NEEDED = 5
 DOCUMENT_SUFFIXES = (".pdf", ".png", ".jpg", ".jpeg")
 EMAIL_WAIT_SECONDS = 20
-TIMEOUT_SECONDS = 120  # the first call can wake a sleeping server and database
+TIMEOUT_SECONDS = 300  # a real addendum takes over a minute; a sleeping server adds more
 
 STEPS = [
     "account registered and 5 documents confirmed",

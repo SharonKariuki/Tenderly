@@ -20,8 +20,9 @@ logger = logging.getLogger(__name__)
 RETRIES = 2  # R17: two retries after the first attempt
 BACKOFF_SECONDS = (1, 3)
 # Per request. An addendum makes two calls (extract and compare) of up to three attempts
-# each, so the gunicorn timeout in render.yaml must stay above 2 * (3 * 45 + 4) seconds.
-TIMEOUT_MS = 45_000
+# each, so the gunicorn timeout in render.yaml must stay above 2 * (3 * 90 + 4) seconds.
+# A real 158-page tender took 30 s to read, so 90 s leaves room for longer ones.
+TIMEOUT_MS = 90_000
 
 
 class LLMError(AIFailure):
