@@ -27,7 +27,7 @@ export function Documents() {
   };
 
   return (
-    <main className="flex-1 max-w-7xl mx-auto px-6 py-12">
+    <div className="max-w-7xl mx-auto px-6 py-12 pb-20">
       {/* Page Intro */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-8 mb-12">
         <div>
@@ -197,6 +197,6 @@ export function Documents() {
           <p className="text-plum-muted">No documents to show</p>
         </Card>
       )}
-    </main>
+    </div>
   );
 }

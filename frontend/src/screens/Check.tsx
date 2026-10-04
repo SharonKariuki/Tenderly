@@ -31,7 +31,7 @@ export function Check() {
   if (uploadMode === 'results') {
     const isGenuine = uploadMode === 'results';
     return (
-      <main className="flex-1 max-w-4xl mx-auto px-6 py-12">
+      <div className="max-w-4xl mx-auto px-6 py-12 pb-20">
         {/* Results Card */}
         <Card
           className={`p-10 mb-10 relative overflow-hidden ${isGenuine ? 'card-hero' : 'card-scam'}`}
@@ -221,11 +221,11 @@ export function Check() {
   }
 
   return (
-    <main className="flex-1 max-w-4xl mx-auto px-6 py-8">
+    <div className="max-w-4xl mx-auto px-6 py-12 pb-20">
       {/* Page Intro */}
       <div>
-        <h1 className="h1 text-plum mb-2">Check a tender</h1>
-        <p className="text-intro text-plum-soft mb-8">
+        <h1 className="h1 mb-2">Check a tender</h1>
+        <p className="text-lg text-plum-soft mb-8">
           Before you spend time and money, check if you qualify and if it's real.
         </p>
       </div>
@@ -314,6 +314,6 @@ export function Check() {
           </div>
         </Card>
       )}
-    </main>
+    </div>
   );
 }
