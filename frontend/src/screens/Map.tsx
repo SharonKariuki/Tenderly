@@ -150,19 +150,19 @@ export function Map() {
 
       {/* Left Panel - Closing Window */}
       <div className="absolute left-6 top-6 max-w-xs">
-        <Card className="bg-white/10 backdrop-blur border border-white/20 p-4">
-          <h3 className="text-sm font-bold text-white mb-3 flex items-center gap-2">
-            Closing within <ChevronDown size={16} />
+        <Card className="bg-white/5 backdrop-blur-xl border border-white/30 p-6 shadow-2xl">
+          <h3 className="text-sm font-bold text-white mb-4 flex items-center gap-2">
+            ⏳ Closing within <ChevronDown size={16} />
           </h3>
           <div className="space-y-2">
             {closingOptions.map((opt) => (
               <button
                 key={opt.id}
                 onClick={() => setClosingWindow(opt.id)}
-                className={`w-full text-left px-3 py-2 rounded-pill text-xs font-medium transition ${
+                className={`w-full text-left px-4 py-3 rounded-lg text-xs font-medium transition-all ${
                   closingWindow === opt.id
-                    ? 'bg-coral text-white'
-                    : 'bg-white/10 text-white/80 hover:bg-white/20'
+                    ? 'bg-gradient-to-r from-coral to-coral-wine text-white shadow-lg'
+                    : 'bg-white/10 text-white/90 hover:bg-white/20'
                 }`}
               >
                 {opt.label} <span className="opacity-60">({opt.tenders})</span>
@@ -176,13 +176,13 @@ export function Map() {
       <div className="absolute right-6 top-6 flex flex-col gap-2">
         <button
           onClick={() => setZoom(Math.min(2, zoom + 0.2))}
-          className="w-12 h-12 rounded-lg bg-white/10 backdrop-blur border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition"
+          className="w-12 h-12 rounded-xl bg-white/10 backdrop-blur-xl border border-white/30 flex items-center justify-center text-white hover:bg-white/20 transition-all shadow-lg"
         >
           <ZoomIn size={20} />
         </button>
         <button
           onClick={() => setZoom(Math.max(0.5, zoom - 0.2))}
-          className="w-12 h-12 rounded-lg bg-white/10 backdrop-blur border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition"
+          className="w-12 h-12 rounded-xl bg-white/10 backdrop-blur-xl border border-white/30 flex items-center justify-center text-white hover:bg-white/20 transition-all shadow-lg"
         >
           <ZoomOut size={20} />
         </button>
@@ -190,21 +190,21 @@ export function Map() {
 
       {/* Right Sidebar - Sector Details */}
       {selectedSector && (
-        <div className="absolute right-0 top-0 bottom-0 w-80 bg-white/95 backdrop-blur p-6 border-l border-line overflow-y-auto">
-          <h3 className="h2 mb-4">
+        <div className="absolute right-0 top-0 bottom-0 w-80 bg-gradient-to-b from-white/98 to-white/95 backdrop-blur-xl p-8 border-l border-white/50 overflow-y-auto shadow-2xl">
+          <h3 className="h2 mb-6">
             {sectors.find((s) => s.id === selectedSector)?.name}
           </h3>
 
-          <div className="space-y-4 mb-6">
-            <div>
-              <p className="text-xs text-plum-muted">Match score</p>
-              <p className="text-2xl font-light text-plum">
+          <div className="space-y-6 mb-8">
+            <div className="p-4 rounded-lg bg-gradient-to-br from-ok-bg/30 to-ok-bg/10">
+              <p className="text-xs text-plum-muted font-medium mb-2">Match score</p>
+              <p className="text-4xl font-light bg-gradient-to-r from-ok-solid to-ok-solid bg-clip-text text-transparent">
                 {sectors.find((s) => s.id === selectedSector)?.match}%
               </p>
             </div>
-            <div>
-              <p className="text-xs text-plum-muted">Tenders available</p>
-              <p className="text-2xl font-light text-plum">
+            <div className="p-4 rounded-lg bg-gradient-to-br from-lilac-light/30 to-lilac-light/10">
+              <p className="text-xs text-plum-muted font-medium mb-2">Tenders available</p>
+              <p className="text-4xl font-light bg-gradient-to-r from-plum to-coral bg-clip-text text-transparent">
                 {sectors.find((s) => s.id === selectedSector)?.tenders}
               </p>
             </div>
