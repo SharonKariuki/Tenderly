@@ -1,0 +1,225 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: radial-gradient(55% 60% at 100% 100%, #F9C9D3 0%, transparent 70%),
+              radial-gradient(45% 50% at 0% 0%, #DCCDEE 0%, transparent 70%),
+              linear-gradient(160deg, #EEE8F1 0%, #F6EEF2 50%, #FBE3E9 100%);
+  color: #2A1530;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Headings */
+.h1 {
+  font-size: 56px;
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: -0.04em;
+}
+
+.h2 {
+  font-size: 22px;
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+/* Cards */
+.card {
+  border-radius: 30px;
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 1px 2px rgba(61, 31, 71, 0.04), 0 12px 32px rgba(61, 31, 71, 0.06);
+}
+
+.card-hero {
+  border-radius: 32px;
+  background: radial-gradient(60% 70% at 100% 0%, rgba(232, 80, 91, 0.55), transparent 70%),
+              radial-gradient(50% 60% at 0% 100%, rgba(200, 182, 226, 0.35), transparent 70%),
+              linear-gradient(150deg, #4A2556 0%, #3D1F47 45%, #24112B 100%);
+  box-shadow: 0 20px 40px rgba(61, 31, 71, 0.25);
+  color: white;
+}
+
+.card-scam {
+  border-radius: 32px;
+  background: radial-gradient(60% 70% at 100% 0%, rgba(232, 80, 91, 0.55), transparent 70%),
+              radial-gradient(50% 60% at 0% 100%, rgba(200, 182, 226, 0.35), transparent 70%),
+              linear-gradient(150deg, #E8505B 0%, #B42335 45%, #6B1A28 100%);
+  box-shadow: 0 20px 40px rgba(61, 31, 71, 0.25);
+  color: white;
+}
+
+/* Chips */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 9999px;
+  padding: 0.5rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.chip-ok {
+  background-color: #D9F0EC;
+  color: #1E6F65;
+}
+
+.chip-warn {
+  background-color: #FBEBCF;
+  color: #8A5A12;
+}
+
+.chip-not-eligible {
+  background-color: #EDE4F4;
+  color: #3D1F47;
+}
+
+.chip-missing {
+  background-color: #E8505B;
+  color: white;
+}
+
+.chip-optional {
+  background-color: white;
+  color: #3D1F47;
+  border: 1px solid #E4D6E2;
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 9999px;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  transition: all 0.2s;
+  border: none;
+  cursor: pointer;
+  min-height: 44px;
+}
+
+.btn:focus {
+  outline: 2px solid #E8505B;
+  outline-offset: 2px;
+}
+
+.btn-primary {
+  background-color: #3D1F47;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #24112B;
+}
+
+.btn-secondary {
+  background-color: #F9D5DC;
+  color: #3D1F47;
+}
+
+.btn-secondary:hover {
+  opacity: 0.8;
+}
+
+.btn-outlined {
+  border: 2px solid #3D1F47;
+  color: #3D1F47;
+  background-color: transparent;
+}
+
+.btn-outlined:hover {
+  background-color: rgba(61, 31, 71, 0.05);
+}
+
+.btn-coral {
+  background-color: #E8505B;
+  color: white;
+}
+
+.btn-coral:hover {
+  opacity: 0.9;
+}
+
+/* Inputs */
+.input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  border: 1px solid #E4D6E2;
+  background-color: white;
+  color: #2A1530;
+  font-family: inherit;
+}
+
+.input::placeholder {
+  color: #6E5478;
+}
+
+.input:focus {
+  outline: none;
+  ring: 2px solid #3D1F47;
+  border-color: transparent;
+}
+
+/* Progress bar */
+.progress-bar {
+  height: 0.5rem;
+  border-radius: 9999px;
+  background: linear-gradient(to right, #3D1F47, #E8505B);
+  overflow: hidden;
+}
+
+.progress-track {
+  height: 100%;
+  background-color: #F3E4EC;
+}
+
+/* Skip link */
+.skip-link {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform: translateY(-100%);
+  border-bottom-left-radius: 9999px;
+  border-bottom-right-radius: 9999px;
+  background-color: #3D1F47;
+  padding: 0.5rem 1rem;
+  color: white;
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
