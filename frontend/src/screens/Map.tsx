@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button } from '../components/ui';
+import { Button, Page, PageHeading, FilterTabs } from '../components/ui';
 import { Toggle } from '../components/access/Toggle';
 import { X, ZoomIn, ZoomOut } from 'lucide-react';
 
@@ -28,7 +28,7 @@ const SECTORS = [
   closingDays: Array.from({ length: sector.tenders }, (_, k) => 2 + ((i * 7 + k * 11) % 85)).sort((a, b) => a - b),
 }));
 
-const hubColor = (match: number) => (match >= 80 ? '#2F8F6B' : match >= 60 ? '#5E8C72' : '#7A6670');
+const hubColor = (match: number) => (match >= 80 ? 'var(--color-brand-600)' : match >= 60 ? 'var(--color-brand-400)' : 'var(--color-muted)');
 
 // Map geometry, in viewBox units.
 const W = 800;
@@ -54,29 +54,17 @@ export function Map() {
   const toggleSector = (id: string) => setSelectedId((current) => (current === id ? null : id));
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 pb-16">
-      <div className="mb-6">
-        <h1 className="h1 mb-2">Map</h1>
-        <p className="text-lg text-plum-soft">Where your open tenders sit, by sector and by how soon they close.</p>
-      </div>
+    <Page>
+      <PageHeading title="Map" subtitle="Where your open tenders are, by type of work and by how soon they close." />
 
       {/* Controls */}
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-        <div className="flex flex-wrap gap-2" role="group" aria-label="Closing within">
-          {WINDOWS.map((w) => (
-            <button
-              key={w.id}
-              type="button"
-              aria-pressed={windowId === w.id}
-              onClick={() => setWindowId(w.id)}
-              className={`focus-ring min-h-[44px] rounded-pill px-4 text-sm font-medium transition-colors ${
-                windowId === w.id ? 'bg-plum text-white' : 'bg-white/70 text-plum border border-plum/15 hover:border-plum'
-              }`}
-            >
-              {w.label} <span className="opacity-75 tabular-nums">({countFor(w)})</span>
-            </button>
-          ))}
-        </div>
+        <FilterTabs
+          label="Closing within"
+          value={windowId}
+          onChange={setWindowId}
+          options={WINDOWS.map((w) => ({ id: w.id, label: w.label, count: countFor(w) }))}
+        />
         <div className="flex gap-2">
           <Button variant="outlined" size="sm" aria-label="Zoom in" disabled={zoom >= 1.6} onClick={() => setZoom((z) => Math.min(1.6, +(z + 0.2).toFixed(1)))}>
             <ZoomIn size={18} aria-hidden />
@@ -89,15 +77,15 @@ export function Map() {
 
       <div className="grid lg:grid-cols-[1fr_20rem] gap-4">
         {/* Map */}
-        <div className="card-hero overflow-hidden">
+        <div className="card overflow-hidden bg-linear-to-br from-white via-brand-50/60 to-accent-50">
           <svg
             viewBox={`0 0 ${W} ${H}`}
             className="block w-full h-auto"
             role="group"
-            aria-label="Sector map. Each circle is a sector; dots are its open tenders."
+            aria-label="Map of your tenders. Each circle is a type of work; the dots are its open tenders."
           >
             <g transform={`translate(${CX} ${CY}) scale(${zoom}) translate(${-CX} ${-CY})`}>
-              <circle cx={CX} cy={CY} r={RING} fill="none" stroke="#FBE4E6" strokeOpacity="0.15" strokeDasharray="6 8" />
+              <circle cx={CX} cy={CY} r={RING} fill="none" stroke="var(--color-brand-200)" strokeDasharray="6 8" />
               {SECTORS.map((sector, i) => {
                 const angle = (i / SECTORS.length) * Math.PI * 2 - Math.PI / 2;
                 const x = CX + Math.cos(angle) * RING;
@@ -113,7 +101,7 @@ export function Map() {
                 const nameY = y - sin * nameGap + 6;
                 return (
                   <g key={sector.id}>
-                    <line x1={CX} y1={CY} x2={x} y2={y} stroke="#E5484D" strokeOpacity="0.35" strokeWidth="2" strokeDasharray="8 6" />
+                    <line x1={CX} y1={CY} x2={x} y2={y} stroke="var(--color-brand-300)" strokeWidth="2" strokeDasharray="8 6" pointerEvents="none" />
                     {showTenders &&
                       dots.map((days, k) => {
                         const a = angle + (k - (dots.length - 1) / 2) * 0.32;
@@ -121,7 +109,7 @@ export function Map() {
                         const dy = y + Math.sin(a) * 88;
                         return (
                           <g key={k}>
-                            <circle cx={dx} cy={dy} r="13" fill={days <= 7 ? '#E5484D' : days <= 30 ? '#E3A12F' : '#5E8C72'} />
+                            <circle cx={dx} cy={dy} r="13" fill={days <= 7 ? 'var(--color-danger-500)' : days <= 30 ? 'var(--color-accent-500)' : 'var(--color-brand-500)'} />
                             {showDays && (
                               <text x={dx} y={dy + 4} fontSize="11" fontWeight="700" fill="#FFFAF9" textAnchor="middle">
                                 {days}
@@ -145,11 +133,11 @@ export function Map() {
                         }}
                         className="map-hub cursor-pointer"
                       >
-                        <circle cx={x} cy={y} r="42" fill={hubColor(sector.match)} stroke={active ? '#FFFAF9' : 'none'} strokeWidth="4" />
-                        <text x={x} y={y + 7} fontSize="20" fontWeight="700" fill="#FFFAF9" textAnchor="middle">
+                        <circle cx={x} cy={y} r="42" fill="white" stroke={active ? 'var(--color-accent-500)' : hubColor(sector.match)} strokeWidth={active ? 5 : 3} />
+                        <text x={x} y={y + 7} fontSize="20" fontWeight="700" fill="var(--color-brand-700)" textAnchor="middle">
                           {sector.match}%
                         </text>
-                        <text x={nameX} y={nameY} fontSize="17" fontWeight="600" fill="#FBE4E6" textAnchor={anchor}>
+                        <text x={nameX} y={nameY} fontSize="17" fontWeight="600" fill="var(--color-ink)" textAnchor={anchor} pointerEvents="none">
                           {sector.name}
                         </text>
                       </g>
@@ -157,35 +145,36 @@ export function Map() {
                   </g>
                 );
               })}
-              <circle cx={CX} cy={CY} r="56" fill="#E5484D" />
-              <text x={CX} y={CY + 6} fontSize="17" fontWeight="700" fill="#FFFAF9" textAnchor="middle">
+              <circle cx={CX} cy={CY} r="70" fill="var(--color-accent-100)" />
+              <circle cx={CX} cy={CY} r="56" fill="var(--color-accent-500)" />
+              <text x={CX} y={CY + 6} fontSize="17" fontWeight="700" fill="white" textAnchor="middle">
                 Your profile
               </text>
             </g>
           </svg>
 
           {/* Legend */}
-          <div className="relative z-10 border-t border-white/10 px-4 py-3 text-white">
+          <div className="border-t border-line bg-white px-4 py-3">
             <div className="flex flex-wrap gap-x-4 gap-y-1">
-              <Toggle dark checked={showHubs} onChange={setShowHubs}>
-                Sector hubs
+              <Toggle checked={showHubs} onChange={setShowHubs}>
+                Types of work
               </Toggle>
-              <Toggle dark checked={showTenders} onChange={setShowTenders}>
+              <Toggle checked={showTenders} onChange={setShowTenders}>
                 Open tenders
               </Toggle>
-              <Toggle dark checked={showDays} onChange={setShowDays}>
+              <Toggle checked={showDays} onChange={setShowDays}>
                 Days left on dots
               </Toggle>
             </div>
-            <p className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-white/85">
+            <p className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-ink-soft">
               <span className="flex items-center gap-2">
-                <span className="h-3 w-3 rounded-full bg-coral" aria-hidden /> closes within 7 days
+                <span className="h-3 w-3 rounded-full bg-danger-500" aria-hidden /> closes within 7 days
               </span>
               <span className="flex items-center gap-2">
-                <span className="h-3 w-3 rounded-full bg-warn-solid" aria-hidden /> within 30 days
+                <span className="h-3 w-3 rounded-full bg-accent-500" aria-hidden /> within 30 days
               </span>
               <span className="flex items-center gap-2">
-                <span className="h-3 w-3 rounded-full bg-lilac" aria-hidden /> later
+                <span className="h-3 w-3 rounded-full bg-brand-500" aria-hidden /> later
               </span>
             </p>
           </div>
@@ -200,23 +189,23 @@ export function Map() {
                 <button
                   type="button"
                   onClick={() => setSelectedId(null)}
-                  aria-label="Close sector details"
-                  className="focus-ring -m-2 flex h-11 w-11 items-center justify-center rounded-full text-plum hover:bg-blush"
+                  aria-label="Close details"
+                  className="-m-2 flex h-11 w-11 items-center justify-center rounded-full text-ink-soft hover:bg-brand-50"
                 >
                   <X size={18} aria-hidden />
                 </button>
               </div>
               <dl className="grid grid-cols-2 gap-3 mb-4">
-                <div className="rounded-tile bg-blush/60 p-3">
-                  <dt className="text-sm text-plum-muted">Match</dt>
-                  <dd className="text-3xl font-light text-plum-ink tabular-nums">{selected.match}%</dd>
+                <div className="rounded-tile bg-brand-50 p-3">
+                  <dt className="text-sm text-ink-soft">Match</dt>
+                  <dd className="text-3xl font-light text-ink tabular-nums">{selected.match}%</dd>
                 </div>
-                <div className="rounded-tile bg-blush/60 p-3">
-                  <dt className="text-sm text-plum-muted">Open now</dt>
-                  <dd className="text-3xl font-light text-plum-ink tabular-nums">{inWindow(selected.closingDays).length}</dd>
+                <div className="rounded-tile bg-brand-50 p-3">
+                  <dt className="text-sm text-ink-soft">Open now</dt>
+                  <dd className="text-3xl font-light text-ink tabular-nums">{inWindow(selected.closingDays).length}</dd>
                 </div>
               </dl>
-              <p className="text-sm text-plum-soft mb-4">
+              <p className="text-sm text-ink-soft mb-4">
                 {inWindow(selected.closingDays).length
                   ? `The nearest closes in ${inWindow(selected.closingDays)[0]} days.`
                   : 'Nothing closes in this window. Try a longer one.'}
@@ -227,21 +216,21 @@ export function Map() {
             </>
           ) : (
             <>
-              <h2 className="h2 mb-1">Sectors</h2>
-              <p className="text-sm text-plum-muted mb-3">Pick one to see its tenders.</p>
+              <h2 className="h2 mb-1">Types of work</h2>
+              <p className="text-sm text-ink-soft mb-3">Pick one to see its tenders.</p>
               <ul className="space-y-1">
                 {SECTORS.map((s) => (
                   <li key={s.id}>
                     <button
                       type="button"
                       onClick={() => toggleSector(s.id)}
-                      className="focus-ring flex w-full min-h-[44px] items-center justify-between gap-3 rounded-tile px-3 text-left hover:bg-blush/60"
+                      className="flex w-full min-h-11 items-center justify-between gap-3 rounded-tile px-3 text-left hover:bg-brand-50"
                     >
-                      <span className="flex items-center gap-2 font-medium text-plum-ink">
+                      <span className="flex items-center gap-2 font-medium text-ink">
                         <span className="h-3 w-3 rounded-full" style={{ background: hubColor(s.match) }} aria-hidden />
                         {s.name}
                       </span>
-                      <span className="text-sm text-plum-muted tabular-nums">
+                      <span className="text-sm text-ink-soft tabular-nums">
                         {s.match}% · {inWindow(s.closingDays).length} open
                       </span>
                     </button>
@@ -252,6 +241,6 @@ export function Map() {
           )}
         </aside>
       </div>
-    </div>
+    </Page>
   );
 }

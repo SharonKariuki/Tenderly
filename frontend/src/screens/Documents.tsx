@@ -1,46 +1,51 @@
-import { useRef, useState } from 'react';
-import axios from 'axios';
-import { Card, Button, StatusChip, ProgressBar } from '../components/ui';
-import { mockDocuments } from '../data/mock';
-import { documentsApi } from '../api/client';
+import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { Card, StatusChip, ProgressBar, Page, PageHeading, FilterTabs, Notice } from '../components/ui';
+import { UploadButton } from '../components/UploadButton';
+import { mockDocuments, mockTenders } from '../data/mock';
 import { BusinessDocument } from '../lib/types';
 import { daysUntil, formatDate } from '../lib/format';
-import { Accessibility, Banknote, Building2, Calendar, FileCheck, FileText, Landmark, Search, ShieldCheck, Upload } from 'lucide-react';
+import { Accessibility, Banknote, Building2, Calendar, ChevronDown, FileCheck, FileText, Landmark, Plus, Search, ShieldCheck, Users } from 'lucide-react';
 
 type Filter = 'all' | 'action' | 'ready' | 'optional';
 
-const CATEGORY: Record<BusinessDocument['category'], { label: string; icon: typeof FileText }> = {
-  crb: { label: 'Credit report', icon: FileText },
-  taxCompliance: { label: 'Tax', icon: FileCheck },
-  tin: { label: 'KRA PIN', icon: Landmark },
-  businessRegistration: { label: 'Registration', icon: Building2 },
-  insurance: { label: 'Insurance', icon: ShieldCheck },
-  bank: { label: 'Bank', icon: Banknote },
-  ncpwd: { label: 'NCPWD', icon: Accessibility },
-  other: { label: 'Other', icon: FileText },
+const CATEGORY: Record<BusinessDocument['category'], { label: string; icon: typeof FileText; tile: string }> = {
+  crb: { label: 'Shows you pay your debts', icon: FileText, tile: 'bg-ok-50 text-ok-700' },
+  taxCompliance: { label: 'Shows your taxes are paid up', icon: FileCheck, tile: 'bg-accent-50 text-accent-700' },
+  tin: { label: 'Your tax number from KRA', icon: Landmark, tile: 'bg-ok-50 text-ok-700' },
+  businessRegistration: { label: 'Shows your business is registered', icon: Building2, tile: 'bg-ok-50 text-ok-700' },
+  insurance: { label: 'Your business insurance cover', icon: ShieldCheck, tile: 'bg-danger-50 text-danger-600' },
+  bank: { label: 'A letter from your bank', icon: Banknote, tile: 'bg-ok-50 text-ok-700' },
+  ncpwd: { label: 'Proves a disability for reserved tenders', icon: Accessibility, tile: 'bg-brand-50 text-brand-600' },
+  owners: { label: 'Who owns and runs your company', icon: Users, tile: 'bg-brand-50 text-brand-600' },
+  other: { label: 'Lets you bid on tenders kept for these groups', icon: FileText, tile: 'bg-brand-50 text-brand-600' },
 };
 
 // The backend's DocType for each card (core/contracts.py).
 function docTypeFor(doc: BusinessDocument): string {
-  if (/agpo/i.test(doc.name)) return 'agpo_certificate';
+  if (doc.category === 'other' && /women|youth|disability/i.test(doc.name)) return 'agpo_certificate';
   return (
     {
       taxCompliance: 'kra_tax_compliance',
       businessRegistration: 'business_registration',
       bank: 'bank_statement',
       ncpwd: 'ncpwd_registration',
+      owners: 'cr12',
     } as Record<string, string>
   )[doc.category] ?? 'other';
 }
 
 const needsAction = (d: BusinessDocument) => d.status === 'actionNeeded' || d.status === 'missing';
+const tendersNeeding = (doc: BusinessDocument) =>
+  mockTenders.filter((t) => t.requiredDocs.some((r) => r.toLowerCase() === doc.name.toLowerCase()));
 
 export function Documents() {
-  const [filter, setFilter] = useState<Filter>('all');
+  const [params, setParams] = useSearchParams();
+  const filter = (['action', 'ready', 'optional'].includes(params.get('filter') ?? '') ? params.get('filter') : 'all') as Filter;
   const [query, setQuery] = useState('');
-  const [notice, setNotice] = useState<string | null>(null);
-  const fileInput = useRef<HTMLInputElement>(null);
-  const uploadFor = useRef<BusinessDocument | null>(null);
+  const [openId, setOpenId] = useState<number | null>(null);
+  const [message, setMessage] = useState<{ text: string; tone: 'info' | 'ok' | 'warn' } | null>(null);
+  const onMessage = (text: string, tone: 'info' | 'ok' | 'warn') => setMessage({ text, tone });
 
   const required = mockDocuments.filter((d) => !d.isOptional);
   const readyCount = required.filter((d) => d.status === 'ready').length;
@@ -58,84 +63,47 @@ export function Documents() {
     .sort((a, b) => (a.expiryDate ?? '').localeCompare(b.expiryDate ?? ''))
     .slice(0, 3);
 
-  const pickFile = (doc: BusinessDocument | null) => {
-    uploadFor.current = doc;
-    fileInput.current?.click();
-  };
-
-  const upload = async (file: File) => {
-    const doc = uploadFor.current;
-    setNotice(`Uploading ${file.name}…`);
-    try {
-      await documentsApi.upload(file, doc ? docTypeFor(doc) : 'other');
-      setNotice(`${file.name} uploaded. We will read it and update this page.`);
-    } catch (err) {
-      const status = axios.isAxiosError(err) ? err.response?.status : undefined;
-      setNotice(
-        status === 401
-          ? 'Sign in to upload documents. Your file was not sent.'
-          : `Could not upload ${file.name}. Check your connection and try again.`,
-      );
-    }
-  };
-
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 pb-16">
-      <input
-        ref={fileInput}
-        type="file"
-        accept="application/pdf,image/*"
-        className="sr-only"
-        tabIndex={-1}
-        aria-hidden
-        onChange={(e) => {
-          const file = e.target.files?.[0];
-          if (file) upload(file);
-          e.target.value = '';
-        }}
-      />
+    <Page>
+      <PageHeading title="Documents" subtitle="Keep your papers ready, and more tenders open up.">
+        <UploadButton docType="other" name="document" onMessage={onMessage} className="btn btn-primary self-start px-5 text-sm">
+          <Plus size={18} aria-hidden /> Add document
+        </UploadButton>
+      </PageHeading>
 
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6 mb-8">
-        <div>
-          <h1 className="h1 mb-2">Documents</h1>
-          <p className="text-lg text-plum-soft">Keep your paperwork ready, and opportunities unlock.</p>
+      {message && (
+        <div className="mb-6">
+          <Notice tone={message.tone}>{message.text}</Notice>
         </div>
-        <Button variant="primary" onClick={() => pickFile(null)}>
-          <Upload size={18} aria-hidden /> Add document
-        </Button>
-      </div>
-
-      {notice && (
-        <p className="mb-6 rounded-tile bg-blush p-4 text-sm text-plum-ink" role="status">
-          {notice}
-        </p>
       )}
 
-      <div className="grid lg:grid-cols-3 gap-6 mb-8">
-        <Card hero className="p-6">
-          <div className="relative z-10">
-            <h2 className="h2 text-white mb-4">Document health</h2>
-            <p className="text-5xl font-light tabular-nums">
-              {readyCount}
-              <span className="text-2xl text-white/70"> / {required.length}</span>
-            </p>
-            <p className="text-white/85 mb-5">required documents ready</p>
-            <ProgressBar value={readyCount} max={required.length} tone="dark" />
+      <div className="mb-8 grid gap-6 lg:grid-cols-[1fr_2fr]">
+        <Card hero className="relative overflow-hidden p-7">
+          <div className="pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full bg-white/10" aria-hidden />
+          <h2 className="text-base font-semibold">Document health</h2>
+          <p className="mt-3 text-5xl font-light tabular-nums">
+            {readyCount}
+            <span className="text-xl text-white/85"> of {required.length} needed are ready</span>
+          </p>
+          <div className="mt-6">
+            <ProgressBar value={readyCount} max={required.length} tone="dark" label="Needed documents ready" />
           </div>
         </Card>
 
-        <Card className="p-6 lg:col-span-2">
+        <Card className="p-6">
           <h2 className="h2 mb-4">Expiry dates</h2>
           <ul className="space-y-2">
             {expiring.map((doc) => {
               const left = daysUntil(doc.expiryDate!);
               return (
-                <li key={doc.id} className="flex flex-wrap items-center justify-between gap-2 rounded-tile bg-blush/50 p-3">
-                  <span className="flex items-center gap-3 font-semibold text-sm text-plum-ink">
-                    <Calendar size={18} className={left < 0 ? 'text-coral' : 'text-warn-solid'} aria-hidden />
+                <li key={doc.id} className="flex flex-wrap items-center justify-between gap-2 rounded-tile bg-canvas p-3">
+                  <span className="flex items-center gap-3 text-sm font-medium text-ink">
+                    <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent-50 text-accent-600">
+                      <Calendar size={16} aria-hidden />
+                    </span>
                     {doc.name}
                   </span>
-                  <span className={`text-sm font-semibold ${left < 0 ? 'text-coral' : left <= 30 ? 'text-plum-ink' : 'text-plum-muted'}`}>
+                  <span className={`text-sm font-semibold ${left < 0 ? 'text-danger-600' : 'text-accent-700'}`}>
                     {left < 0 ? `Expired ${formatDate(doc.expiryDate!)}` : `Expires ${formatDate(doc.expiryDate!)}`}
                   </span>
                 </li>
@@ -145,87 +113,99 @@ export function Documents() {
         </Card>
       </div>
 
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-        <div className="flex gap-2 flex-wrap" role="group" aria-label="Filter documents">
-          {(
-            [
-              { id: 'all', label: 'All', count: mockDocuments.length },
-              { id: 'action', label: 'Needs action', count: mockDocuments.filter(needsAction).length },
-              { id: 'ready', label: 'Ready', count: mockDocuments.filter((d) => d.status === 'ready').length },
-              { id: 'optional', label: 'Optional', count: mockDocuments.filter((d) => d.isOptional).length },
-            ] as const
-          ).map((f) => (
-            <button
-              key={f.id}
-              type="button"
-              aria-pressed={filter === f.id}
-              onClick={() => setFilter(f.id)}
-              className={`focus-ring min-h-[44px] rounded-pill px-4 text-sm font-medium transition-colors ${
-                filter === f.id ? 'bg-plum text-white' : 'bg-white/70 text-plum border border-plum/15 hover:border-plum'
-              }`}
-            >
-              {f.label} <span className="opacity-75 tabular-nums">({f.count})</span>
-            </button>
-          ))}
-        </div>
+      <div className="mb-6 flex flex-col justify-between gap-4 md:flex-row md:items-center">
+        <FilterTabs
+          label="Filter documents"
+          value={filter}
+          onChange={(id) => setParams(id === 'all' ? {} : { filter: id }, { replace: true })}
+          options={[
+            { id: 'all', label: 'All', count: mockDocuments.length },
+            { id: 'action', label: 'Needs action', count: mockDocuments.filter(needsAction).length },
+            { id: 'ready', label: 'Ready', count: mockDocuments.filter((d) => d.status === 'ready').length },
+            { id: 'optional', label: 'Optional', count: mockDocuments.filter((d) => d.isOptional).length },
+          ]}
+        />
         <label className="relative block md:w-72">
           <span className="sr-only">Search documents</span>
-          <Search size={18} className="pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2 text-plum-muted" aria-hidden />
-          <input
-            type="search"
-            placeholder="Search documents"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            className="input pl-10"
-          />
+          <Search size={18} className="pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2 text-ink-soft" aria-hidden />
+          <input type="search" placeholder="Search documents" value={query} onChange={(e) => setQuery(e.target.value)} className="input pl-10" />
         </label>
       </div>
 
-      <ul className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <ul className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
         {filteredDocs.map((doc) => {
-          const { icon: Icon } = CATEGORY[doc.category];
-          const label = /agpo/i.test(doc.name) ? 'AGPO' : CATEGORY[doc.category].label;
+          const { label, icon: Icon, tile } = CATEGORY[doc.category];
           const expired = doc.expiryDate ? daysUntil(doc.expiryDate) < 0 : false;
+          const open = openId === doc.id;
+          const needing = tendersNeeding(doc);
           return (
-            <li key={doc.id} className={`card p-5 flex flex-col ${needsAction(doc) ? 'border-coral/50' : ''}`}>
-              <div className="flex items-start justify-between gap-3 mb-3">
-                <span className="w-11 h-11 rounded-xl bg-blush flex items-center justify-center flex-shrink-0">
-                  <Icon size={22} className="text-plum" aria-hidden />
+            <li
+              key={doc.id}
+              className={`card flex flex-col p-5 ${
+                doc.status === 'missing' ? 'ring-2 ring-danger-500/40' : doc.status === 'actionNeeded' ? 'ring-2 ring-warn-500/50' : ''
+              }`}
+            >
+              <div className="mb-3 flex items-start justify-between gap-3">
+                <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${tile}`}>
+                  <Icon size={21} aria-hidden />
                 </span>
                 <StatusChip status={doc.status} />
               </div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-plum-muted">{label}</p>
-              <h3 className="font-semibold text-plum-ink mb-3">{doc.name}</h3>
-              <dl className="text-sm text-plum-muted space-y-0.5 mb-4">
-                {doc.issueDate && (
-                  <div className="flex gap-1">
-                    <dt>Issued</dt>
-                    <dd>{formatDate(doc.issueDate)}</dd>
+              <h3 className="text-sm font-semibold text-ink">{doc.name}</h3>
+              <p className="mb-3 text-xs text-ink-soft">{label}</p>
+              {(doc.issueDate || doc.expiryDate) && (
+                <dl className="mb-3 grid grid-cols-2 gap-2 text-xs">
+                  <div className="rounded-lg bg-canvas p-2">
+                    <dt className="text-ink-soft">Issued</dt>
+                    <dd className="font-medium text-ink">{doc.issueDate ? formatDate(doc.issueDate) : 'Not known'}</dd>
                   </div>
-                )}
-                {doc.expiryDate && (
-                  <div className={`flex gap-1 ${expired ? 'text-coral font-semibold' : ''}`}>
-                    <dt>{expired ? 'Expired' : 'Expires'}</dt>
-                    <dd>{formatDate(doc.expiryDate)}</dd>
+                  <div className={`rounded-lg p-2 ${expired ? 'bg-danger-50' : 'bg-canvas'}`}>
+                    <dt className={expired ? 'text-danger-600' : 'text-ink-soft'}>{expired ? 'Expired' : 'Expires'}</dt>
+                    <dd className={`font-medium ${expired ? 'text-danger-600' : 'text-ink'}`}>
+                      {doc.expiryDate ? formatDate(doc.expiryDate) : 'Never'}
+                    </dd>
                   </div>
-                )}
-                <div className="flex gap-1">
-                  <dt className="sr-only">Required by</dt>
-                  <dd>
-                    Needed for {doc.requiredByCount} tender{doc.requiredByCount !== 1 ? 's' : ''}
-                  </dd>
+                </dl>
+              )}
+              <p className="mb-4 text-xs text-ink-soft">
+                Needed for {doc.requiredByCount} tender{doc.requiredByCount !== 1 ? 's' : ''}
+              </p>
+              {open && (
+                <div id={`doc-${doc.id}`} className="mb-4 rounded-lg bg-brand-50 p-3 text-xs text-ink">
+                  {needing.length ? (
+                    <>
+                      <p className="mb-1 font-semibold">Your matches that ask for it:</p>
+                      <ul className="list-disc pl-4">
+                        {needing.map((t) => (
+                          <li key={t.id}>{t.title}</li>
+                        ))}
+                      </ul>
+                    </>
+                  ) : (
+                    <p>None of your current matches ask for it, but other tenders do.</p>
+                  )}
                 </div>
-              </dl>
-              <div className="flex gap-2 mt-auto">
-                {doc.status === 'ready' ? (
-                  <Button variant="outlined" size="sm" className="flex-1" onClick={() => pickFile(doc)}>
-                    Replace
-                  </Button>
-                ) : (
-                  <Button variant="primary" size="sm" className="flex-1" onClick={() => pickFile(doc)}>
-                    {doc.status === 'missing' ? 'Upload' : 'Renew'}
-                  </Button>
-                )}
+              )}
+              <div className="mt-auto flex gap-2">
+                <button
+                  type="button"
+                  aria-expanded={open}
+                  aria-controls={`doc-${doc.id}`}
+                  onClick={() => setOpenId(open ? null : doc.id)}
+                  className="btn btn-secondary flex-1 px-3 text-sm"
+                >
+                  Details <ChevronDown size={16} className={`transition-transform ${open ? 'rotate-180' : ''}`} aria-hidden />
+                </button>
+                <UploadButton
+                  docType={docTypeFor(doc)}
+                  name={doc.name.toLowerCase()}
+                  onMessage={onMessage}
+                  className={`btn flex-1 px-3 text-sm ${
+                    doc.status === 'ready' ? 'btn-outlined' : doc.status === 'missing' ? 'btn-primary' : 'btn-accent'
+                  }`}
+                >
+                  {doc.status === 'ready' ? 'Replace' : doc.status === 'missing' ? 'Upload' : 'Renew'}
+                </UploadButton>
               </div>
             </li>
           );
@@ -234,9 +214,9 @@ export function Documents() {
 
       {filteredDocs.length === 0 && (
         <Card className="p-10 text-center">
-          <p className="text-plum-muted">No documents match{query ? ` "${query}"` : ' this filter'}.</p>
+          <p className="text-ink-soft">No documents match{query ? ` "${query}"` : ' this filter'}.</p>
         </Card>
       )}
-    </div>
+    </Page>
   );
 }
